@@ -10,22 +10,22 @@ export default defineConfig({
     build: {
         rollupOptions: {
             output: {
-                entryFileNames: ({ name, facadeModuleId }) => {
-                    console.log(">>>entryFileNames>", name, facadeModuleId)
+                entryFileNames: ({ name }) => {
                     return 'assets/[name].[hash].js'
                 },
-                chunkFileNames: ({ name, facadeModuleId }) => {
-                    console.log(">>chunkFileNames>", name, facadeModuleId)
+                chunkFileNames: ({ name }) => {
                     return 'assets/[name].[hash].js'
                 },
-                assetFileNames: ({ name, facadeModuleId }) => {
-                    console.log(">>>assetFileNames>", name, facadeModuleId)
-                    if (/\.(gif|jpe?g|png|svg)$/.test(name ?? '')) {
-                        return 'assets/[name].[hash].[ext]';
+                assetFileNames: ({ name }) => {
+                    if (/\.(woff2?|ttf|otf)$/.test(name ?? '')) {
+                        return 'assets/fonts/[name].[hash].[ext]';
                     }
-                    if (/\.css$/.test(name ?? '')) {
-                        return 'assets/[name].[hash].[ext]';
-                    }
+                    // if (/\.(gif|jpe?g|png|svg)$/.test(name ?? '')) {
+                    //     return 'assets/[name].[hash].[ext]';
+                    // }
+                    // if (/\.css$/.test(name ?? '')) {
+                    //     return 'assets/[name].[hash].[ext]';
+                    // }
                     return 'assets/[name].[hash].[ext]';
                 }
             }

@@ -2,31 +2,25 @@ import '@/App.css'
 import reactLogo from '@/assets/react.svg'
 import moment from 'moment'
 import { useState } from 'react'
+import dmoLogo from '/dmo.png'
 import viteLogo from '/vite.svg'
+import Button from '@mui/material/Button'
+// import {Button} from '@mui/material'
 
 function App() {
     const [count, setCount] = useState(0)
     return (<>
         <div>
-            <a href="https://vitejs.dev" target="_blank">
-                <img src={viteLogo} className="logo" alt="Vite logo" />
-            </a>
-            <a href="https://react.dev" target="_blank">
-                <img src={reactLogo} className="logo react" alt="React logo" />
-            </a>
+            <img src={dmoLogo} className="logo" alt="Daily Money One logo" />
+            <img src={viteLogo} className="logo" alt="Vite logo" />
+            <img src={reactLogo} className="logo react" alt="React logo" />
         </div>
         <h1>Daily Money One Desk</h1>
         <div className="card">
-            <button onClick={() => setCount((count) => count + 1)}>
+            <Button variant="contained" onClick={() => setCount((count) => count + 1)}>
                 count is {count}, time is {moment().toString()}
-            </button>
-            <p>
-                Edit <code>src/App.jsx</code> and save to test HMR
-            </p>
+            </Button>
         </div>
-        <p className="read-the-docs">
-            Click on the Vite and React logos to learn more
-        </p>
     </>)
 }
 
