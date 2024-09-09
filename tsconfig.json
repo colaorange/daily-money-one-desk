@@ -1,0 +1,17 @@
+{
+    "extends": "@tsconfig/vite-react/tsconfig.json",
+    "compilerOptions": {
+        "baseUrl": ".",
+        "forceConsistentCasingInFileNames": true,
+        "paths": {
+            "@/*": [
+                "./src/*"
+            ]
+        },
+        //I and some 3rd libaries use any in code
+        "noImplicitAny": false
+    },
+    "include": [
+        "./src/**/*",
+    ]
+}
