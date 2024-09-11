@@ -1,40 +1,50 @@
 {
-  "name": "daily-money-one-desk",
-  "private": true,
-  "version": "0.0.1",
-  "type": "module",
-  "scripts": {
-    "dev": "vite --port 8088",
-    "build": "vite build --manifest manifest.json",
-    "lint": "eslint .",
-    "preview": "vite preview",
-    "build-server": "yarn build && http-server --port 8088 dist"
-  },
-  "dependencies": {
-    "@emotion/react": "^11.13.3",
-    "@emotion/styled": "^11.13.0",
-    "@fontsource/roboto": "^5.0.15",
-    "@mui/icons-material": "^6.0.2",
-    "@mui/material": "^6.0.2",
-    "moment": "^2.30.1",
-    "react": "18.2.0",
-    "react-dom": "18.2.0"
-  },
-  "devDependencies": {
-    "@eslint/js": "^9.9.0",
-    "@tsconfig/vite-react": "^3.0.2",
-    "@types/react": "18.2.79",
-    "@types/react-dom": "18.2.25",
-    "@vitejs/plugin-react": "^4.3.1",
-    "eslint": "^9.9.0",
-    "eslint-plugin-react": "^7.35.0",
-    "eslint-plugin-react-hooks": "^5.1.0-rc.0",
-    "eslint-plugin-react-refresh": "^0.4.9",
-    "globals": "^15.9.0",
-    "http-server": "^14.1.1",
-    "typescript": "5.3.3",
-    "vite": "^5.4.1",
-    "vite-plugin-commonjs": "^0.10.1",
-    "vite-tsconfig-paths": "^5.0.1"
-  }
+    "name": "daily-money-one-desk",
+    "private": true,
+    "version": "0.0.1",
+    "type": "module",
+    "scripts": {
+        "dev": "vite --host 0.0.0.0 --port 8088",
+        "build": "vite build --manifest manifest.json",
+        "lint": "eslint .",
+        "preview": "vite preview",
+        "build-server": "yarn build && http-server --port 8088 dist",
+        "//1.": "",
+        "syncApi": "ts-node --esm --project ./tsconfig.ts-node.json -r tsconfig-paths/register ./src/cli/syncApi.ts",
+        "cleanClient": "rimraf ./gen/client",
+        "genClient": "openapi-generator-cli generate -c openapi-generator.config.json -i ./dist/api-definition.json -g typescript-axios -o ./gen/client"
+    },
+    "dependencies": {
+        "@emotion/react": "^11.13.3",
+        "@emotion/styled": "^11.13.0",
+        "@fontsource/roboto": "^5.0.15",
+        "@mui/icons-material": "^6.0.2",
+        "@mui/material": "^6.0.2",
+        "axios": "^1.7.7",
+        "moment": "^2.30.1",
+        "react": "18.2.0",
+        "react-dom": "18.2.0"
+    },
+    "devDependencies": {
+        "@eslint/js": "^9.9.0",
+        "@openapitools/openapi-generator-cli": "^2.13.5",
+        "@tsconfig/vite-react": "^3.0.2",
+        "@types/node": "^22.5.4",
+        "@types/react": "18.2.79",
+        "@types/react-dom": "18.2.25",
+        "@vitejs/plugin-react": "^4.3.1",
+        "eslint": "^9.9.0",
+        "eslint-plugin-react": "^7.35.0",
+        "eslint-plugin-react-hooks": "^5.1.0-rc.0",
+        "eslint-plugin-react-refresh": "^0.4.9",
+        "globals": "^15.9.0",
+        "http-server": "^14.1.1",
+        "rimraf": "3.0.2",
+        "ts-node": "^10.9.2",
+        "tsconfig-paths": "^4.2.0",
+        "typescript": "5.3.3",
+        "vite": "^5.4.1",
+        "vite-plugin-commonjs": "^0.10.1",
+        "vite-tsconfig-paths": "^5.0.1"
+    }
 }

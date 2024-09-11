@@ -1,14 +1,14 @@
 {
-    "extends": "@tsconfig/vite-react/tsconfig.json",
     "compilerOptions": {
-        "baseUrl": ".",
-        "forceConsistentCasingInFileNames": true,
+        "strict": true,
+        "module": "esnext",
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "target": "es2020",
         "paths": {
             "@/*": [
                 "./src/*"
-            ],
-            "@client/*": [
-                "./gen/client/*"
             ]
         },
         //I and some 3rd libaries use any in code
@@ -16,6 +16,5 @@
     },
     "include": [
         "./src/**/*",
-        "./gen/client/**/*",
     ]
 }

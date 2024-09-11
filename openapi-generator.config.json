@@ -1,0 +1,6 @@
+{
+    "modelPackage": "models",
+    "apiPackage": "apis",
+    "supportingFiles": [],
+    "withSeparateModelsAndApi": true
+}
