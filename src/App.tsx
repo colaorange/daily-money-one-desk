@@ -1,29 +1,33 @@
 import '@/App.css'
-import reactLogo from '@/assets/react.svg'
 import dmoLogo from '@/assets/dmo.png'
+import reactLogo from '@/assets/react.svg'
 import viteLogo from '@/assets/vite.svg'
-import moment from 'moment'
-import { useState } from 'react'
+import { TextField, Typography } from '@mui/material'
 import Button from '@mui/material/Button'
-import { TextField } from '@mui/material'
-// import {Button} from '@mui/material'
-import { AuthroizationApi, Fail } from '@client/api'
+import { useCallback, useMemo, useState } from 'react'
+import { AuthroizationApi } from '@client/api'
 import { Configuration } from '@client/configuration'
+import { Fail } from '@client/models'
 import { AxiosError } from 'axios'
+import { MdSecurity } from 'react-icons/md';
 
 function App() {
-    const [count, setCount] = useState(0)
+
+    const basePath = useMemo(() => {
+        const url = new URL(window?.location.href);
+        const searchParams = url.searchParams;
+        return searchParams.get('connectionPoint') || `${url.protocol}://${url.hostname}:${url.port}`
+    }, [])
 
     const [password, setPassword] = useState('')
-
     const [authResult, setAuthResult] = useState<{
         error?: boolean,
         message?: string
     }>()
 
-    const doAuth = async () => {
+    const doAuth = useCallback(async () => {
         const api = new AuthroizationApi(new Configuration({
-            basePath: 'http://127.0.0.1:8080',
+            basePath,
             apiKey: password
         }))
         try {
@@ -50,7 +54,7 @@ function App() {
                 })
             }
         }
-    }
+    }, [basePath, password])
     return (<>
         <div>
             <img src={dmoLogo} className="logo" alt="Daily Money One logo" />
@@ -59,10 +63,9 @@ function App() {
         </div>
         <h1>Daily Money One Desk</h1>
         <div className="card">
-            <Button variant="contained" onClick={() => setCount((count) => count + 1)}>
-                count is {count}, time is {moment().toString()}
-            </Button>
-            <TextField value={password} onChange={(evt) => {
+            <Typography>Connection Point : {basePath}</Typography>
+            <MdSecurity size={40} style={{alignSelf: 'center'}} />
+            <TextField variant='outlined' title='Connection Password' type='password' value={password} onChange={(evt) => {
                 setPassword(evt.target.value)
                 setAuthResult({})
             }}
