@@ -12,7 +12,7 @@
         "//1.": "",
         "syncApi": "ts-node --esm --project ./tsconfig.ts-node.json -r tsconfig-paths/register ./src/cli/syncApi.ts",
         "cleanClient": "rimraf ./gen/client",
-        "genClient": "openapi-generator-cli generate -c openapi-generator.config.json -i ./dist/api-definition.json -g typescript-axios -o ./gen/client"
+        "genClient": "yarn cleanClient && openapi-generator-cli generate -c openapi-generator.config.json -i ./dist/api-definition.json -g typescript-axios -o ./gen/client"
     },
     "dependencies": {
         "@emotion/react": "^11.13.3",

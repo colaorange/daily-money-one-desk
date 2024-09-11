@@ -7,7 +7,7 @@ import Button from '@mui/material/Button'
 import { useCallback, useMemo, useState } from 'react'
 import { AuthroizationApi } from '@client/api'
 import { Configuration } from '@client/configuration'
-import { Fail } from '@client/models'
+import { Fail } from '@client/model'
 import { AxiosError } from 'axios'
 import { MdSecurity } from 'react-icons/md';
 
@@ -16,7 +16,7 @@ function App() {
     const basePath = useMemo(() => {
         const url = new URL(window?.location.href);
         const searchParams = url.searchParams;
-        return searchParams.get('connectionPoint') || `${url.protocol}://${url.hostname}:${url.port}`
+        return searchParams.get('connectionPoint') || `${url.protocol}//${url.hostname}:${url.port}`
     }, [])
 
     const [password, setPassword] = useState('')
@@ -40,7 +40,7 @@ function App() {
                 const fail: Fail = err.response?.data
                 setAuthResult({
                     error: true,
-                    message: fail.message || err.message
+                    message: fail.message ? `${fail.message} (${fail.code})` : err.message
                 })
             } else if (err instanceof Error) {
                 setAuthResult({
@@ -64,7 +64,7 @@ function App() {
         <h1>Daily Money One Desk</h1>
         <div className="card">
             <Typography>Connection Point : {basePath}</Typography>
-            <MdSecurity size={40} style={{alignSelf: 'center'}} />
+            <MdSecurity size={40} style={{ alignSelf: 'center' }} />
             <TextField variant='outlined' title='Connection Password' type='password' value={password} onChange={(evt) => {
                 setPassword(evt.target.value)
                 setAuthResult({})
