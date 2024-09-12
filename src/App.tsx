@@ -5,7 +5,7 @@ import viteLogo from '@/assets/vite.svg'
 import { TextField, Typography } from '@mui/material'
 import Button from '@mui/material/Button'
 import { useCallback, useMemo, useState } from 'react'
-import { AuthroizationApi } from '@client/api'
+import { AuthroizationApi, BookApi } from '@client/api'
 import { Configuration } from '@client/configuration'
 import { Fail } from '@client/model'
 import { AxiosError } from 'axios'
@@ -25,36 +25,59 @@ function App() {
         message?: string
     }>()
 
-    const doAuth = useCallback(async () => {
-        const api = new AuthroizationApi(new Configuration({
+    const doError = useCallback((err: unknown) => {
+        if (err instanceof AxiosError) {
+            //will undefine when network error
+            const fail: Fail = err.response?.data
+            setAuthResult({
+                error: true,
+                message: (fail && fail.message) ? `${fail.message} (${fail.code})` : err.message
+            })
+        } else if (err instanceof Error) {
+            setAuthResult({
+                error: true,
+                message: err.message
+            })
+        } else {
+            setAuthResult({
+                error: true,
+                message: JSON.stringify(err)
+            })
+        }
+    }, [])
+
+    const doQueryInfo = useCallback(async () => {
+        const api = new BookApi(new Configuration({
             basePath,
             apiKey: password
         }))
         try {
-            const result = await api.authroizeGet()
+            const books = (await api.listBook()).data
             setAuthResult({
-                message: result.data.message
+                message: `There are books: ${books?.map((b) => b.name).join(', ')}`
             })
         } catch (err) {
-            if (err instanceof AxiosError) {
-                const fail: Fail = err.response?.data
-                setAuthResult({
-                    error: true,
-                    message: fail.message ? `${fail.message} (${fail.code})` : err.message
-                })
-            } else if (err instanceof Error) {
-                setAuthResult({
-                    error: true,
-                    message: err.message
-                })
-            } else {
-                setAuthResult({
-                    error: true,
-                    message: JSON.stringify(err)
-                })
-            }
+            doError(err)
         }
-    }, [basePath, password])
+    }, [basePath, doError, password])
+
+    const doAuth = useCallback(async () => {
+        const api = new AuthroizationApi(new Configuration({
+            basePath,
+        }))
+        try {
+            const result = (await api.authorize(password)).data
+            if(!result.error){
+                setAuthResult({
+                    message: 'Authroized, Getting information...'
+                })
+                doQueryInfo()
+            }
+        } catch (err) {
+            doError(err)
+        }
+    }, [basePath, password, doError, doQueryInfo])
+
     return (<>
         <div>
             <img src={dmoLogo} className="logo" alt="Daily Money One logo" />
