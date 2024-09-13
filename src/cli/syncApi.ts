@@ -5,8 +5,11 @@ import { fileURLToPath } from 'url';
 
 export function syncApi() {
 
-    //check if there is ../daily-money-one-desk/dist/mainfest.json, read it
-    const apiDefinitionPath = path.resolve(process.cwd(), '../daily-money-one-api/dist/api-definition.json')
+
+    const apiProjectPath = path.resolve(process.cwd(), '../daily-money-one-api')
+
+    //check if there is apiProjectPath/dist/api-definition.json
+    const apiDefinitionPath = path.resolve(apiProjectPath, './dist/api-definition.json')
 
     if (!fs.existsSync(apiDefinitionPath)) {
         console.error(`Api definition file does not exist: ${apiDefinitionPath}`);

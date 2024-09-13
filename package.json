@@ -12,15 +12,17 @@
         "//1.": "",
         "syncApi": "ts-node --esm --project ./tsconfig.ts-node.json -r tsconfig-paths/register ./src/cli/syncApi.ts",
         "cleanClient": "rimraf ./gen/client",
-        "genClient": "yarn cleanClient && openapi-generator-cli generate -c openapi-generator.config.json -i ./dist/api-definition.json -g typescript-axios -o ./gen/client"
+        "genClient": "yarn cleanClient && openapi-generator-cli generate --enable-post-process-file -c openapi-generator.config.json -i ./dist/api-definition.json -g typescript-axios -o ./gen/client"
     },
     "dependencies": {
+        "@emotion/css": "^11.13.0",
         "@emotion/react": "^11.13.3",
         "@emotion/styled": "^11.13.0",
         "@fontsource/roboto": "^5.0.15",
         "@mui/icons-material": "^6.0.2",
         "@mui/material": "^6.0.2",
         "axios": "^1.7.7",
+        "clsx": "^2.1.1",
         "moment": "^2.30.1",
         "react": "18.2.0",
         "react-dom": "18.2.0",

@@ -11,8 +11,11 @@
                 "./gen/client/*"
             ]
         },
+        "jsxImportSource": "@emotion/react",
         //I and some 3rd libaries use any in code
-        "noImplicitAny": false
+        "noImplicitAny": false,
+        "noUnusedLocals": false,
+        "noUnusedParameters": false,
     },
     "include": [
         "./src/**/*",
