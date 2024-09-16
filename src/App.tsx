@@ -1,27 +1,34 @@
 import '@/App.css';
-import { createTheme, ThemeProvider, Typography } from '@mui/material';
+import { createTheme, css, keyframes, ThemeProvider } from '@mui/material';
 
-import clsx from 'clsx';
-import { Link1, Link2 } from './components/styled';
-import utilStyles from './utilStyles';
-import { Link3 } from './components/themed';
+import { useMemo } from 'react';
+import ApiProvider from './contexts/ApiProvider';
+import I18nProvider from './contexts/I18nProvider';
 import Landing from './pages/Landing';
 
 const defaultTheme = createTheme({});
 
 
 function App() {
+    const { apiBasePath, custom } = useMemo(() => {
+        const url = new URL(window?.location.href);
+        const searchParams = url.searchParams;
+        const apiBasePath = searchParams.get('apiBasePath')
+        return apiBasePath ? {
+            apiBasePath,
+            custom: true
+        } : {
+            apiBasePath: `${url.protocol}//${url.hostname}:${url.port}`
+        }
+    }, [])
     return (
         <ThemeProvider theme={defaultTheme}>
-            <Landing />
-            {/* <div className={clsx(utilStyles.vlayout)} >
-                <Link1>abc</Link1>
-                <Link2>def</Link2>
-                <Link3>xyz</Link3>
-                <Typography>A</Typography>
-                <Typography>B</Typography>
-                <Typography>C</Typography>
-            </div> */}
+            {/* <div css={style}>ABC</div> */}
+            <ApiProvider basePath={apiBasePath} custom={custom}>
+                <I18nProvider>
+                    <Landing />
+                </I18nProvider>
+            </ApiProvider>
         </ThemeProvider>
     )
 }
