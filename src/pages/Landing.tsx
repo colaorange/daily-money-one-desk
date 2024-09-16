@@ -20,7 +20,7 @@ export const Landing = memo(function Landing(props: LandingProps) {
         return searchParams.get('connectionPoint') || `${url.protocol}//${url.hostname}:${url.port}`
     }, [])
 
-    const [password, setPassword] = useState('')
+    const [connectionToken, setConnectionToken] = useState('')
     const [authResult, setAuthResult] = useState<{
         error?: boolean,
         message?: string
@@ -50,7 +50,7 @@ export const Landing = memo(function Landing(props: LandingProps) {
     const doQueryInfo = useCallback(async () => {
         const api = new BookApi(new Configuration({
             basePath,
-            apiKey: password
+            apiKey: connectionToken
         }))
         try {
             const books = (await api.listBook()).data
@@ -60,24 +60,29 @@ export const Landing = memo(function Landing(props: LandingProps) {
         } catch (err) {
             doError(err)
         }
-    }, [basePath, doError, password])
+    }, [basePath, doError, connectionToken])
 
     const doAuth = useCallback(async () => {
         const api = new BasicApi(new Configuration({
             basePath,
         }))
         try {
-            const result = (await api.authorize(password)).data
+            const result = (await api.authorize(connectionToken)).data
             if (!result.error) {
                 setAuthResult({
                     message: 'Authroized, Getting information...'
                 })
                 doQueryInfo()
+            }else{
+                setAuthResult({
+                    error: true,
+                    message: result.message
+                })
             }
         } catch (err) {
             doError(err)
         }
-    }, [basePath, password, doError, doQueryInfo])
+    }, [basePath, connectionToken, doError, doQueryInfo])
 
     return (<>
         <div>
@@ -89,8 +94,8 @@ export const Landing = memo(function Landing(props: LandingProps) {
         <div className="card">
             <Typography>Connection Point : {basePath}</Typography>
             <MdSecurity size={40} style={{ alignSelf: 'center' }} />
-            <TextField variant='outlined' title='Connection Password' type='password' value={password} onChange={(evt) => {
-                setPassword(evt.target.value)
+            <TextField variant='outlined' title='Connection Token' type='password' value={connectionToken} onChange={(evt) => {
+                setConnectionToken(evt.target.value)
                 setAuthResult({})
             }}
                 error={!!authResult?.error}
