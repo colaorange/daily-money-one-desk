@@ -144,7 +144,7 @@ export const Landing = memo(function Landing(props: LandingProps) {
         }}>
             <div css={styles.card}>
                 <MdSecurity size={90} style={{ alignSelf: 'center', margin: 50 }} />
-                {custom && <Typography align='center'>{ll('desktop.connectionUrl')} : {basePath}</Typography>}
+                {custom && <Typography align='center'>{ll('desktop.apiBasePath')} : {basePath}</Typography>}
                 <TextField label={ll('serverMode.connectionToken')} variant='outlined' type='password' value={connectionToken} onChange={(evt) => {
                     setConnectionToken(evt.target.value)
                     setAuthResult({})

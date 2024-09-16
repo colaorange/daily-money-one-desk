@@ -1,5 +1,5 @@
 {
-    "name": "daily-money-one-desk",
+    "name": "daily-money-one-desktop",
     "private": true,
     "version": "0.0.1",
     "type": "module",
@@ -10,9 +10,7 @@
         "preview": "vite preview",
         "build-server": "yarn build && http-server --port 8088 dist",
         "//1.": "",
-        "syncApi": "ts-node --esm --project ./tsconfig.ts-node.json -r tsconfig-paths/register ./src/cli/syncApi.ts",
-        "cleanClient": "rimraf ./gen/client",
-        "genClient": "yarn cleanClient && openapi-generator-cli generate --enable-post-process-file -c openapi-generator.config.json -i ./dist/api-definition.json -g typescript-axios -o ./gen/client"
+        "syncApi": "ts-node --esm --project ./tsconfig.ts-node.json -r tsconfig-paths/register ./src/cli/syncApi.ts"
     },
     "dependencies": {
         "@emotion/css": "^11.13.0",
@@ -33,7 +31,6 @@
     },
     "devDependencies": {
         "@eslint/js": "^9.9.0",
-        "@openapitools/openapi-generator-cli": "^2.13.5",
         "@tsconfig/vite-react": "^3.0.2",
         "@types/node": "^22.5.4",
         "@types/react": "18.2.79",
@@ -45,7 +42,6 @@
         "eslint-plugin-react-refresh": "^0.4.9",
         "globals": "^15.9.0",
         "http-server": "^14.1.1",
-        "rimraf": "3.0.2",
         "ts-node": "^10.9.2",
         "tsconfig-paths": "^4.2.0",
         "typescript": "5.3.3",

@@ -8,7 +8,7 @@
                 "./src/*"
             ],
             "@client/*": [
-                "./gen/client/*"
+                "./sync/client/*"
             ]
         },
         "jsxImportSource": "@emotion/react",
@@ -19,6 +19,6 @@
     },
     "include": [
         "./src/**/*",
-        "./gen/client/**/*",
+        "./sync/client/**/*",
     ]
 }

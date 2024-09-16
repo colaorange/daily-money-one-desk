@@ -1,5 +1,5 @@
-# daily-money-one-desk
-The Desk Web App for DailyMoneyOne ServerMode
+# daily-money-one-desktop
+The Desktop Web App for DailyMoneyOne ServerMode
 
 
 # React + Vite

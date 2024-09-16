@@ -6,10 +6,10 @@ import commonjs from 'vite-plugin-commonjs'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    base: '/desk/',
+    base: '/desktop/',
     plugins: [react(), tsconfigPaths(), commonjs()],
     build: {
-        outDir: './dist/desk',
+        outDir: './dist/desktop',
         rollupOptions: {
             output: {
                 entryFileNames: ({ name }) => {

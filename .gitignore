@@ -12,8 +12,8 @@ dist/
 dist-ssr
 *.local
 
-#gen client
-gen/
+#sync client
+sync/
 openapitools.json
 
 # Editor directories and files
