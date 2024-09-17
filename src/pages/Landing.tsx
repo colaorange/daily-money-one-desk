@@ -4,23 +4,21 @@ import reactLogo from '@/assets/react.svg'
 import viteLogo from '@/assets/vite.svg'
 import useApi from '@/contexts/useApi'
 import { useI18nLabel } from '@/contexts/useI18n'
+import useAlert from '@/contexts/userAlert'
 import utilStyles from '@/utilStyles'
 import { BasicApi, BookApi } from '@client/api'
 import { Configuration } from '@client/configuration'
 import { Fail } from '@client/model'
-import { keyframes, css } from '@emotion/react'
+import { css, keyframes } from '@emotion/react'
 import { TextField, Typography, useTheme } from '@mui/material'
 import Button from '@mui/material/Button'
 import { AxiosError } from 'axios'
 import { memo, PropsWithChildren, useCallback, useMemo, useState } from 'react'
-import { MdSecurity } from 'react-icons/md'
-
 export type LandingProps = PropsWithChildren
 
 export const Landing = memo(function Landing(props: LandingProps) {
-    const { basePath, custom } = useApi()
+    const { basePath, custom, setConnectionToken: setApiConnectionToken } = useApi()
     const ll = useI18nLabel()
-    const theme = useTheme()
 
     const [connectionToken, setConnectionToken] = useState('')
     const [authResult, setAuthResult] = useState<{
@@ -49,21 +47,6 @@ export const Landing = memo(function Landing(props: LandingProps) {
         }
     }, [])
 
-    const doQueryInfo = useCallback(async () => {
-        const api = new BookApi(new Configuration({
-            basePath,
-            apiKey: connectionToken
-        }))
-        try {
-            const books = (await api.listBook()).data
-            setAuthResult({
-                message: `There are books: ${books?.map((b) => b.name).join(', ')}`
-            })
-        } catch (err) {
-            doError(err)
-        }
-    }, [basePath, doError, connectionToken])
-
     const doAuth = useCallback(async () => {
         const api = new BasicApi(new Configuration({
             basePath,
@@ -71,10 +54,7 @@ export const Landing = memo(function Landing(props: LandingProps) {
         try {
             const result = (await api.authorize(connectionToken)).data
             if (!result.error) {
-                setAuthResult({
-                    message: 'Authroized, Getting information...'
-                })
-                doQueryInfo()
+                setApiConnectionToken(connectionToken)
             } else {
                 setAuthResult({
                     error: true,
@@ -84,7 +64,7 @@ export const Landing = memo(function Landing(props: LandingProps) {
         } catch (err) {
             doError(err)
         }
-    }, [basePath, connectionToken, doError, doQueryInfo, ll])
+    }, [basePath, connectionToken, doError, ll, setApiConnectionToken])
 
     const styles = useMemo(() => {
         const logoSpin = keyframes({
@@ -96,31 +76,32 @@ export const Landing = memo(function Landing(props: LandingProps) {
             }
         })
         return {
-            root: css({
-                paddingTop: 100
+            root: css(utilStyles.vlayout, {
+                paddingTop: 160
             }),
-            logo: css({
-                height: '6em',
-                padding: '1.5em',
-                willChange: 'filter',
-                transition: 'filter 300ms',
-                ':hover': {
-                    filter: 'drop-shadow(0 0 2em #6100feaa)'
-                },
-
-            }),
-            react: css({
-                animation: `${logoSpin} infinite 10s linear`,
-                ':hover': {
-                    filter: 'drop-shadow(0 0 2em #545cffaa)'
-                },
+            powerBy: css({
+                position: 'absolute',
+                right: 8,
+                top: 8,
+                overflow: 'hidden',
+                '.logo': css({
+                    height: '3em',
+                    padding: '0.5em',
+                }),
+                '.react': css({
+                    animation: `${logoSpin} infinite 10s linear`,
+                }),
             }),
             dmo: css({
-                ':hover': {
-                    filter: 'drop-shadow(0 0 2em #61fa6baa)'
-                },
+                padding: 32,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                'img': {
+                    width: 200
+                }
             }),
-            card: css({
+            form: css({
                 padding: '2em',
                 display: 'flex',
                 flexDirection: 'column',
@@ -130,32 +111,36 @@ export const Landing = memo(function Landing(props: LandingProps) {
         }
     }, [])
 
-    return (<div css={[utilStyles.vlayout, styles.root]}>
-        <div>
-            <img src={dmoLogo} css={[styles.logo, styles.dmo]} alt="Daily Money One logo" />
-            <img src={viteLogo} css={styles.logo} alt="Vite logo" />
-            <img src={reactLogo} css={[styles.logo, styles.react]} alt="React logo" />
+    return (<div css={styles.root}>
+        <div css={styles.powerBy}>
+            <img src={viteLogo} className='logo' alt="Vite logo" />
+            <img src={reactLogo} className='logo react' alt="React logo" />
         </div>
         <Typography variant='h3'>{ll('appName')}</Typography>
         <Typography variant='h3'>{ll('desktop')}</Typography>
-        <form onSubmit={(evt) => {
+        <form css={styles.form} onSubmit={(evt) => {
             evt.preventDefault()
             doAuth()
         }}>
-            <div css={styles.card}>
-                <MdSecurity size={90} style={{ alignSelf: 'center', margin: 50 }} />
-                {custom && <Typography align='center'>{ll('desktop.apiBasePath')} : {basePath}</Typography>}
-                <TextField label={ll('serverMode.connectionToken')} variant='outlined' type='password' value={connectionToken} onChange={(evt) => {
+            <div css={styles.dmo} >
+                <img src={dmoLogo} alt="Daily Money One logo" />
+            </div>
+            {custom && <Typography align='center'>{ll('desktop.apiBasePath')} : {basePath}</Typography>}
+            <TextField
+                label={ll('serverMode.connectionToken')}
+                variant='outlined'
+                type='password'
+                autoComplete='password'
+                value={connectionToken} onChange={(evt) => {
                     setConnectionToken(evt.target.value)
                     setAuthResult({})
                 }}
-                    error={!!authResult?.error}
-                    helperText={authResult?.message}
-                />
-                <Button variant="contained" onClick={doAuth}>
-                    {ll('action.authorize')}
-                </Button>
-            </div>
+                error={!!authResult?.error}
+                helperText={authResult?.message}
+            />
+            <Button variant="contained" onClick={doAuth}>
+                {ll('action.authorize')}
+            </Button>
         </form>
     </div>)
 })
