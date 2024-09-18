@@ -4,20 +4,20 @@ import reactLogo from '@/assets/react.svg'
 import viteLogo from '@/assets/vite.svg'
 import useApi from '@/contexts/useApi'
 import { useI18nLabel } from '@/contexts/useI18n'
-import useAlert from '@/contexts/userAlert'
 import utilStyles from '@/utilStyles'
-import { BasicApi, BookApi } from '@client/api'
+import { BasicApi } from '@client/api'
 import { Configuration } from '@client/configuration'
 import { Fail } from '@client/model'
 import { css, keyframes } from '@emotion/react'
-import { TextField, Typography, useTheme } from '@mui/material'
+import { TextField, Typography } from '@mui/material'
 import Button from '@mui/material/Button'
 import { AxiosError } from 'axios'
 import { memo, PropsWithChildren, useCallback, useMemo, useState } from 'react'
+
 export type LandingProps = PropsWithChildren
 
 export const Landing = memo(function Landing(props: LandingProps) {
-    const { basePath, custom, setConnectionToken: setApiConnectionToken } = useApi()
+    const { basePath, custom, setAuhtorization } = useApi()
     const ll = useI18nLabel()
 
     const [connectionToken, setConnectionToken] = useState('')
@@ -54,7 +54,15 @@ export const Landing = memo(function Landing(props: LandingProps) {
         try {
             const result = (await api.authorize(connectionToken)).data
             if (!result.error) {
-                setApiConnectionToken(connectionToken)
+                const preferences = (await new BasicApi(new Configuration({
+                    basePath,
+                    apiKey: connectionToken
+                })).getPreference()).data
+
+                setAuhtorization({
+                    connectionToken,
+                    preferences
+                })
             } else {
                 setAuthResult({
                     error: true,
@@ -64,7 +72,7 @@ export const Landing = memo(function Landing(props: LandingProps) {
         } catch (err) {
             doError(err)
         }
-    }, [basePath, connectionToken, doError, ll, setApiConnectionToken])
+    }, [basePath, connectionToken, doError, ll, setAuhtorization])
 
     const styles = useMemo(() => {
         const logoSpin = keyframes({

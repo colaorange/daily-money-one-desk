@@ -7,7 +7,7 @@ import { AiFillBug } from "react-icons/ai";
 /**
  * a full screen error indicator for initialization
  */
-export const UnhandledError = memo(function InitError({ message }: { message: string }) {
+export const UnhandledError = memo(function UnhandledError({ message }: { message: string }) {
 
     const theme = useTheme()
     const styles = useMemo(() => {

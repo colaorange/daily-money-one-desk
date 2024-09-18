@@ -1,6 +1,5 @@
 import '@/App.css';
 import { createTheme, ThemeProvider } from '@mui/material';
-
 import { PropsWithChildren, useCallback, useEffect, useMemo } from 'react';
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 import { appErrMessage } from './appUtils';
@@ -9,7 +8,11 @@ import AlertProvider, { AlertLevel } from './contexts/AlertProvider';
 import ApiProvider from './contexts/ApiProvider';
 import I18nProvider from './contexts/I18nProvider';
 import useAlert from './contexts/userAlert';
-import Main from './pages/Main';
+import Router from './Router';
+import type {} from '@mui/x-date-pickers/themeAugmentation';
+import type {} from '@mui/x-charts/themeAugmentation';
+import type {} from '@mui/x-data-grid/themeAugmentation';
+import type {} from '@mui/x-tree-view/themeAugmentation';
 
 const defaultTheme = createTheme({});
 
@@ -17,7 +20,7 @@ const defaultTheme = createTheme({});
 function App() {
     return (<AppBoundary1>
         <AppBoundary2>
-            <Main />
+            <Router />
         </AppBoundary2>
     </AppBoundary1>
     )

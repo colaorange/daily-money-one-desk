@@ -5,7 +5,7 @@ import { logDebug } from "@/logger"
 import { runAsync } from "@/util"
 import { BasicApi } from "@client/api"
 import { Configuration as ApiConfiguration } from "@client/configuration"
-import { PublicSetting } from "@client/model"
+import { Preferences, PublicSetting } from "@client/model"
 import { createContext, memo, PropsWithChildren, useEffect, useMemo, useState } from "react"
 
 export type ApiProviderProps = PropsWithChildren<{
@@ -17,12 +17,17 @@ export type ApiContextValue = {
     basePath: string,
     custom?: boolean
     publicSetting: PublicSetting
+    setAuhtorization: (authorization: ApiAuthorization) => void
     authorized?: boolean
-    setConnectionToken: (connectionToken: string) => void
+    preferences?: Preferences
 }
 
 const SESSION_CONNECTION_TOKEN = "connectionToken"
 
+export type ApiAuthorization = {
+    connectionToken: string,
+    preferences: Preferences
+}
 
 export const ApiContext = createContext<ApiContextValue | undefined>(undefined)
 export const ApiProvider = memo(function ApiProvider({ basePath, custom: custom, children }: ApiProviderProps) {
@@ -30,7 +35,7 @@ export const ApiProvider = memo(function ApiProvider({ basePath, custom: custom,
     const [stateMix, setStateMix] = useState<{
         error?: string,
         setting?: PublicSetting,
-        connectionToken?: string,
+        authorization?: ApiAuthorization
     }>()
 
     useEffect(() => {
@@ -42,11 +47,16 @@ export const ApiProvider = memo(function ApiProvider({ basePath, custom: custom,
             }))
             const setting = (await basicApi.getPublicSetting()).data
             let connectionToken: string | undefined
-
+            let preferences: Preferences | undefined
             if (sessionConnectionToken) {
                 try {
                     const result = (await basicApi.authorize(sessionConnectionToken)).data
                     if (!result.error) {
+                        preferences = (await new BasicApi(new ApiConfiguration({
+                            basePath,
+                            apiKey: sessionConnectionToken
+                        })).getPreference()).data
+
                         connectionToken = sessionConnectionToken
                     } else {
                         sessionStorage.removeItem(SESSION_CONNECTION_TOKEN)
@@ -59,7 +69,10 @@ export const ApiProvider = memo(function ApiProvider({ basePath, custom: custom,
 
             setStateMix({
                 setting,
-                connectionToken
+                authorization: (connectionToken && preferences) ? {
+                    connectionToken,
+                    preferences
+                } : undefined,
             })
         }, (err) => {
             setStateMix({
@@ -70,18 +83,19 @@ export const ApiProvider = memo(function ApiProvider({ basePath, custom: custom,
 
 
     const value = useMemo(() => {
-        const setConnectionToken = (connectionToken: string) => {
+        const setAuhtorization = (authorization: ApiAuthorization) => {
             setStateMix((state) => {
-                sessionStorage.setItem(SESSION_CONNECTION_TOKEN, connectionToken)
-                return { ...state, connectionToken }
+                sessionStorage.setItem(SESSION_CONNECTION_TOKEN, authorization.connectionToken)
+                return { ...state, authroization: authorization }
             })
         }
         const value: ApiContextValue | undefined = stateMix?.setting ? {
             basePath,
             publicSetting: stateMix.setting,
-            setConnectionToken,
-            authorized: !!stateMix?.connectionToken,
-            custom: custom
+            custom: custom,
+            setAuhtorization,
+            authorized: !!stateMix.authorization,
+            preferences: stateMix.authorization?.preferences
         } : undefined
         return value
     }, [stateMix, basePath, custom])

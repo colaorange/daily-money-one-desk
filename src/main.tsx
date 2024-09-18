@@ -10,7 +10,7 @@ import App from '@/App'
 
 createRoot(document.getElementById('root')!).render(
     <MainStrictMode off>
-        <CssBaseline />
+        <CssBaseline  enableColorScheme/>
         <App />
     </MainStrictMode>,
 )
