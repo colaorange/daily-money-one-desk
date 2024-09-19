@@ -23,7 +23,7 @@ export const MainTemplate = memo(function MainTemplate(props: MainTemplateProps)
 
     return <Box sx={{
         display: 'flex',
-        paddingTop: { xs: `calc(${theme.mixins.toolbar.minHeight}px + 2px)`, md: 0 },
+        paddingTop: {  xs: `calc(${theme.mixins.toolbar.minHeight}px)`, sm: `calc(${theme.mixins.toolbar.minHeight}px)`,  md: 0 },
         minHeight: '100vh',
         color: theme.palette.text.primary,
         bgcolor: theme.palette.background.default

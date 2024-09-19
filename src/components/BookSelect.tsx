@@ -1,6 +1,6 @@
 import { useI18nLabel } from "@/contexts/useI18n";
 import { Book } from "@client/model";
-import { FormControl, InputLabel, MenuItem, Select, SelectProps, SxProps, Theme } from "@mui/material";
+import { FormControl, InputLabel, MenuItem, Select, SxProps, Theme } from "@mui/material";
 import { memo } from "react";
 
 
@@ -11,7 +11,7 @@ export type BookSelectProps = {
     sx?: SxProps<Theme>
 }
 
-export const BookSelect = memo(function PrimaryBookSelect({ bookId, books, onChange, sx = { minWidth: 160} }: BookSelectProps) {
+export const BookSelect = memo(function BookSelect({ bookId, books, onChange, sx = { minWidth: { sm: 160 } } }: BookSelectProps) {
     const ll = useI18nLabel()
     const bookLabel = ll('book')
     return <FormControl>

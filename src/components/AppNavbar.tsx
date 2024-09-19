@@ -1,5 +1,5 @@
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
-import { IconButton, useTheme } from "@mui/material";
+import { IconButton } from "@mui/material";
 import AppBar from '@mui/material/AppBar';
 import Stack from '@mui/material/Stack';
 import Toolbar from '@mui/material/Toolbar';
@@ -7,12 +7,14 @@ import Typography from '@mui/material/Typography';
 import * as React from 'react';
 import SideMenuMobile from './SideMenuMobile';
 import { useI18nLabel } from '@/contexts/useI18n';
+import useTheme from '@/contexts/useTheme';
 
 
 export default function AppNavbar() {
     const ll = useI18nLabel()
+    const {theme, appColorScheme } = useTheme()
+
     const [open, setOpen] = React.useState(false);
-    const theme = useTheme()
 
     const toggleDrawer = (newOpen: boolean) => () => {
         setOpen(newOpen);
@@ -24,14 +26,14 @@ export default function AppNavbar() {
             sx={{
                 display: { xs: 'auto', md: 'none' },
                 boxShadow: 0,
-                bgcolor: 'background.paper',
+                bgcolor: appColorScheme.navbarBgColor,
                 backgroundImage: 'none',
                 borderBottom: '1px solid',
                 borderColor: 'divider',
                 top: 0,
             }}
         >
-            <Toolbar variant="regular" style={{ minHeight: theme.mixins.toolbar.minHeight }}>
+            <Toolbar variant="regular" style={{ height: theme.mixins.toolbar.minHeight }}>
                 <Stack direction="row" spacing={1} sx={{ justifyContent: 'start', gap: theme.spacing(1), flex: 1, overflow: 'hidden' }}>
                     <IconButton size="small" aria-label="menu" onClick={toggleDrawer(true)}>
                         <MenuRoundedIcon />

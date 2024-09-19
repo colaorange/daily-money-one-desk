@@ -1,9 +1,9 @@
+import AppToolbar from "@/components/AppToolbar"
 import BookSelect from "@/components/BookSelect"
 import { useBookStore } from "@/contexts/useStore"
 import MainTemplate from "@/templates/MainTemplate"
-import utilStyles from "@/utilStyles"
 import { Book } from "@client/model"
-import { Toolbar, Typography } from "@mui/material"
+import { Divider, Typography } from "@mui/material"
 import { observer } from "mobx-react-lite"
 import { PropsWithChildren, useCallback, useEffect } from "react"
 
@@ -24,9 +24,10 @@ export const TrendChartsPage = observer(function TrendChartsPage(props: TrendCha
     }, [bookStore])
 
     return <MainTemplate>
-        <Toolbar css={utilStyles.alignSelfStretch}>
+        <AppToolbar >
             <BookSelect bookId={currentBookId} books={books} onChange={onBookChange} />
-        </Toolbar>
+        </AppToolbar>
+        <Divider flexItem />
         <Typography>TrendChartsPage</Typography>
     </MainTemplate>
 })

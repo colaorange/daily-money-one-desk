@@ -1,12 +1,28 @@
 import Color from "color"
 import { PropsWithChildren, createContext, memo, useMemo } from "react"
 import { usePublicSetting } from "./useApi"
-import { createTheme, Theme, ThemeProvider as MuiThemeProvider } from "@mui/material"
+import { createTheme, Theme, css, ThemeProvider as MuiThemeProvider } from "@mui/material"
+import { ColorScheme } from "@client/model"
+import { SerializedStyles } from "@emotion/react"
 
 export type ThemeProviderProps = PropsWithChildren
 
+
+export type AppColorScheme = {
+    navbarBgColor: string
+    toolbarBgColor: string
+    notouchedOutline: string
+}
+
+export type AppStyles = {
+    outlineIconButton: SerializedStyles
+}
+
 export type ThemeContextValue = {
     theme: Theme,
+    colorScheme: ColorScheme
+    appColorScheme: AppColorScheme
+    appStyles: AppStyles
 }
 
 export const ThemeContext = createContext<ThemeContextValue | undefined>(undefined)
@@ -16,11 +32,17 @@ export const ThemeProvider = memo(function ThemeProvider({ children }: ThemeProv
     const { colorScheme } = usePublicSetting()
 
     const value = useMemo(() => {
-        const theme = createTheme(colorScheme && {
+        const toolbarMinHeight = 64
+        const defaultTheme = createTheme({})
+        const theme = createTheme({
+            mixins: {
+                toolbar: {
+                    minHeight: toolbarMinHeight
+                }
+            },
             palette: {
                 mode: colorScheme?.dark ? 'dark' : 'light',
                 action: {
-                    // 你可以在這裡自定義 hover、selected、disabled 等狀態的顏色
                 },
                 background: {
                     default: colorScheme.background,
@@ -74,16 +96,75 @@ export const ThemeProvider = memo(function ThemeProvider({ children }: ThemeProv
                 },
             },
             components: {
+                MuiOutlinedInput: {
+                    styleOverrides: {
+                        notchedOutline: {
+                            border: `1px solid ${colorScheme.outline}`
+                        }
+                    },
+                },
                 MuiSelect: {
                     styleOverrides: {
                         root: {
-                            height: 46
+                            height: 46,
                         },
+                    }
+                },
+                MuiToolbar: {
+                    styleOverrides: {
+                        root: {
+                            //[prevent height change in xs and sm]
+                            height: toolbarMinHeight,
+                            minHeight: toolbarMinHeight,
+                            [defaultTheme.breakpoints.down('sm')]: {
+                                height: toolbarMinHeight,
+                                minHeight: toolbarMinHeight,
+                            },
+                            [defaultTheme.breakpoints.down('xs')]: {
+                                height: toolbarMinHeight,
+                                minHeight: toolbarMinHeight,
+                            },
+                        }
                     }
                 }
             }
         });
-        return { theme }
+        const appColorScheme: AppColorScheme = {
+            navbarBgColor: colorScheme.primaryContainer,
+            toolbarBgColor: colorScheme.elevation.level1,
+            notouchedOutline: colorScheme.outline
+
+        }
+        const appStyles: AppStyles = {
+            outlineIconButton: css({
+                borderRadius: theme.spacing(0.5),
+                height: 46,
+                width: 46,
+                border: '1px solid',
+                borderColor: appColorScheme.notouchedOutline,
+                ':hover': {
+                    borderColor: theme.palette.common.white,
+                },
+                ':active': {
+                    borderWidth: '2px',
+                    borderColor: theme.palette.primary.main,
+                },
+                ':focus': {
+                    borderWidth: '2px',
+                    borderColor: theme.palette.primary.main,
+                },
+                //stronger name
+                '& .MuiTouchRipple-root .MuiTouchRipple-child': {
+                    borderRadius: theme.spacing(0.5),
+                }
+            })
+        }
+        return {
+            theme,
+            colorScheme,
+            appColorScheme,
+            appStyles
+        }
     }, [colorScheme])
 
 

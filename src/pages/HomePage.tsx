@@ -1,12 +1,15 @@
 
+import AppToolbar from "@/components/AppToolbar";
 import BookSelect from "@/components/BookSelect";
+import TimePeriodButton from "@/components/TimePeriodButton";
 import { useBookStore } from "@/contexts/useStore";
 import MainTemplate from "@/templates/MainTemplate";
-import utilStyles from "@/utilStyles";
+import { TimeGranularity, TimePeriod } from "@/types";
 import { Book } from "@client/model";
-import { Toolbar } from '@mui/material';
+import { Divider, IconButton, Typography } from '@mui/material';
 import { observer } from "mobx-react-lite";
-import { PropsWithChildren, useCallback, useEffect } from "react";
+import moment from "moment";
+import { PropsWithChildren, useCallback, useEffect, useState } from "react";
 
 export type HomePageProps = PropsWithChildren
 /**
@@ -20,25 +23,36 @@ export type HomePageProps = PropsWithChildren
 
 export const HomePage = observer(function HomePage(props: HomePageProps) {
 
-    const bookStore = useBookStore()
+    const [timePeriod, setTimePeriod] = useState<TimePeriod>({
+        start: moment().startOf('day').add(-1, 'month').valueOf(),
+        end: moment().endOf('day').valueOf(),
+        granularity: TimeGranularity.MONTHLY
+    })
 
+    const bookStore = useBookStore()
     const { books, currentBookId } = bookStore
-    useEffect(() => {
-        if (!books) {
-            bookStore.fetchBooks()
-        }
-    }, [bookStore, books])
 
     const onBookChange = useCallback((book?: Book) => {
         bookStore.currentBookId = book?.id
     }, [bookStore])
 
 
-    return <MainTemplate>
-        <Toolbar css={utilStyles.alignSelfStretch}>
-            <BookSelect bookId={currentBookId} books={books} onChange={onBookChange} />
-        </Toolbar>
+    useEffect(() => {
+        if (!books) {
+            bookStore.fetchBooks()
+        }
+    }, [bookStore, books])
 
+
+    return <MainTemplate>
+        <AppToolbar sxGap={1} align="end">
+            <BookSelect bookId={currentBookId} books={books} onChange={onBookChange} />
+
+            <TimePeriodButton timePeriod={timePeriod} />
+        </AppToolbar>
+        <Divider flexItem />
+        <Typography>HomePage</Typography>
+        <div style={{ height: '200vh' }} />
         {/* <Button onClick={() => { bookStore.increment() }}>Increment</Button>
         <Button onClick={() => { bookStore.decrement() }}>Decrement</Button>
         <Button onClick={() => {

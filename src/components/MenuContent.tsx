@@ -26,7 +26,7 @@ const mainListItems: MenuAction[] = [
     { text: 'desktop.balanceSheets', icon: <FaBalanceScale size={iconSize} />, href: '/balance-sheets' },
     { text: 'desktop.trendCharts', icon: <FaChartLine size={iconSize} />, href: '/trend-charts' },
     { text: 'desktop.transactions', icon: <FaReceipt size={iconSize} />, href: '/transactions' },
-    { text: 'desktop.searchTransactions', icon: <FaSearch size={iconSize} />, href: '/search-transactions' },
+    { text: 'desktop.searchTransactions', icon: <FaSearch size={iconSize} />, href: '/search-transactions' }
 ];
 
 const secondaryListItems: MenuAction[] = [
