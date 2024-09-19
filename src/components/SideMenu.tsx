@@ -9,6 +9,7 @@ import Stack from '@mui/material/Stack';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import MenuContent from './MenuContent';
+import { useI18nLabel } from '@/contexts/useI18n';
 
 const drawerWidth = 240;
 
@@ -25,8 +26,9 @@ const Drawer = styled(MuiDrawer)({
 
 export default function SideMenu() {
 
-    const { preferences } = useApi()
+    const { preferences, setAuhtorization } = useApi()
     const { profile } = preferences || {}
+    const ll = useI18nLabel()
 
     return (
         <Drawer
@@ -68,8 +70,10 @@ export default function SideMenu() {
             <MenuContent />
             <Divider />
             <Stack sx={{ p: 2 }}>
-                <Button variant="outlined" fullWidth startIcon={<LogoutRoundedIcon />}>
-                    Exit
+                <Button variant="outlined" fullWidth startIcon={<LogoutRoundedIcon />} onClick={() => {
+                    setAuhtorization(undefined)
+                }}>
+                    {ll('action.exit')}
                 </Button>
             </Stack>
         </Drawer>

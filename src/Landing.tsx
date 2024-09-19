@@ -9,10 +9,11 @@ import { BasicApi } from '@client/api'
 import { Configuration } from '@client/configuration'
 import { Fail } from '@client/model'
 import { css, keyframes } from '@emotion/react'
-import { TextField, Typography } from '@mui/material'
+import { Paper, TextField, Typography, useTheme as useMuiTheme } from '@mui/material'
 import Button from '@mui/material/Button'
 import { AxiosError } from 'axios'
 import { memo, PropsWithChildren, useCallback, useMemo, useState } from 'react'
+import useTheme from './contexts/useTheme'
 
 export type LandingProps = PropsWithChildren
 
@@ -25,6 +26,11 @@ export const Landing = memo(function Landing(props: LandingProps) {
         error?: boolean,
         message?: string
     }>()
+
+    const muiTheme = useMuiTheme()
+    const theme = useTheme().theme
+    console.log(">>>>>", theme === muiTheme)
+    console.log(">>>>>", theme.palette.primary.main, muiTheme.palette.primary.main)
 
     const doError = useCallback((err: any) => {
         if (err instanceof AxiosError) {
@@ -85,7 +91,8 @@ export const Landing = memo(function Landing(props: LandingProps) {
         })
         return {
             root: css(utilStyles.vlayout, {
-                paddingTop: 160
+                paddingTop: 160,
+                minHeight: '100vh'
             }),
             powerBy: css({
                 position: 'absolute',
@@ -119,7 +126,7 @@ export const Landing = memo(function Landing(props: LandingProps) {
         }
     }, [])
 
-    return (<div css={styles.root}>
+    return (<Paper css={styles.root}>
         <div css={styles.powerBy}>
             <img src={viteLogo} className='logo' alt="Vite logo" />
             <img src={reactLogo} className='logo react' alt="React logo" />
@@ -150,7 +157,7 @@ export const Landing = memo(function Landing(props: LandingProps) {
                 {ll('action.authorize')}
             </Button>
         </form>
-    </div>)
+    </Paper>)
 })
 
 export default Landing

@@ -9,6 +9,7 @@ import Typography from '@mui/material/Typography';
 import useApi from '@/contexts/useApi';
 import { Box } from '@mui/material';
 import MenuContent from './MenuContent';
+import { useI18nLabel } from '@/contexts/useI18n';
 
 interface SideMenuMobileProps {
     open: boolean | undefined;
@@ -17,8 +18,9 @@ interface SideMenuMobileProps {
 
 export default function SideMenuMobile({ open, toggleDrawer }: SideMenuMobileProps) {
 
-    const { preferences } = useApi()
+    const { preferences, setAuhtorization } = useApi()
     const { profile } = preferences || {}
+    const ll = useI18nLabel()
 
     return (
         <Drawer
@@ -69,8 +71,10 @@ export default function SideMenuMobile({ open, toggleDrawer }: SideMenuMobilePro
                     <Divider />
                 </Stack>
                 <Stack sx={{ p: 2 }}>
-                    <Button variant="outlined" fullWidth startIcon={<LogoutRoundedIcon />}>
-                        Exit
+                    <Button variant="outlined" fullWidth startIcon={<LogoutRoundedIcon />} onClick={() => {
+                        setAuhtorization(undefined)
+                    }}>
+                        {ll('action.exit')}
                     </Button>
                 </Stack>
             </Stack>

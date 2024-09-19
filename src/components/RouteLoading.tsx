@@ -1,13 +1,18 @@
 import utilStyles from "@/utilStyles"
-import { CircularProgress } from "@mui/material"
-import { clsx } from "clsx"
+import { Box, CircularProgress, useTheme } from "@mui/material"
 import { memo } from "react"
 
 /**
  * a full screen loading indicator for routing
  */
 export const RouteLoading = memo(function RouteLoading() {
-    return <div css={[utilStyles.vclayout, utilStyles.fill]}>
+    const theme = useTheme()
+    return <Box
+        css={[utilStyles.vclayout, utilStyles.fill]}
+        sx={{
+            gap: theme.spacing(1), color: theme.palette.text.primary,
+            bgcolor: theme.palette.background.default
+        }}>
         <CircularProgress />
-    </div>
+    </Box>
 })

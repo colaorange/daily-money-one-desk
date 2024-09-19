@@ -7,6 +7,7 @@ export type HomePageProps = PropsWithChildren
 export const HomePage = memo(function HomePage(props: HomePageProps) {
     return <MainTemplate>
         <Typography>Home</Typography>
+        <div style={{height: '200vh'}}/>
     </MainTemplate>
 })
 

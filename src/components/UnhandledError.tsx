@@ -1,6 +1,6 @@
 import utilStyles from "@/utilStyles"
 import { css } from '@emotion/react'
-import { Button, Typography, useTheme } from "@mui/material"
+import { Box, Button, Typography, useTheme } from "@mui/material"
 import { memo, useMemo } from "react"
 import { AiFillBug } from "react-icons/ai";
 
@@ -18,7 +18,12 @@ export const UnhandledError = memo(function UnhandledError({ message }: { messag
         }
     }, [theme])
 
-    return <div css={[utilStyles.vclayout, utilStyles.fill]} style={{ gap: theme.spacing(1) }}>
+    return <Box
+        css={[utilStyles.vclayout, utilStyles.fill]}
+        sx={{
+            gap: theme.spacing(1), color: theme.palette.text.primary,
+            bgcolor: theme.palette.background.default
+        }}>
         <AiFillBug size={64} css={styles.errTxtSty} />
         <Typography variant="subtitle1" css={styles.errTxtSty}>{`<ERROR>`}</Typography>
         <Typography variant="body1">{message}</Typography>
@@ -27,5 +32,5 @@ export const UnhandledError = memo(function UnhandledError({ message }: { messag
         <Button variant="contained" onClick={() => {
             window.location.reload()
         }}>Try Again</Button>
-    </div>
+    </Box>
 })

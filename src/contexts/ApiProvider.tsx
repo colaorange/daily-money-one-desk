@@ -17,7 +17,7 @@ export type ApiContextValue = {
     basePath: string,
     custom?: boolean
     publicSetting: PublicSetting
-    setAuhtorization: (authorization: ApiAuthorization) => void
+    setAuhtorization: (authorization?: ApiAuthorization) => void
     authorized?: boolean
     preferences?: Preferences
 }
@@ -83,10 +83,15 @@ export const ApiProvider = memo(function ApiProvider({ basePath, custom: custom,
 
 
     const value = useMemo(() => {
-        const setAuhtorization = (authorization: ApiAuthorization) => {
+        const setAuhtorization = (authorization?: ApiAuthorization) => {
             setStateMix((state) => {
-                sessionStorage.setItem(SESSION_CONNECTION_TOKEN, authorization.connectionToken)
-                return { ...state, authroization: authorization }
+                if(authorization){
+                    sessionStorage.setItem(SESSION_CONNECTION_TOKEN, authorization.connectionToken)
+                }else{
+                    sessionStorage.removeItem(SESSION_CONNECTION_TOKEN)
+                    //todo remove cache in session store
+                }
+                return { ...state, authorization }
             })
         }
         const value: ApiContextValue | undefined = stateMix?.setting ? {

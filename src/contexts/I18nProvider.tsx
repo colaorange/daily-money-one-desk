@@ -54,8 +54,9 @@ export const I18nProvider = memo(function I18nProvider({ children }: I18nProvide
 
 
     const i18next = useMemo(() => {
+        document.documentElement.lang = language
+        
         const i18next = i18nextDefault.createInstance()
-
 
         i18next.init({
             //fix

@@ -2,8 +2,8 @@ import { appErrMessage } from "@/appUtils"
 import { useI18nLabel } from "@/contexts/useI18n"
 import utilStyles from "@/utilStyles"
 import { css } from '@emotion/react'
-import { Button, Typography, useTheme } from "@mui/material"
-import { clsx } from "clsx"
+import { Box, Button, Typography, useTheme } from "@mui/material"
+
 import { memo, useMemo } from "react"
 import { BiSolidError } from "react-icons/bi"
 import { BsFillQuestionCircleFill, BsSignStop } from "react-icons/bs";
@@ -49,11 +49,16 @@ export const RouteError = memo(function RouteError() {
 
 
 
-    return <div css={[utilStyles.vclayout, utilStyles.fill]} style={{ gap: theme.spacing(1) }}>
+    return <Box
+        css={[utilStyles.vclayout, utilStyles.fill]}
+        sx={{
+            gap: theme.spacing(1), color: theme.palette.text.primary,
+            bgcolor: theme.palette.background.default
+        }}>
         {(() => {
             if (statusCode === 404) {
                 return <BsFillQuestionCircleFill size={64} css={styles.errTxtSty} />
-            }else if (statusCode === 403) {
+            } else if (statusCode === 403) {
                 return <BsSignStop size={64} css={styles.errTxtSty} />
             }
             return <BiSolidError size={64} css={styles.errTxtSty} />
@@ -71,5 +76,5 @@ export const RouteError = memo(function RouteError() {
                 navigate('/')
             }}>{ll('desktop.home')}</Button>
         </div>
-    </div>
+    </Box>
 })
