@@ -73,6 +73,15 @@ export const ThemeProvider = memo(function ThemeProvider({ children }: ThemeProv
                     disabled: colorScheme.surfaceDisabled
                 },
             },
+            components: {
+                MuiSelect: {
+                    styleOverrides: {
+                        root: {
+                            height: 46
+                        },
+                    }
+                }
+            }
         });
         return { theme }
     }, [colorScheme])

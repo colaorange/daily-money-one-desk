@@ -1,10 +1,11 @@
 import MainTemplate from "@/templates/MainTemplate"
 import { Typography } from "@mui/material"
-import { memo, PropsWithChildren } from "react"
+import { observer } from "mobx-react-lite"
+import { PropsWithChildren } from "react"
 
 export type SearchTransactionsPageProps = PropsWithChildren
 
-export const SearchTransactionsPage = memo(function AboutPage(props: SearchTransactionsPageProps) {
+export const SearchTransactionsPage = observer(function AboutPage(props: SearchTransactionsPageProps) {
     return <MainTemplate>
         <Typography>SearchTransactionsPage</Typography>
     </MainTemplate>

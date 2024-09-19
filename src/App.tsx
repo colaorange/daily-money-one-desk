@@ -10,6 +10,7 @@ import I18nProvider from './contexts/I18nProvider';
 import useAlert from './contexts/userAlert';
 import Router from './Router';
 import ThemeProvider from './contexts/ThemeProvider';
+import StoreProvider from './contexts/StoreProvider';
 
 const defaultTheme = createTheme({});
 
@@ -55,7 +56,9 @@ function AppBoundary2({ children }: PropsWithChildren) {
         <I18nProvider>
             <ThemeProvider>
                 <AlertProvider>
-                    {children}
+                    <StoreProvider>
+                        {children}
+                    </StoreProvider>
                 </AlertProvider>
             </ThemeProvider>
         </I18nProvider>

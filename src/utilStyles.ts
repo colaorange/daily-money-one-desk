@@ -57,6 +57,9 @@ export const utilStyles = {
     flex1: css({
         display: 'flex',
         flex: 1
+    }),
+    alignSelfStretch: css({
+        alignSelf: 'stretch'
     })
 }
 
