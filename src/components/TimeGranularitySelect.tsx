@@ -5,33 +5,33 @@ import { memo } from "react";
 
 
 export type TimeGranularitySelectProps = {
-    mode?: TimeGranularity
-    modes?: TimeGranularity[]
-    onChange?: (mode?: TimeGranularity) => void
+    value?: TimeGranularity
+    candidates?: TimeGranularity[]
+    onChange?: (value?: TimeGranularity) => void
     sx?: SxProps<Theme>
     label?: string
 }
 
-export const TimeGranularityModeSelect = memo(function TimeGranularityModeSelect({ mode, label, modes = Object.values(TimeGranularity), onChange, sx = { minWidth: { sm: 100 } } }: TimeGranularitySelectProps) {
+export const TimeGranularitySelect = memo(function TimeGranularitySelect({ value, label, candidates = Object.values(TimeGranularity), onChange, sx = { minWidth: { sm: 100 } } }: TimeGranularitySelectProps) {
     const ll = useI18nLabel()
     const timeGranularityLabel = label || ll('desktop.timeGranularity')
     return <FormControl>
         <InputLabel>{timeGranularityLabel}</InputLabel>
         <Select
-            value={mode}
+            value={value}
             sx={sx}
             label={timeGranularityLabel}
             onChange={onChange ? (evt) => {
                 const mode = evt.target.value
-                onChange(modes?.find((m) => m === mode))
+                onChange(candidates?.find((m) => m === mode))
             } : undefined}
         >
-            {modes?.map((b) => {
-                return <MenuItem value={b}>{ll(`desktop.timeGranularity.${b}`)}</MenuItem>
+            {candidates?.map((b) => {
+                return <MenuItem key={b} value={b}>{ll(`desktop.timeGranularity.${b}`)}</MenuItem>
             })}
         </Select>
     </FormControl>
 })
 
 
-export default TimeGranularityModeSelect
+export default TimeGranularitySelect

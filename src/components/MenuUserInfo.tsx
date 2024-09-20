@@ -7,7 +7,7 @@ import Typography from '@mui/material/Typography';
 
 export default function MenuUserInfo() {
 
-    const { theme, appColorScheme } = useTheme()
+    const { theme, appScheme } = useTheme()
     const { preferences } = useApi()
     const { profile } = preferences || {}
 
@@ -17,7 +17,7 @@ export default function MenuUserInfo() {
             p: 2,
             gap: 1,
             alignItems: 'center',
-            bgcolor: appColorScheme.toolbarBgColor,
+            bgcolor: appScheme.toolbarBgColor,
             height: theme.mixins.toolbar.minHeight
         }}
     >

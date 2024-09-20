@@ -12,7 +12,7 @@ import useTheme from '@/contexts/useTheme';
 
 export default function AppNavbar() {
     const ll = useI18nLabel()
-    const {theme, appColorScheme } = useTheme()
+    const {theme, appScheme } = useTheme()
 
     const [open, setOpen] = React.useState(false);
 
@@ -26,7 +26,7 @@ export default function AppNavbar() {
             sx={{
                 display: { xs: 'auto', md: 'none' },
                 boxShadow: 0,
-                bgcolor: appColorScheme.navbarBgColor,
+                bgcolor: appScheme.navbarBgColor,
                 backgroundImage: 'none',
                 borderBottom: '1px solid',
                 borderColor: 'divider',

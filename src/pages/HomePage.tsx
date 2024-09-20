@@ -2,11 +2,14 @@
 import AppToolbar from "@/components/AppToolbar";
 import BookSelect from "@/components/BookSelect";
 import TimePeriodButton from "@/components/TimePeriodButton";
+import TimePeriodInfo from "@/components/TimePeriodInfo";
 import { useBookStore } from "@/contexts/useStore";
+import useTheme from "@/contexts/useTheme";
 import MainTemplate from "@/templates/MainTemplate";
 import { TimeGranularity, TimePeriod } from "@/types";
+import utilStyles from "@/utilStyles";
 import { Book } from "@client/model";
-import { Divider, IconButton, Typography } from '@mui/material';
+import { Divider, Typography } from '@mui/material';
 import { observer } from "mobx-react-lite";
 import moment from "moment";
 import { PropsWithChildren, useCallback, useEffect, useState } from "react";
@@ -23,10 +26,12 @@ export type HomePageProps = PropsWithChildren
 
 export const HomePage = observer(function HomePage(props: HomePageProps) {
 
+    const { appStyles } = useTheme()
+
     const [timePeriod, setTimePeriod] = useState<TimePeriod>({
-        start: moment().startOf('day').add(-1, 'month').valueOf(),
+        start: moment().add(-1, 'month').add(1, 'day').valueOf(),
         end: moment().endOf('day').valueOf(),
-        granularity: TimeGranularity.MONTHLY
+        granularity: TimeGranularity.DAILY
     })
 
     const bookStore = useBookStore()
@@ -35,6 +40,10 @@ export const HomePage = observer(function HomePage(props: HomePageProps) {
     const onBookChange = useCallback((book?: Book) => {
         bookStore.currentBookId = book?.id
     }, [bookStore])
+
+    const onTimePeriodChange = useCallback((timePeriod: TimePeriod) => {
+        setTimePeriod(timePeriod)
+    }, [])
 
 
     useEffect(() => {
@@ -45,10 +54,11 @@ export const HomePage = observer(function HomePage(props: HomePageProps) {
 
 
     return <MainTemplate>
-        <AppToolbar sxGap={1} align="end">
-            <BookSelect bookId={currentBookId} books={books} onChange={onBookChange} />
-
-            <TimePeriodButton timePeriod={timePeriod} />
+        <AppToolbar sxGap={1}>
+            <BookSelect bookId={currentBookId} books={books} onBookChange={onBookChange} css={appStyles.toolbarSelect} />
+            <span css={utilStyles.flex1} />
+            <TimePeriodInfo timePeriod={timePeriod} />
+            <TimePeriodButton timePeriod={timePeriod} onTimePeriodChange={onTimePeriodChange} />
         </AppToolbar>
         <Divider flexItem />
         <Typography>HomePage</Typography>

@@ -1,32 +1,33 @@
 import { useI18nLabel } from "@/contexts/useI18n";
 import { Book } from "@client/model";
-import { FormControl, InputLabel, MenuItem, Select, SxProps, Theme } from "@mui/material";
+import { FormControl, InputLabel, MenuItem, Select, SelectProps } from "@mui/material";
 import { memo } from "react";
 
 
 export type BookSelectProps = {
     bookId?: string
     books?: Book[]
-    onChange?: (book?: Book) => void
-    sx?: SxProps<Theme>
-}
+    onBookChange?: (book?: Book) => void
+} & SelectProps
 
-export const BookSelect = memo(function BookSelect({ bookId, books, onChange, sx = { minWidth: { sm: 160 } } }: BookSelectProps) {
+export const BookSelect = memo(function BookSelect({ bookId, books, onBookChange, sx = { minWidth: { sm: 160 } }, ...restProps }: BookSelectProps) {
     const ll = useI18nLabel()
     const bookLabel = ll('book')
+    const inBooks = books?.some((b) => b.id === bookId)
     return <FormControl>
         <InputLabel>{bookLabel}</InputLabel>
         <Select
-            value={bookId}
+            value={inBooks ? bookId : ''}
             sx={sx}
             label={bookLabel}
-            onChange={onChange ? (evt) => {
+            onChange={onBookChange ? (evt) => {
                 const bookId = evt.target.value
-                onChange(books?.find((b) => b.id === bookId))
+                onBookChange(books?.find((b) => b.id === bookId))
             } : undefined}
+            {...restProps}
         >
             {books?.map((b) => {
-                return <MenuItem value={b.id}>{b.name}</MenuItem>
+                return <MenuItem key={b.id} value={b.id}>{b.name}</MenuItem>
             })}
         </Select>
     </FormControl>

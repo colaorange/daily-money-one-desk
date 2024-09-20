@@ -8,20 +8,22 @@ import { SerializedStyles } from "@emotion/react"
 export type ThemeProviderProps = PropsWithChildren
 
 
-export type AppColorScheme = {
+export type AppScheme = {
     navbarBgColor: string
     toolbarBgColor: string
-    notouchedOutline: string
+    outlineColor: string
+    toolbarHeight: number
 }
 
 export type AppStyles = {
     outlineIconButton: SerializedStyles
+    toolbarSelect: SerializedStyles
 }
 
 export type ThemeContextValue = {
     theme: Theme,
     colorScheme: ColorScheme
-    appColorScheme: AppColorScheme
+    appScheme: AppScheme
     appStyles: AppStyles
 }
 
@@ -32,12 +34,12 @@ export const ThemeProvider = memo(function ThemeProvider({ children }: ThemeProv
     const { colorScheme } = usePublicSetting()
 
     const value = useMemo(() => {
-        const toolbarMinHeight = 64
+        const toolbarHeight = 64
         const defaultTheme = createTheme({})
         const theme = createTheme({
             mixins: {
                 toolbar: {
-                    minHeight: toolbarMinHeight
+                    minHeight: toolbarHeight
                 }
             },
             palette: {
@@ -96,6 +98,13 @@ export const ThemeProvider = memo(function ThemeProvider({ children }: ThemeProv
                 },
             },
             components: {
+                MuiTypography: {
+                    styleOverrides: {
+                        root: {
+                            fontWeight: 200
+                        }
+                    }
+                },
                 MuiOutlinedInput: {
                     styleOverrides: {
                         notchedOutline: {
@@ -103,36 +112,30 @@ export const ThemeProvider = memo(function ThemeProvider({ children }: ThemeProv
                         }
                     },
                 },
-                MuiSelect: {
-                    styleOverrides: {
-                        root: {
-                            height: 46,
-                        },
-                    }
-                },
                 MuiToolbar: {
                     styleOverrides: {
                         root: {
                             //[prevent height change in xs and sm]
-                            height: toolbarMinHeight,
-                            minHeight: toolbarMinHeight,
+                            height: toolbarHeight,
+                            minHeight: toolbarHeight,
                             [defaultTheme.breakpoints.down('sm')]: {
-                                height: toolbarMinHeight,
-                                minHeight: toolbarMinHeight,
+                                height: toolbarHeight,
+                                minHeight: toolbarHeight,
                             },
                             [defaultTheme.breakpoints.down('xs')]: {
-                                height: toolbarMinHeight,
-                                minHeight: toolbarMinHeight,
+                                height: toolbarHeight,
+                                minHeight: toolbarHeight,
                             },
                         }
                     }
                 }
             }
         });
-        const appColorScheme: AppColorScheme = {
+        const appScheme: AppScheme = {
             navbarBgColor: colorScheme.primaryContainer,
             toolbarBgColor: colorScheme.elevation.level1,
-            notouchedOutline: colorScheme.outline
+            outlineColor: colorScheme.outline,
+            toolbarHeight
 
         }
         const appStyles: AppStyles = {
@@ -141,7 +144,7 @@ export const ThemeProvider = memo(function ThemeProvider({ children }: ThemeProv
                 height: 46,
                 width: 46,
                 border: '1px solid',
-                borderColor: appColorScheme.notouchedOutline,
+                borderColor: appScheme.outlineColor,
                 ':hover': {
                     borderColor: theme.palette.common.white,
                 },
@@ -157,12 +160,15 @@ export const ThemeProvider = memo(function ThemeProvider({ children }: ThemeProv
                 '& .MuiTouchRipple-root .MuiTouchRipple-child': {
                     borderRadius: theme.spacing(0.5),
                 }
+            }),
+            toolbarSelect: css({
+                height: toolbarHeight - 20, 
             })
         }
         return {
             theme,
             colorScheme,
-            appColorScheme,
+            appScheme,
             appStyles
         }
     }, [colorScheme])

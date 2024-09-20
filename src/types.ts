@@ -44,7 +44,7 @@ export enum TimeGranularity {
 }
 
 export type TimePeriod = {
-    start: number,
+    start: number | null,
     end: number,
     granularity: TimeGranularity
 }

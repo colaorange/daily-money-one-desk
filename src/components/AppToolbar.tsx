@@ -8,9 +8,9 @@ export type AppToolbarProps = PropsWithChildren<{ sxGap?: number, align?: 'start
 
 export const AppToolbar = memo(function AppToolbar({ children, sxGap, align }: AppToolbarProps) {
 
-    const { appColorScheme } = useTheme()
+    const { appScheme } = useTheme()
 
-    return <Toolbar css={utilStyles.alignSelfStretch} sx={{ bgcolor: appColorScheme.toolbarBgColor, gap: sxGap, justifyContent: align === 'end' ? 'flex-end' : 'flex-start' }}>
+    return <Toolbar css={utilStyles.alignSelfStretch} sx={{ bgcolor: appScheme.toolbarBgColor, gap: sxGap, justifyContent: align === 'end' ? 'flex-end' : 'flex-start' }}>
         {children}
     </Toolbar>
 

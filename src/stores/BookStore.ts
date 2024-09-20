@@ -1,7 +1,7 @@
 import { BookApi } from '@client/api';
 import { Configuration } from '@client/configuration';
 import { Book } from '@client/model';
-import { makeAutoObservable } from 'mobx';
+import { action, makeAutoObservable, runInAction } from 'mobx';
 
 export class BookStore {
 
@@ -29,7 +29,9 @@ export class BookStore {
 
     async fetchBooks(): Promise<Book[]> {
         const books = (await new BookApi(this.configuration).listBook()).data
-        this._books = books
+        runInAction(()=>{
+            this._books = books
+        })
         return books
     }
 }

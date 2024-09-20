@@ -1,6 +1,6 @@
+import { Preferences, PublicSetting } from "@client/model"
 import { useContext } from "react"
 import { ApiContext, ApiContextValue } from "./ApiProvider"
-import { PublicSetting } from "@client/model"
 
 
 export function useApi(): ApiContextValue {
@@ -16,4 +16,8 @@ export default useApi
 
 export function usePublicSetting(): PublicSetting {
     return useApi().publicSetting
+}
+
+export function usePreferences(): Preferences | undefined {
+    return useApi().preferences
 }
