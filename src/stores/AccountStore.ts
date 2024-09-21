@@ -7,6 +7,7 @@ export class AccountStore {
 
     readonly configuration: Configuration
     private _accounts?: Account[] | undefined
+    private _fetchingAccounts = 0
 
     constructor({ configuration }: { configuration: Configuration }) {
         this.configuration = configuration
@@ -24,12 +25,17 @@ export class AccountStore {
 
 
     async fetchAccounts(force?: boolean): Promise<void> {
-        if (!force && this._accounts) {
+        if (!force && this._fetchingAccounts > 0) {
             return
         }
-        const accounts = (await new AccountApi(this.configuration).listAccountAll()).data
-        runInAction(() => {
-            this._accounts = accounts
-        })
+        this._fetchingAccounts++
+        try {
+            const accounts = (await new AccountApi(this.configuration).listAccountAll()).data
+            runInAction(() => {
+                this._accounts = accounts
+            })
+        } finally {
+            this._fetchingAccounts--
+        }
     }
 }

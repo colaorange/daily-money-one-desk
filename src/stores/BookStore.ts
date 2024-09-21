@@ -8,7 +8,7 @@ export class BookStore {
     readonly configuration: Configuration
     private _currentBookId?: string;
     private _books?: Book[] | undefined
-    private _fetchingBooks = false
+    private _fetchingBooks = 0
 
     constructor({ configuration, currentBookId }: { configuration: Configuration, currentBookId?: string }) {
         this.configuration = configuration
@@ -23,7 +23,6 @@ export class BookStore {
     set currentBookId(currentBookId: string | undefined) {
         this._currentBookId = currentBookId
     }
-
     get books(): Book[] | undefined {
         return this._books
     }
@@ -33,12 +32,17 @@ export class BookStore {
     }
 
     async fetchBooks(force?: boolean): Promise<void> {
-        if (!force && (this._books || this._fetchingBooks)) {
+        if (!force && this._fetchingBooks > 0) {
             return
         }
-        const books = (await new BookApi(this.configuration).listBookAll()).data
-        runInAction(() => {
-            this._books = books
-        })
+        this._fetchingBooks++
+        try {
+            const books = (await new BookApi(this.configuration).listBookAll()).data
+            runInAction(() => {
+                this._books = books
+            })
+        } finally {
+            this._fetchingBooks--
+        }
     }
 }
