@@ -1,18 +1,14 @@
 
 import AppToolbar from "@/components/AppToolbar";
 import BookSelect from "@/components/BookSelect";
-import TimePeriodButton from "@/components/TimePeriodButton";
-import TimePeriodInfo from "@/components/TimePeriodInfo";
-import { useBookStore } from "@/contexts/useStore";
+import { useAccountStore, useBookStore } from "@/contexts/useStore";
 import useTheme from "@/contexts/useTheme";
 import MainTemplate from "@/templates/MainTemplate";
-import { TimeGranularity, TimePeriod } from "@/types";
 import utilStyles from "@/utilStyles";
 import { Book } from "@client/model";
-import { Divider, Typography } from '@mui/material';
+import { Divider, Stack } from '@mui/material';
 import { observer } from "mobx-react-lite";
-import moment from "moment";
-import { PropsWithChildren, useCallback, useEffect, useState } from "react";
+import { PropsWithChildren, useCallback, useEffect } from "react";
 
 export type HomePageProps = PropsWithChildren
 /**
@@ -28,46 +24,37 @@ export const HomePage = observer(function HomePage(props: HomePageProps) {
 
     const { appStyles } = useTheme()
 
-    const [timePeriod, setTimePeriod] = useState<TimePeriod>({
-        start: moment().add(-1, 'month').add(1, 'day').valueOf(),
-        end: moment().endOf('day').valueOf(),
-        granularity: TimeGranularity.DAILY
-    })
-
     const bookStore = useBookStore()
+    const accountStore = useAccountStore()
+    
     const { books, currentBookId } = bookStore
+    const { accounts } = accountStore
 
     const onBookChange = useCallback((book?: Book) => {
         bookStore.currentBookId = book?.id
     }, [bookStore])
-
-    const onTimePeriodChange = useCallback((timePeriod: TimePeriod) => {
-        setTimePeriod(timePeriod)
-    }, [])
-
 
     useEffect(() => {
         if (!books) {
             bookStore.fetchBooks()
         }
     }, [bookStore, books])
-
+    useEffect(() => {
+        if (!accounts) {
+            accountStore.fetchAccounts()
+        }
+    }, [accountStore, accounts])
 
     return <MainTemplate>
         <AppToolbar sxGap={1}>
             <BookSelect bookId={currentBookId} books={books} onBookChange={onBookChange} css={appStyles.toolbarSelect} />
             <span css={utilStyles.flex1} />
-            <TimePeriodInfo timePeriod={timePeriod} />
-            <TimePeriodButton timePeriod={timePeriod} onTimePeriodChange={onTimePeriodChange} />
         </AppToolbar>
         <Divider flexItem />
-        <Typography>HomePage</Typography>
-        <div style={{ height: '200vh' }} />
-        {/* <Button onClick={() => { bookStore.increment() }}>Increment</Button>
-        <Button onClick={() => { bookStore.decrement() }}>Decrement</Button>
-        <Button onClick={() => {
-            bookStore.count = 0
-        }}>Reset</Button> */}
+        <Stack direction={"column"}>
+
+
+        </Stack>
     </MainTemplate>
 })
 

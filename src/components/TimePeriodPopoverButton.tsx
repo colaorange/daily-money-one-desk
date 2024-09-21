@@ -6,13 +6,14 @@ import { memo, useCallback, useState } from "react";
 import { FaCalendarDays } from "react-icons/fa6";
 import TimePeriodPopover from "./TimePeriodPopover";
 
-export type TimePeriodButtonProps = {
+export type TimePeriodPopoverButtonProps = {
     timePeriod: TimePeriod
     granularityModes?: TimeGranularity[]
     onTimePeriodChange?: (timePeriod: TimePeriod) => void
+    hideGranularity?: boolean
 }
 
-export const TimePeriodButton = memo(function TimePeriodButton({ timePeriod, granularityModes = Object.values(TimeGranularity), onTimePeriodChange }: TimePeriodButtonProps) {
+export const TimePeriodPopoverButton = memo(function TimePeriodPopoverButton({ timePeriod, hideGranularity, granularityModes, onTimePeriodChange }: TimePeriodPopoverButtonProps) {
     const { appStyles } = useTheme()
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
     const onClick = useCallback((evt: React.MouseEvent<HTMLButtonElement>) => {
@@ -35,6 +36,7 @@ export const TimePeriodButton = memo(function TimePeriodButton({ timePeriod, gra
             open={true}
             anchorEl={anchorEl}
             
+            hideGranularity={hideGranularity}
             onTimePeriodClose={onTimePeriodClose}
             timePeriod={timePeriod}
             granularityModes={granularityModes}
@@ -55,4 +57,4 @@ export const TimePeriodButton = memo(function TimePeriodButton({ timePeriod, gra
 })
 
 
-export default TimePeriodButton
+export default TimePeriodPopoverButton

@@ -1,66 +1,207 @@
 import { useI18nLabel } from "@/contexts/useI18n";
 import useTheme from "@/contexts/useTheme";
 import { TimeGranularity, TimePeriod } from "@/types";
-import { Button, css, Divider, FormControlLabel, IconButton, Popover, PopoverProps, Stack, Switch } from "@mui/material";
+import { Button, css, Divider, FormControlLabel, Popover, PopoverProps, Stack, Switch } from "@mui/material";
 
 import { DEFAULT_DATE_FORMAT } from "@/constants";
 import { usePreferences } from "@/contexts/useApi";
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import moment from "moment";
-import { memo, useCallback, useMemo, useState } from "react";
-import { FaFastBackward, FaFastForward, FaStepBackward, FaStepForward } from "react-icons/fa";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { FaAngleDoubleLeft, FaAngleDoubleRight, FaFastBackward, FaFastForward, FaStepBackward, FaStepForward } from "react-icons/fa";
+import { FaAngleLeft, FaAngleRight, FaStop } from "react-icons/fa6";
 import TimeGranularitySelect from "./TimeGranularitySelect";
-import { FaStop } from "react-icons/fa6";
+import TimePeriodShiftButton from "./TimePeriodShiftButton";
 
 export type TimePeriodPopoverProps = {
     timePeriod: TimePeriod
+    hideGranularity?: boolean
     granularityModes?: TimeGranularity[]
     onTimePeriodClose?: (timePeriod: TimePeriod) => void
 } & PopoverProps
 
 
 function normalize2Moment(start: number | null, end: number) {
-    const mstart = start !== null ? moment(Math.min(start, end)).startOf('day') : null
-    const mend = (start !== null ? moment(Math.max(start, end)) : moment(end)).endOf('day')
+    const mStart = start !== null ? moment(Math.min(start, end)).startOf('day') : null
+    const mEnd = (start !== null ? moment(Math.max(start, end)) : moment(end)).endOf('day')
     return {
-        mstart, mend
+        mStart, mEnd
     }
 }
 
-export const TimePeriodPopover = memo(function TimePeriodPopover({ timePeriod, granularityModes = Object.values(TimeGranularity), onTimePeriodClose, ...rest }: TimePeriodPopoverProps) {
+export const TimePeriodPopover = memo(function TimePeriodPopover({ timePeriod, hideGranularity, granularityModes = Object.values(TimeGranularity), onTimePeriodClose, ...rest }: TimePeriodPopoverProps) {
     const { theme, appScheme } = useTheme()
     const { dateFormat = DEFAULT_DATE_FORMAT } = usePreferences() || {}
     const ll = useI18nLabel()
-    const [startFromInit, setStartFromInit] = useState(timePeriod.start === null)
 
-    const { mstart, mend } = normalize2Moment(timePeriod.start, timePeriod.end)
 
-    const [start, setStart] = useState<moment.Moment | null>(mstart)
-    const [end, setEnd] = useState(mend)
-    const [granularity, setGranularity] = useState(timePeriod.granularity)
+    const { mStart, mEnd } = normalize2Moment(timePeriod.start, timePeriod.end)
+
+    //init state
+
+    const [stateMix, setStateMix] = useState<{
+        fromInit: boolean
+        mStart: moment.Moment | null
+        mEnd: moment.Moment
+        granularity: TimeGranularity
+    }>({
+        fromInit: timePeriod.start === null,
+        mStart,
+        mEnd,
+        granularity: timePeriod.granularity
+    })
+
+    const resetState = useCallback((timePeriod: TimePeriod, fromInit?: boolean) => {
+        const { mStart, mEnd } = normalize2Moment(timePeriod.start, timePeriod.end)
+
+        setStateMix((s) => {
+            return {
+                fromInit: fromInit === undefined ? s.fromInit : fromInit,
+                mStart,
+                mEnd,
+                granularity: s.granularity
+            }
+        })
+    }, [])
+
+    //reset state by props timePeriod
+    useEffect(() => {
+        resetState(timePeriod, timePeriod.start === null)
+    }, [resetState, timePeriod])
 
     const onClose = useCallback(() => {
         if (onTimePeriodClose) {
-            const tp = {
-                start: (!startFromInit && start !== null) ? Math.min(start.valueOf(), end.valueOf()) : null,
-                end: (!startFromInit && start !== null) ? Math.max(start.valueOf(), end.valueOf()) : end.valueOf(),
+            const {
+                fromInit,
+                mStart,
+                mEnd,
+                granularity,
+            } = stateMix
+            const closeTimePeriod: TimePeriod = {
+                start: (!fromInit && mStart !== null) ? Math.min(mStart.valueOf(), mEnd.valueOf()) : null,
+                end: (!fromInit && mStart !== null) ? Math.max(mStart.valueOf(), mEnd.valueOf()) : mEnd.valueOf(),
                 granularity
             }
-            onTimePeriodClose(tp)
-
-            const { mstart, mend } = normalize2Moment(tp.start, tp.end)
-
-            setStart(mstart)
-            setEnd(mend)
+            onTimePeriodClose(closeTimePeriod)
         }
-    }, [end, startFromInit, granularity, start, onTimePeriodClose])
+    }, [onTimePeriodClose, stateMix])
 
     const onChangeGranularity = useCallback((granularity?: TimeGranularity) => {
         if (granularity) {
-            setGranularity(granularity)
+            setStateMix((s) => {
+                return {
+                    ...s,
+                    granularity
+                }
+            })
         }
     }, [])
 
+    const fixedRange = useCallback((value: number, unit: 'month' | 'year', granularity: TimeGranularity) => {
+        setStateMix(() => {
+            return {
+                fromInit: false,
+                mStart: moment().add(value, unit).startOf(unit),
+                mEnd: moment().add(value, unit).endOf(unit),
+                granularity,
+            }
+        })
+    }, [])
+
+
+    const onThisMonth = useCallback(() => {
+        fixedRange(0, 'month', TimeGranularity.DAILY)
+    }, [fixedRange])
+
+    const onLastMonth = useCallback(() => {
+        fixedRange(-1, 'month', TimeGranularity.DAILY)
+    }, [fixedRange])
+
+    const onThisYear = useCallback(() => {
+        fixedRange(0, 'year', TimeGranularity.MONTHLY)
+    }, [fixedRange])
+
+    const onLastYear = useCallback(() => {
+        fixedRange(-1, 'year', TimeGranularity.DAILY)
+    }, [fixedRange])
+
+    const withIn = useCallback((value: number, unit: 'month' | 'year', granularity: TimeGranularity) => {
+        setStateMix(() => {
+            return {
+                fromInit: false,
+                mStart: moment().add(value, unit).add(1, 'day').startOf('day'),
+                mEnd: moment().endOf('day'),
+                granularity,
+            }
+        })
+    }, [])
+
+    const onInAMonth = useCallback(() => {
+        withIn(-1, 'month', TimeGranularity.DAILY)
+    }, [withIn])
+
+    const onInSixMonths = useCallback(() => {
+        withIn(-6, 'month', TimeGranularity.DAILY)
+    }, [withIn])
+
+    const onInAYear = useCallback(() => {
+        withIn(-1, 'year', TimeGranularity.MONTHLY)
+    }, [withIn])
+
+    const onInThreeYears = useCallback(() => {
+        withIn(-3, 'year', TimeGranularity.MONTHLY)
+    }, [withIn])
+
+    const onInSixYears = useCallback(() => {
+        withIn(-6, 'year', TimeGranularity.MONTHLY)
+    }, [withIn])
+
+    const onChangeStart = useCallback((m: moment.Moment | null) => {
+        setStateMix((s) => {
+            return {
+                ...s,
+                mStart: m?.isValid() ? m : s.mStart
+            }
+        })
+    }, [])
+    const onChangeEnd = useCallback((m: moment.Moment | null) => {
+        setStateMix((s) => {
+            return {
+                ...s,
+                mEnd: m?.isValid() ? m : s.mEnd
+            }
+        })
+    }, [])
+
+    const onToggleStartFromInit = useCallback(() => {
+        setStateMix((s) => {
+            const fromInit = !s.fromInit
+            return {
+                ...s,
+                fromInit,
+                mStart: (!fromInit && !s.mStart) ? s.mEnd.clone().add(-1, 'month').add(-1, 'day').startOf('day') : s.mStart,
+            }
+        })
+    }, [])
+
+    const onShift = useCallback((timePeriod) => {
+        resetState(timePeriod)
+    }, [resetState])
+
+
+    //don't care fromInit for shift button
+    const shfitBtnTimePeriod: TimePeriod = useMemo(() => {
+        const {
+            mStart,
+            mEnd,
+            granularity,
+        } = stateMix
+        return {
+            start: (mStart !== null) ? Math.min(mStart.valueOf(), mEnd.valueOf()) : null,
+            end: (mStart !== null) ? Math.max(mStart.valueOf(), mEnd.valueOf()) : mEnd.valueOf(),
+            granularity
+        }
+    }, [stateMix])
 
     const styles = useMemo(() => {
         return {
@@ -86,119 +227,6 @@ export const TimePeriodPopover = memo(function TimePeriodPopover({ timePeriod, g
         }
     }, [theme, appScheme])
 
-    const onThisMonth = useCallback(() => {
-        setStart(moment().startOf('month'))
-        setEnd(moment().endOf('month'))
-        setGranularity(TimeGranularity.DAILY)
-        setStartFromInit(false)
-    }, [])
-
-    const onLastMonth = useCallback(() => {
-        setStart(moment().add(-1, 'month').startOf('month'))
-        setEnd(moment().add(-1, 'month').endOf('month'))
-        setGranularity(TimeGranularity.DAILY)
-        setStartFromInit(false)
-    }, [])
-
-    const onInAMonth = useCallback(() => {
-        setStart(moment().add(-1, 'month').add(1, 'day').startOf('day'))
-        setEnd(moment().endOf('day'))
-        setGranularity(TimeGranularity.DAILY)
-        setStartFromInit(false)
-    }, [])
-
-    const onInSixMonths = useCallback(() => {
-        setStart(moment().add(-6, 'month').add(1, 'day').startOf('day'))
-        setEnd(moment().endOf('day'))
-        setGranularity(TimeGranularity.DAILY)
-        setStartFromInit(false)
-    }, [])
-
-    const onThisYear = useCallback(() => {
-        setStart(moment().startOf('year'))
-        setEnd(moment().endOf('year'))
-        setGranularity(TimeGranularity.MONTHLY)
-        setStartFromInit(false)
-    }, [])
-
-    const onLastYear = useCallback(() => {
-        setStart(moment().add(-1, 'year').startOf('year'))
-        setEnd(moment().add(-1, 'year').endOf('year'))
-        setGranularity(TimeGranularity.MONTHLY)
-        setStartFromInit(false)
-    }, [])
-
-    const onInAYear = useCallback(() => {
-        setStart(moment().add(-1, 'year').add(1, 'day').startOf('day'))
-        setEnd(moment().endOf('day'))
-        setGranularity(TimeGranularity.MONTHLY)
-        setStartFromInit(false)
-    }, [])
-
-    const onInThreeYears = useCallback(() => {
-        setStart(moment().add(-3, 'year').add(1, 'day').startOf('day'))
-        setEnd(moment().endOf('day'))
-        setGranularity(TimeGranularity.MONTHLY)
-        setStartFromInit(false)
-    }, [])
-
-    const onInSixYears = useCallback(() => {
-        setStart(moment().add(-6, 'year').add(1, 'day').startOf('day'))
-        setEnd(moment().endOf('day'))
-        setGranularity(TimeGranularity.MONTHLY)
-        setStartFromInit(false)
-    }, [])
-
-    const onChangeStart = useCallback((m: moment.Moment | null) => {
-        setStart((s) => m?.isValid() ? m : s)
-    }, [])
-    const onChangeEnd = useCallback((m: moment.Moment | null) => {
-        setEnd((e) => m?.isValid() ? m : e)
-    }, [])
-
-    const onToggleStartFromInit = useCallback(() => {
-        if (!start && !startFromInit) {
-            setStart(end.clone().add(-1, 'month').add(-1, 'day').startOf('day'))
-        }
-        setStartFromInit(!startFromInit)
-    }, [startFromInit, start, end])
-
-    const onPreviousMonth = useCallback(() => {
-        if (start) {
-            setStart(start.clone().add(-1, 'month').startOf('day'))
-        }
-        setEnd(end.clone().add(-1, 'month').endOf('day'))
-    }, [start, end])
-
-    const onNextMonth = useCallback(() => {
-        if (start) {
-            setStart(start.clone().add(1, 'month').startOf('day'))
-        }
-        setEnd(end.clone().add(1, 'month').endOf('day'))
-    }, [start, end])
-    const onPreviousYear = useCallback(() => {
-        if (start) {
-            setStart(start.clone().add(-1, 'year').startOf('day'))
-        }
-        setEnd(end.clone().add(-1, 'year').endOf('day'))
-    }, [start, end])
-
-    const onNextYear = useCallback(() => {
-        if (start) {
-            setStart(start.clone().add(1, 'year').startOf('day'))
-        }
-        setEnd(end.clone().add(1, 'year').endOf('day'))
-    }, [start, end])
-
-    const onToday = useCallback(() => {
-        const today = moment().endOf('day')
-        if (start) {
-            const endDayDiff = today.diff(end, 'day')
-            setStart(start.clone().add(endDayDiff, 'day').startOf('day'))
-        }
-        setEnd(today)
-    }, [start, end])
-
     return <Popover
         onClose={onClose}
         {...rest}
@@ -223,27 +251,27 @@ export const TimePeriodPopover = memo(function TimePeriodPopover({ timePeriod, g
                 <Button css={styles.button} onClick={onInSixYears}>{ll('desktop.inSixYears')}</Button>
             </Stack>
             <Divider flexItem css={styles.divider} />
-            <FormControlLabel labelPlacement="start" control={<Switch checked={startFromInit} />} label={ll('desktop.startFromInitDay')} onChange={onToggleStartFromInit} />
-            {!startFromInit && <DatePicker label={ll('desktop.startDate')} format={dateFormat} value={start} onChange={onChangeStart} />}
-            <DatePicker label={ll('desktop.endDate')} format={dateFormat} value={end} onChange={(onChangeEnd)} />
+            <FormControlLabel labelPlacement="start" control={<Switch checked={stateMix.fromInit} />} label={ll('desktop.startFromInitDay')} onChange={onToggleStartFromInit} />
+            {!stateMix.fromInit && <DatePicker label={ll('desktop.startDate')} format={dateFormat} value={stateMix.mStart} onChange={onChangeStart} />}
+            <DatePicker label={ll('desktop.endDate')} format={dateFormat} value={stateMix.mEnd} onChange={(onChangeEnd)} />
             <Stack direction='row' css={styles.playbar} >
-                <IconButton size="small" onClick={onPreviousYear}>
-                    <FaFastBackward />
-                </IconButton>
-                <IconButton size="small" onClick={onPreviousMonth}>
-                    <FaStepBackward />
-                </IconButton>
-                <IconButton size="small" onClick={onToday}>
+                <TimePeriodShiftButton varient="previousYear" timePeriod={shfitBtnTimePeriod} onShift={onShift}>
+                    <FaAngleDoubleLeft />
+                </TimePeriodShiftButton>
+                <TimePeriodShiftButton varient="previousMonth" timePeriod={shfitBtnTimePeriod} onShift={onShift}>
+                    <FaAngleLeft />
+                </TimePeriodShiftButton>
+                <TimePeriodShiftButton varient="today" timePeriod={shfitBtnTimePeriod} onShift={onShift}>
                     <FaStop />
-                </IconButton>
-                <IconButton size="small" onClick={onNextMonth}>
-                    <FaStepForward />
-                </IconButton>
-                <IconButton size="small" onClick={onNextYear}>
-                    <FaFastForward />
-                </IconButton>
+                </TimePeriodShiftButton>
+                <TimePeriodShiftButton varient="nextMonth" timePeriod={shfitBtnTimePeriod} onShift={onShift}>
+                    <FaAngleRight />
+                </TimePeriodShiftButton>
+                <TimePeriodShiftButton varient="nextYear" timePeriod={shfitBtnTimePeriod} onShift={onShift}>
+                    <FaAngleDoubleRight />
+                </TimePeriodShiftButton>
             </Stack>
-            <TimeGranularitySelect value={granularity} onChange={onChangeGranularity} candidates={granularityModes} />
+            {!hideGranularity && <TimeGranularitySelect value={stateMix.granularity} onChange={onChangeGranularity} candidates={granularityModes} />}
         </Stack>
 
     </Popover>

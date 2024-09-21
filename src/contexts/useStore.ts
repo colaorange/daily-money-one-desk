@@ -1,6 +1,8 @@
 import { BookStore } from "@/stores/BookStore"
 import { useContext } from "react"
 import { StoreContext, StoreContextValue } from "./StoreProvider"
+import { AccountStore } from "@/stores/AccountStore"
+import { SharedStore } from "@/stores/SharedStore"
 
 
 export function useStore(): StoreContextValue {
@@ -13,7 +15,12 @@ export function useStore(): StoreContextValue {
 
 export default useStore
 
-
+export function useSharedStore(): SharedStore {
+    return useStore().sharedStore
+}
 export function useBookStore(): BookStore {
     return useStore().bookStore
+}
+export function useAccountStore(): AccountStore {
+    return useStore().accountStore
 }

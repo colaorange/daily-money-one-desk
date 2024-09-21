@@ -40,7 +40,7 @@ export function UnhandledErrorBoundary({ children }: PropsWithChildren) {
         }
     }, [onUnhandledError, onUnhandledRejection])
 
-    return { children }
+    return children
 }
 
 

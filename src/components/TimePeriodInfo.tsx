@@ -9,9 +9,10 @@ import { memo, useMemo } from "react";
 
 export type TimePeriodButtonProps = {
     timePeriod: TimePeriod
+    hideGranularity?: boolean
 }
 
-export const TimePeriodInfo = memo(function TimePeriodInfo({ timePeriod }: TimePeriodButtonProps) {
+export const TimePeriodInfo = memo(function TimePeriodInfo({ timePeriod, hideGranularity }: TimePeriodButtonProps) {
 
     const { start, end, granularity } = timePeriod
     const ll = useI18nLabel()
@@ -24,12 +25,12 @@ export const TimePeriodInfo = memo(function TimePeriodInfo({ timePeriod }: TimeP
     const styles = useMemo(() => {
         return {
             text: css({
-                fontSize: '0.7rem',
-                fontWeight: 100,
-                lineHeight: 1.4
+                fontSize: !hideGranularity ? '0.7rem' : undefined,
+                fontWeight: !hideGranularity ? 100 : undefined,
+                lineHeight: !hideGranularity ? 1.4 : undefined
             })
         }
-    }, [])
+    }, [hideGranularity])
 
     return <Stack direction='column' alignItems={'center'} >
         <Stack direction='row' sx={{ gap: 1 }}>
@@ -37,7 +38,7 @@ export const TimePeriodInfo = memo(function TimePeriodInfo({ timePeriod }: TimeP
             <Typography variant="caption" css={styles.text} >-</Typography>
             <Typography variant="caption" css={styles.text} >{endm.format(dateFormat)}</Typography>
         </Stack>
-        <Typography variant="caption" css={styles.text} >{ll('desktop.timeGranularity')} : {ll(`desktop.timeGranularity.${granularity}`)}</Typography>
+        {!hideGranularity && <Typography variant="caption" css={styles.text} >{ll('desktop.timeGranularity')} : {ll(`desktop.timeGranularity.${granularity}`)}</Typography>}
     </Stack>
 })
 

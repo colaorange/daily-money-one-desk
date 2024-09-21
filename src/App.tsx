@@ -11,6 +11,7 @@ import useAlert from './contexts/userAlert';
 import Router from './Router';
 import ThemeProvider from './contexts/ThemeProvider';
 import StoreProvider from './contexts/StoreProvider';
+import UnhandledErrorBoundary from './boundaries/UnhandledErrorBoundary';
 
 const defaultTheme = createTheme({});
 
@@ -56,9 +57,11 @@ function AppBoundary2({ children }: PropsWithChildren) {
         <I18nProvider>
             <ThemeProvider>
                 <AlertProvider>
-                    <StoreProvider>
-                        {children}
-                    </StoreProvider>
+                    <UnhandledErrorBoundary>
+                        <StoreProvider>
+                            {children}
+                        </StoreProvider>
+                    </UnhandledErrorBoundary>
                 </AlertProvider>
             </ThemeProvider>
         </I18nProvider>
