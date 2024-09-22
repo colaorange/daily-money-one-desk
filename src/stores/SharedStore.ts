@@ -8,9 +8,9 @@ export class SharedStore {
 
     constructor() {
         this._timePeriod = {
-            start: moment().add(-1, 'month').add(1, 'day').valueOf(),
+            start: null,
             end: moment().endOf('day').valueOf(),
-            granularity: TimeGranularity.DAILY
+            granularity: TimeGranularity.MONTHLY
         }
         makeAutoObservable(this);
     }

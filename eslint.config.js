@@ -29,6 +29,7 @@ export default tseslint.config(
             //trun on in production
             '@typescript-eslint/no-unused-vars': 'warn',
             'prefer-const': 'warn',
+            'no-empty': 'warn'
         },
     },
 )

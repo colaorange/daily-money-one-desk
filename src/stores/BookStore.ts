@@ -31,6 +31,10 @@ export class BookStore {
         return (this._books && this._currentBookId) ? this._books.find((b) => b.id === this._currentBookId) : undefined
     }
 
+    getBook(uid: string): Book | undefined {
+        return (this._books) ? this._books.find((b) => b.id === uid) : undefined
+    }
+
     async fetchBooks(force?: boolean): Promise<void> {
         if (!force && this._fetchingBooks > 0) {
             return

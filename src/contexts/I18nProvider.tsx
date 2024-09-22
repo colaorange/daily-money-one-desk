@@ -2,9 +2,11 @@
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment"
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider/LocalizationProvider"
 import i18nextDefault, { i18n as I18nextInstance } from "i18next"
+import moment from "moment"
 import { PropsWithChildren, createContext, memo, useMemo } from "react"
 import useApi from "./useApi"
-import moment from "moment"
+import { I18nHasLabel, I18nLabel } from "@/types"
+import { FirstDayOfWeek } from "@client/model"
 
 import "@/moment-locale/zh"
 import "moment/locale/bn"
@@ -22,21 +24,12 @@ import "moment/locale/tr"
 import "moment/locale/vi"
 import "moment/locale/zh-cn"
 import "moment/locale/zh-tw"
-import { FirstDayOfWeek } from "@client/model"
 
-
-export type I18nLabel = {
-    (key: string, args?: NonNullable<unknown>): string
-}
 
 export type I18nTranslation = {
     (): {
         [key: string]: object
     }
-}
-
-export type I18nHasLabel = {
-    (key: string): boolean
 }
 
 export type I18nProviderProps = PropsWithChildren

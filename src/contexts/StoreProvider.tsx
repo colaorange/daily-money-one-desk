@@ -3,6 +3,7 @@ import { createContext, memo, PropsWithChildren, useMemo } from "react"
 import useApi from "./useApi"
 import { AccountStore } from "@/stores/AccountStore"
 import { SharedStore } from "@/stores/SharedStore"
+import { ReportStore } from "@/stores/ReportStore"
 
 export type StoreProviderProps = PropsWithChildren
 
@@ -10,6 +11,7 @@ export type StoreContextValue = {
     sharedStore: SharedStore
     bookStore: BookStore
     accountStore: AccountStore
+    reportStore: ReportStore
 }
 
 export const StoreContext = createContext<StoreContextValue | undefined>(undefined)
@@ -27,6 +29,9 @@ export const StoreProvider = memo(function StoreProvider({ children }: StoreProv
                 currentBookId: preferences?.primaryBookId
             }),
             accountStore: new AccountStore({
+                configuration
+            }),
+            reportStore: new ReportStore({
                 configuration
             })
         } : undefined

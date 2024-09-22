@@ -19,8 +19,12 @@ export class AccountStore {
         return this._accounts
     }
 
-    findBookAccounts(bookId: string): Account[] | undefined {
+    listBookAccounts(bookId: string): Account[] | undefined {
         return this._accounts ? this._accounts.filter((a) => a.bookId === bookId) : undefined
+    }
+
+    getAccount(uid: string): Account | undefined {
+        return (this._accounts) ? this._accounts.find((a) => a.id === uid) : undefined
     }
 
 

@@ -1,7 +1,7 @@
 
 import { PropsWithChildren, ReactNode, createContext, memo, useCallback, useMemo } from "react";
 
-import { hint } from "@/util";
+import { hint } from "@/utils";
 import { Typography } from "@mui/material";
 import { SnackbarProvider, useSnackbar } from 'notistack';
 

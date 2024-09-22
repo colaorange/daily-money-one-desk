@@ -1,8 +1,36 @@
 import inspect from "browser-util-inspect"
 import { ValidationError, Validator } from "jsonschema"
 import { AppError, I18nLabel } from './types'
+import { AccountType } from "@client/model"
+import { I18nContextValue } from "./contexts/I18nProvider"
 
 
+export function isReversedAccountType(type: AccountType): boolean {
+    switch (type) {
+        case AccountType.Income:
+        case AccountType.Liability:
+            return true
+        case AccountType.Asset:
+        case AccountType.Expense:
+        case AccountType.Other:
+        default:
+            return false
+    }
+}
+
+export function accountTypeFactor(type: AccountType): 1 | -1 {
+    return isReversedAccountType(type) ? -1 : 1
+}
+
+export function toCurrencySymbol(i18n: I18nContextValue, currency: string) {
+    if (currency) {
+        const key = 'currency.' + currency
+        if (i18n.hasLabel(key)) {
+            return i18n.label(key)
+        }
+    }
+    return ''
+}
 
 export function appErrMessage(error: any, label?: I18nLabel) {
     let errorMessage: string
@@ -49,5 +77,12 @@ export function validationLabel(label: I18nLabel, err: ValidationError) {
         return label(`validation.format.${argument}`)
     } else {
         return label(`validation.${name}`, { argument })
+    }
+}
+
+export function errorHandler() {
+    return (error: any) => {
+        //TODO
+        throw error
     }
 }

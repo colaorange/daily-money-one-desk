@@ -1,6 +1,15 @@
 
 export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 
+
+export type I18nLabel = {
+    (key: string, args?: NonNullable<unknown>): string
+}
+
+export type I18nHasLabel = {
+    (key: string): boolean
+}
+
 export type UserMessage = {
     key: string
     args?: { [argKey: string]: any }
