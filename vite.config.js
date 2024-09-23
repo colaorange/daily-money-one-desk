@@ -12,6 +12,21 @@ export default defineConfig({
         outDir: './dist/desktop',
         rollupOptions: {
             output: {
+                manualChunks(id) {
+                    if (id.includes('/node_modules/')) {
+                        if (id.includes('/node_modules/react/') || id.includes('/node_modules/react-dom/')) {
+                            return 'react';
+                        } else if (id.includes('/node_modules/@mui/') || id.includes('/node_modules/@emotion/')) {
+                            return 'mui';
+                        } else if (id.includes('/node_modules/d3-')) {
+                            return 'd3';
+                        } else if (id.includes('/node_modules/moment/')) {
+                            return 'moment';
+                        } else {
+                            return 'other';
+                        }
+                    }
+                },
                 entryFileNames: ({ name }) => {
                     return 'assets/[name].[hash].js'
                 },

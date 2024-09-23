@@ -77,13 +77,14 @@ export const HomePage = observer(function HomePage(props: HomePageProps) {
     const styles = useMemo(() => {
         return {
             container: css({
-                margin: theme.spacing(1),
+                margin: theme.spacing(2),
                 alignSelf: 'stretch',
             }),
             card: css({
 
             }),
             mainTileSize: {
+                xs: 12,
                 sm: 12,
                 md: 6,
                 xl: 4
@@ -101,7 +102,7 @@ export const HomePage = observer(function HomePage(props: HomePageProps) {
             <TimePeriodPopoverButton timePeriod={timePeriod} onTimePeriodChange={onTimePeriodChange} hideGranularity />
         </AppToolbar>
         <Divider flexItem />
-        <Grid2 container css={styles.container} spacing={1}>
+        <Grid2 container css={styles.container} spacing={2}>
             <Grid2 size={styles.mainTileSize}>
                 <AssetLiabilityBalanceCard report={bookBalanceReport} />
             </Grid2>
