@@ -9,19 +9,31 @@ export type TimePeriodButtonProps = PropsWithChildren<{
     timePeriod: TimePeriod
     onShift?: (timePeriod: TimePeriod) => void
     varient: 'previousYear' | 'previousMonth' | 'previousWeek' | 'previousDay' | 'today' | 'nextDay' | 'nextWeek' | 'nextMonth' | 'nextYear'
+    disabled?: boolean
 }>
 
 
-export const TimePeriodShiftButton = memo(function TimePeriodPopover({ timePeriod, varient, onShift: onOuterShift, children }: TimePeriodButtonProps) {
+export const TimePeriodShiftButton = memo(function TimePeriodPopover({ timePeriod, varient, onShift: onOuterShift, disabled, children }: TimePeriodButtonProps) {
 
     const onShift = useCallback((timePeriod: TimePeriod, value: number, unit: 'year' | 'month' | 'week' | 'day') => {
         if (onOuterShift) {
             const { start, end, granularity } = timePeriod
+            const mstart = start !== null ? moment(start).add(value, unit) : null
+
+            const mend = moment(end)
+            //month end has special case while shifting
+            if (unit === 'month' && mend.isSame(mend.clone().endOf('month'), 'day')) {
+                mend.add(value, unit).endOf('month')
+            }else{
+                mend.add(value, unit)
+            }
+
             onOuterShift!({
-                start: start !== null ? moment(start).add(value, unit).valueOf() : null,
-                end: moment(end).add(value, unit).valueOf(),
+                start: mstart !== null ? mstart.valueOf() : null,
+                end: mend.valueOf(),
                 granularity
             })
+
         }
     }, [onOuterShift])
 
@@ -76,7 +88,7 @@ export const TimePeriodShiftButton = memo(function TimePeriodPopover({ timePerio
         }
     }, [onOuterShift, varient, onShift, timePeriod, onToday])
 
-    return <IconButton size="small" onClick={onClick}>
+    return <IconButton size="small" onClick={onClick} disabled={disabled}>
         {children && children}
         {!children && (varient === 'previousYear' || varient === 'previousMonth' || varient === 'previousWeek' || varient === 'previousDay') && <FaAngleLeft />}
         {!children && varient === 'today' && <FaStop />}

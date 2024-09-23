@@ -13,11 +13,13 @@ export type AppScheme = {
     toolbarBgColor: string
     outlineColor: string
     toolbarHeight: number
+    
 }
 
 export type AppStyles = {
     outlineIconButton: SerializedStyles
     toolbarSelect: SerializedStyles
+    barChart: SerializedStyles
 }
 
 export type ThemeContextValue = {
@@ -163,6 +165,38 @@ export const ThemeProvider = memo(function ThemeProvider({ children }: ThemeProv
             }),
             toolbarSelect: css({
                 height: toolbarHeight - 20, 
+            }),
+            barChart: css({
+                '& .MuiBarLabel-series-income': {
+                    fill: colorScheme.onIncomeContainer,
+                },
+                '& .MuiBarElement-series-income': {
+                    fill: colorScheme.incomeContainer,
+                },
+                '& .MuiBarLabel-series-asset': {
+                    fill: colorScheme.onAssetContainer
+                },
+                '& .MuiBarElement-series-asset': {
+                    fill: colorScheme.assetContainer
+                },
+                '& .MuiBarLabel-series-expense': {
+                    fill: colorScheme.onExpenseContainer
+                },
+                '& .MuiBarElement-series-expense': {
+                    fill: colorScheme.expenseContainer
+                },
+                '& .MuiBarLabel-series-liability': {
+                    fill: colorScheme.onLiabilityContainer
+                },
+                '& .MuiBarElement-series-liability': {
+                    fill: colorScheme.liabilityContainer
+                },
+                '& .MuiBarLabel-series-other': {
+                    fill: colorScheme.onOtherContainer
+                },
+                '& .MuiBarElement-series-other': {
+                    fill: colorScheme.otherContainer
+                }
             })
         }
         return {

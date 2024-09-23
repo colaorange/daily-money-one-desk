@@ -11,9 +11,10 @@ export type TimePeriodPopoverButtonProps = {
     granularityModes?: TimeGranularity[]
     onTimePeriodChange?: (timePeriod: TimePeriod) => void
     hideGranularity?: boolean
+    disabled?: boolean
 }
 
-export const TimePeriodPopoverButton = memo(function TimePeriodPopoverButton({ timePeriod, hideGranularity, granularityModes, onTimePeriodChange }: TimePeriodPopoverButtonProps) {
+export const TimePeriodPopoverButton = memo(function TimePeriodPopoverButton({ timePeriod, hideGranularity, granularityModes, onTimePeriodChange, disabled }: TimePeriodPopoverButtonProps) {
     const { appStyles } = useTheme()
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
     const onClick = useCallback((evt: React.MouseEvent<HTMLButtonElement>) => {
@@ -28,14 +29,14 @@ export const TimePeriodPopoverButton = memo(function TimePeriodPopoverButton({ t
     }, [onTimePeriodChange])
 
     return <Box>
-        <IconButton size="small" aria-label="menu" css={appStyles.outlineIconButton} onClick={onClick}>
+        <IconButton size="small" aria-label="menu" css={appStyles.outlineIconButton} onClick={onClick} disabled={disabled}>
             <FaCalendarDays />
         </IconButton>
 
-        {anchorEl && <TimePeriodPopover
+        {anchorEl && !disabled && <TimePeriodPopover
             open={true}
             anchorEl={anchorEl}
-            
+
             hideGranularity={hideGranularity}
             onTimePeriodClose={onTimePeriodClose}
             timePeriod={timePeriod}

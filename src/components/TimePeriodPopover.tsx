@@ -152,10 +152,6 @@ export const TimePeriodPopover = memo(function TimePeriodPopover({ timePeriod, h
         withIn(-3, 'year', TimeGranularity.MONTHLY)
     }, [withIn])
 
-    const onInSixYears = useCallback(() => {
-        withIn(-6, 'year', TimeGranularity.MONTHLY)
-    }, [withIn])
-
     const onChangeStart = useCallback((m: moment.Moment | null) => {
         setStateMix((s) => {
             return {
@@ -184,7 +180,7 @@ export const TimePeriodPopover = memo(function TimePeriodPopover({ timePeriod, h
         })
     }, [])
 
-    const onShift = useCallback((timePeriod) => {
+    const onShift = useCallback((timePeriod: TimePeriod) => {
         resetState(timePeriod)
     }, [resetState])
 
@@ -248,7 +244,6 @@ export const TimePeriodPopover = memo(function TimePeriodPopover({ timePeriod, h
                 <Button css={styles.button} onClick={onLastYear}>{ll('desktop.lastYear')}</Button>
                 <Button css={styles.button} onClick={onInAYear}>{ll('desktop.inAYear')}</Button>
                 <Button css={styles.button} onClick={onInThreeYears}>{ll('desktop.inThreeYears')}</Button>
-                <Button css={styles.button} onClick={onInSixYears}>{ll('desktop.inSixYears')}</Button>
             </Stack>
             <Divider flexItem css={styles.divider} />
             <FormControlLabel labelPlacement="start" control={<Switch checked={stateMix.fromInit} />} label={ll('desktop.startFromInitDay')} onChange={onToggleStartFromInit} />
@@ -272,8 +267,11 @@ export const TimePeriodPopover = memo(function TimePeriodPopover({ timePeriod, h
                 </TimePeriodShiftButton>
             </Stack>
             {!hideGranularity && <TimeGranularitySelect value={stateMix.granularity} onChange={onChangeGranularity} candidates={granularityModes} />}
+            <Divider flexItem css={styles.divider} />
+            <Stack alignSelf={'flex-end'} direction={'row'}>
+                <Button css={styles.button} onClick={onClose}>{ll('action.close')}</Button>
+            </Stack>
         </Stack>
-
     </Popover>
 })
 

@@ -1,24 +1,21 @@
 
+import { errorHandler } from "@/appUtils";
 import AppToolbar from "@/components/AppToolbar";
 import BookSelect from "@/components/BookSelect";
-import useStore, { useAccountStore, useBookStore, useReportStore } from "@/contexts/useStore";
+import TimePeriodInfo from "@/components/TimePeriodInfo";
+import TimePeriodPopoverButton from "@/components/TimePeriodPopoverButton";
+import TimePeriodShiftButton from "@/components/TimePeriodShiftButton";
+import useStore from "@/contexts/useStore";
 import useTheme from "@/contexts/useTheme";
 import MainTemplate from "@/templates/MainTemplate";
+import { TimePeriod } from "@/types";
+import { runAsync } from "@/utils";
 import utilStyles from "@/utilStyles";
 import { AccountType, Book, BookBalanceReport } from "@client/model";
-import { css, Divider, Grid2, Stack } from '@mui/material';
+import { css, Divider, Grid2, SxProps, Theme } from '@mui/material';
 import { observer } from "mobx-react-lite";
 import { PropsWithChildren, useCallback, useEffect, useMemo, useState } from "react";
-import AssetLiabilityBalanceCard from "./components/AssetLiabilityBalanceCard";
-import { runAsync } from "@/utils";
-import { errorHandler } from "@/appUtils";
-import { ReportApi } from "@client/api";
-import { ReportStore } from "@/stores/ReportStore";
-import TimePeriodInfo from "@/components/TimePeriodInfo";
-import TimePeriodShiftButton from "@/components/TimePeriodShiftButton";
-import TimePeriodPopoverButton from "@/components/TimePeriodPopoverButton";
-import { TimePeriod } from "@/types";
-import IncomeExpenseBalanceCard from "./components/IncomeExpanseBalanceCard";
+import AccountTypeBalanceCard from "./components/AccountTypeBalanceCard";
 
 export type HomePageProps = PropsWithChildren
 /**
@@ -33,6 +30,8 @@ export type HomePageProps = PropsWithChildren
 export const HomePage = observer(function HomePage(props: HomePageProps) {
 
     const { appStyles, theme } = useTheme()
+
+    const [processing, setProcessing] = useState<boolean>()
 
     const { bookStore, accountStore, reportStore, sharedStore } = useStore()
 
@@ -60,6 +59,7 @@ export const HomePage = observer(function HomePage(props: HomePageProps) {
 
     useEffect(() => {
         if (currentBookId && accounts) {
+            setProcessing(true)
             runAsync(async () => {
                 const report = await reportStore.reportBookBalance(currentBookId, {
                     accountTypes: [AccountType.Income, AccountType.Asset, AccountType.Expense, AccountType.Liability, AccountType.Other],
@@ -70,51 +70,61 @@ export const HomePage = observer(function HomePage(props: HomePageProps) {
                     }
                 })
                 setBookBalanceReport(report)
-            }, errorHandler())
+            }, errorHandler()).finally(() => {
+                setProcessing(false)
+            })
         }
     }, [reportStore, currentBookId, accounts, timePeriod])
 
     const styles = useMemo(() => {
         return {
             container: css({
-                margin: theme.spacing(2),
                 alignSelf: 'stretch',
             }),
-            card: css({
-
-            }),
+            containerSx: {
+                margin: {
+                    xs: theme.spacing(2, 4),
+                    sm: theme.spacing(2, 4),
+                    md: theme.spacing(2),
+                    xl: theme.spacing(2),
+                },
+            } as SxProps<Theme>,
             mainTileSize: {
                 xs: 12,
                 sm: 12,
                 md: 6,
                 xl: 4
-            }
+            },
+            fullTileSize: {
+                xs: 12,
+                sm: 12,
+                md: 12,
+                xl: 12
+            },
         }
     }, [theme])
 
     return <MainTemplate>
         <AppToolbar sxGap={1}>
-            <BookSelect bookId={currentBookId} books={books} onBookChange={onBookChange} css={appStyles.toolbarSelect} />
+            <BookSelect bookId={currentBookId} books={books} onBookChange={onBookChange} css={appStyles.toolbarSelect} disabled={processing} />
             <span css={utilStyles.flex1} />
             <TimePeriodInfo timePeriod={timePeriod} hideGranularity />
-            <TimePeriodShiftButton varient="previousMonth" timePeriod={timePeriod} onShift={onTimePeriodChange} />
-            <TimePeriodShiftButton varient="nextMonth" timePeriod={timePeriod} onShift={onTimePeriodChange} />
-            <TimePeriodPopoverButton timePeriod={timePeriod} onTimePeriodChange={onTimePeriodChange} hideGranularity />
+            <TimePeriodShiftButton varient="previousMonth" timePeriod={timePeriod} onShift={onTimePeriodChange} disabled={processing} />
+            <TimePeriodShiftButton varient="nextMonth" timePeriod={timePeriod} onShift={onTimePeriodChange} disabled={processing} />
+            <TimePeriodPopoverButton timePeriod={timePeriod} onTimePeriodChange={onTimePeriodChange} hideGranularity disabled={processing} />
         </AppToolbar>
         <Divider flexItem />
-        <Grid2 container css={styles.container} spacing={2}>
+        <Grid2 container css={styles.container} sx={styles.containerSx} spacing={2}>
+            {/* <Grid2 size={styles.fullTileSize}>
+                <AccountTypeBalanceCard accountTypes={[AccountType.Asset, AccountType.Liability, AccountType.Income, AccountType.Expense, AccountType.Other]} report={bookBalanceReport} />
+            </Grid2> */}
             <Grid2 size={styles.mainTileSize}>
-                <AssetLiabilityBalanceCard report={bookBalanceReport} />
+                <AccountTypeBalanceCard accountTypes={[AccountType.Asset, AccountType.Liability]} report={bookBalanceReport} />
             </Grid2>
             <Grid2 size={styles.mainTileSize}>
-                <IncomeExpenseBalanceCard report={bookBalanceReport} />
+                <AccountTypeBalanceCard accountTypes={[AccountType.Income, AccountType.Expense]} report={bookBalanceReport} />
             </Grid2>
-            <Grid2 size={styles.mainTileSize}>
-                <AssetLiabilityBalanceCard report={bookBalanceReport} />
-            </Grid2>
-            <Grid2 size={styles.mainTileSize}>
-                <AssetLiabilityBalanceCard report={bookBalanceReport} />
-            </Grid2>
+
         </Grid2>
     </MainTemplate>
 })
