@@ -16,15 +16,13 @@ import { css, Divider, Grid2, SxProps, Theme } from '@mui/material';
 import { observer } from "mobx-react-lite";
 import { PropsWithChildren, useCallback, useEffect, useMemo, useState } from "react";
 import AccountTypeBalanceCard from "./components/AccountTypeBalanceCard";
+import { isEqual } from "lodash";
+import moment from "moment";
 
 export type HomePageProps = PropsWithChildren
 /**
-1. 目前資產及目前債務 (橫向條形圖（Horizontal Bar Chart）, Pie Chart) (1 row, 2 chart)
-2. 本月(某月, 或過去N天)的每日支出 (bar, left), 累加支出(line, right)
-3. 今年(某年) 的每月支出,收入 (bar), 累加支出收入(line, right)
 3. 本月(某月)花費結構 (Pie Chart)
 5. 本月(某月)收入結構 (Pie Chart)
-
  */
 
 export const HomePage = observer(function HomePage(props: HomePageProps) {
@@ -46,7 +44,9 @@ export const HomePage = observer(function HomePage(props: HomePageProps) {
         bookStore.currentBookId = book?.id
     }, [bookStore])
     const onTimePeriodChange = useCallback((timePeriod: TimePeriod) => {
-        sharedStore.timePeriod = timePeriod
+        if (!isEqual(sharedStore.timePeriod, timePeriod)) {
+            sharedStore.timePeriod = timePeriod
+        }
     }, [sharedStore])
 
     useEffect(() => {
@@ -101,30 +101,45 @@ export const HomePage = observer(function HomePage(props: HomePageProps) {
                 md: 12,
                 xl: 12
             },
+            fullTileSx: {
+                height: {
+                    xs: 0,
+                    sm: 0,
+                    md: 'auto',
+                    xl: 'auto',
+                },
+                overflow: {
+                    xs: 'hidden',
+                    sm: 'hidden',
+                    md: 'auto',
+                    xl: 'auto',
+                }
+            },
         }
     }, [theme])
+
+    const yearShift = timePeriod.start && Math.abs(moment(timePeriod.start).diff(timePeriod.end, 'day')) >= 364
 
     return <MainTemplate>
         <AppToolbar sxGap={1}>
             <BookSelect bookId={currentBookId} books={books} onBookChange={onBookChange} css={appStyles.toolbarSelect} disabled={processing} />
             <span css={utilStyles.flex1} />
             <TimePeriodInfo timePeriod={timePeriod} hideGranularity />
-            <TimePeriodShiftButton varient="previousMonth" timePeriod={timePeriod} onShift={onTimePeriodChange} disabled={processing} />
-            <TimePeriodShiftButton varient="nextMonth" timePeriod={timePeriod} onShift={onTimePeriodChange} disabled={processing} />
+            <TimePeriodShiftButton varient={yearShift ? "previousYear" : "previousMonth"} timePeriod={timePeriod} onShift={onTimePeriodChange} disabled={processing} />
+            <TimePeriodShiftButton varient={yearShift ? "nextYear" : "nextMonth"} timePeriod={timePeriod} onShift={onTimePeriodChange} disabled={processing} />
             <TimePeriodPopoverButton timePeriod={timePeriod} onTimePeriodChange={onTimePeriodChange} hideGranularity disabled={processing} />
         </AppToolbar>
         <Divider flexItem />
         <Grid2 container css={styles.container} sx={styles.containerSx} spacing={2}>
-            {/* <Grid2 size={styles.fullTileSize}>
-                <AccountTypeBalanceCard accountTypes={[AccountType.Asset, AccountType.Liability, AccountType.Income, AccountType.Expense, AccountType.Other]} report={bookBalanceReport} />
-            </Grid2> */}
-            <Grid2 size={styles.mainTileSize}>
-                <AccountTypeBalanceCard accountTypes={[AccountType.Asset, AccountType.Liability]} report={bookBalanceReport} />
+            <Grid2 size={styles.fullTileSize} sx={styles.fullTileSx}>
+                <AccountTypeBalanceCard timePeriod={timePeriod} accountTypes={[AccountType.Asset, AccountType.Liability, AccountType.Income, AccountType.Expense, AccountType.Other]} report={bookBalanceReport} />
             </Grid2>
             <Grid2 size={styles.mainTileSize}>
-                <AccountTypeBalanceCard accountTypes={[AccountType.Income, AccountType.Expense]} report={bookBalanceReport} />
+                <AccountTypeBalanceCard timePeriod={timePeriod} accountTypes={[AccountType.Asset, AccountType.Liability]} report={bookBalanceReport} />
             </Grid2>
-
+            <Grid2 size={styles.mainTileSize}>
+                <AccountTypeBalanceCard timePeriod={timePeriod} accountTypes={[AccountType.Income, AccountType.Expense]} report={bookBalanceReport} />
+            </Grid2>
         </Grid2>
     </MainTemplate>
 })

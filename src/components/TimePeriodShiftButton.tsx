@@ -3,6 +3,7 @@ import { IconButton } from "@mui/material";
 
 import moment from "moment";
 import { memo, PropsWithChildren, useCallback } from "react";
+import { FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";
 import { FaAngleLeft, FaAngleRight, FaStop } from "react-icons/fa6";
 
 export type TimePeriodButtonProps = PropsWithChildren<{
@@ -90,9 +91,11 @@ export const TimePeriodShiftButton = memo(function TimePeriodPopover({ timePerio
 
     return <IconButton size="small" onClick={onClick} disabled={disabled}>
         {children && children}
-        {!children && (varient === 'previousYear' || varient === 'previousMonth' || varient === 'previousWeek' || varient === 'previousDay') && <FaAngleLeft />}
+        {!children && (varient === 'previousMonth' || varient === 'previousWeek' || varient === 'previousDay') && <FaAngleLeft />}
+        {!children && (varient === 'previousYear') && <FaAngleDoubleLeft />}
         {!children && varient === 'today' && <FaStop />}
-        {!children && (varient === 'nextYear' || varient === 'nextMonth' || varient === 'nextWeek' || varient === 'nextDay') && <FaAngleRight />}
+        {!children && (varient === 'nextMonth' || varient === 'nextWeek' || varient === 'nextDay') && <FaAngleRight />}
+        {!children && (varient === 'nextYear') && <FaAngleDoubleRight />}
     </IconButton>
 })
 

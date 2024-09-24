@@ -1,12 +1,14 @@
 
 
 import { accountTypeFactor, toCurrencySymbol } from "@/appUtils";
+import TimePeriodInfo from "@/components/TimePeriodInfo";
 import useI18n from "@/contexts/useI18n";
 import useTheme from "@/contexts/useTheme";
+import { TimePeriod } from "@/types";
 import { getNumberFormat } from "@/utils";
 import utilStyles from "@/utilStyles";
 import { AccountType, AccountTypeBalance, BookBalanceReport } from "@client/model";
-import { Card, CardContent, CircularProgress, css, SxProps, Theme } from "@mui/material";
+import { Box, Card, CardContent, CardHeader, CircularProgress, css, Stack, SxProps, Theme, Typography } from "@mui/material";
 import { BarChartProps, ChartsReferenceLine, ChartsXAxisProps, ChartsYAxisProps } from "@mui/x-charts";
 import { BarChart, BarItem } from '@mui/x-charts/BarChart';
 import { axisClasses } from '@mui/x-charts/ChartsAxis';
@@ -14,14 +16,15 @@ import { observer } from "mobx-react-lite";
 import { PropsWithChildren, useMemo } from "react";
 
 export type AccountTypeBalanceCardProps = PropsWithChildren<{
+    timePeriod?: TimePeriod
     report?: BookBalanceReport
     accountTypes: AccountType[]
 }>
 
-export const AccountTypeBalanceCard = observer(function AccountTypeBalanceCard({ report, accountTypes }: AccountTypeBalanceCardProps) {
+export const AccountTypeBalanceCard = observer(function AccountTypeBalanceCard({ report, accountTypes, timePeriod }: AccountTypeBalanceCardProps) {
 
 
-    const { colorScheme, appStyles } = useTheme()
+    const { colorScheme, appStyles, theme } = useTheme()
     const i18n = useI18n()
 
     const chartProps = useMemo(() => {
@@ -79,6 +82,7 @@ export const AccountTypeBalanceCard = observer(function AccountTypeBalanceCard({
             ] as BarChartProps['xAxis'],
             yAxis: [
                 {
+                    //don't show to save y axis space
                     // label: currencySymbol,
                 } as ChartsYAxisProps
             ] as BarChartProps['yAxis'],
@@ -96,6 +100,7 @@ export const AccountTypeBalanceCard = observer(function AccountTypeBalanceCard({
                 return valueFormatter(barItem.value || 0)
             },
             margin: {
+                //30 for y axis space
                 left: maxAmountTxtLength * 8 /* + 30 */,
                 right: 4,
                 top: 8,
@@ -103,6 +108,7 @@ export const AccountTypeBalanceCard = observer(function AccountTypeBalanceCard({
             },
             sx: {
                 [`.${axisClasses.left} .${axisClasses.label}`]: {
+                    //25 for y axis space
                     transform: `translate(-${maxAmountTxtLength * 8/* - 25*/}px, 0)`,
                 }
             } as SxProps<Theme>,
@@ -122,24 +128,29 @@ export const AccountTypeBalanceCard = observer(function AccountTypeBalanceCard({
                             textAlign: 'right'
                         }
                     }
-                },
-                axisTickLabel: {
                 }
-            } as BarChartProps['slotProps'],
+            } as BarChartProps['slotProps']
         }
     }, [report, i18n, accountTypes, colorScheme])
 
     const styles = useMemo(() => {
         return {
-            content: css(utilStyles.vclayout, appStyles.barChart, {
+            content: css(utilStyles.vlayout, appStyles.barChart, {
                 minHeight: 300
+            }),
+            header: css({
+                gap: theme.spacing(1)
             }),
             height: 300
         }
-    }, [appStyles])
+    }, [theme, appStyles])
 
     return <Card>
         <CardContent css={styles.content}>
+            <Stack direction='row' css={styles.header}>
+                {report?.book && <Typography variant="caption">{report?.book.name}</Typography>}
+                {timePeriod && <TimePeriodInfo timePeriod={timePeriod} hideGranularity />}
+            </Stack>
             {chartProps ? <BarChart skipAnimation
                 dataset={chartProps.dataset}
                 series={chartProps.series}
@@ -156,7 +167,10 @@ export const AccountTypeBalanceCard = observer(function AccountTypeBalanceCard({
                     lineStyle={{ strokeDasharray: '10 5' }}
                     labelAlign="start"
                 />
-            </BarChart> : <CircularProgress />}
+            </BarChart> : 
+            <Stack direction={'column'} flex={1} justifyContent={'center'}>
+                <CircularProgress />
+            </Stack>}
         </CardContent>
     </Card>
 })

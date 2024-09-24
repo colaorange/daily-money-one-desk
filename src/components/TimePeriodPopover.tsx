@@ -29,6 +29,13 @@ function normalize2Moment(start: number | null, end: number) {
     }
 }
 
+type StateMix = {
+    fromInit: boolean
+    mStart: moment.Moment | null
+    mEnd: moment.Moment
+    granularity: TimeGranularity
+}
+
 export const TimePeriodPopover = memo(function TimePeriodPopover({ timePeriod, hideGranularity, granularityModes = Object.values(TimeGranularity), onTimePeriodClose, ...rest }: TimePeriodPopoverProps) {
     const { theme, appScheme } = useTheme()
     const { dateFormat = DEFAULT_DATE_FORMAT } = usePreferences() || {}
@@ -39,12 +46,7 @@ export const TimePeriodPopover = memo(function TimePeriodPopover({ timePeriod, h
 
     //init state
 
-    const [stateMix, setStateMix] = useState<{
-        fromInit: boolean
-        mStart: moment.Moment | null
-        mEnd: moment.Moment
-        granularity: TimeGranularity
-    }>({
+    const [stateMix, setStateMix] = useState<StateMix>({
         fromInit: timePeriod.start === null,
         mStart,
         mEnd,
@@ -69,22 +71,29 @@ export const TimePeriodPopover = memo(function TimePeriodPopover({ timePeriod, h
         resetState(timePeriod, timePeriod.start === null)
     }, [resetState, timePeriod])
 
-    const onClose = useCallback(() => {
-        if (onTimePeriodClose) {
-            const {
-                fromInit,
-                mStart,
-                mEnd,
-                granularity,
-            } = stateMix
-            const closeTimePeriod: TimePeriod = {
-                start: (!fromInit && mStart !== null) ? Math.min(mStart.valueOf(), mEnd.valueOf()) : null,
-                end: (!fromInit && mStart !== null) ? Math.max(mStart.valueOf(), mEnd.valueOf()) : mEnd.valueOf(),
-                granularity
-            }
-            onTimePeriodClose(closeTimePeriod)
+    const resetOrClose = useCallback((stateMix: StateMix) => {
+        const {
+            fromInit,
+            mStart,
+            mEnd,
+            granularity,
+        } = stateMix
+        const closeTimePeriod: TimePeriod = {
+            start: (!fromInit && mStart !== null) ? Math.min(mStart.valueOf(), mEnd.valueOf()) : null,
+            end: (!fromInit && mStart !== null) ? Math.max(mStart.valueOf(), mEnd.valueOf()) : mEnd.valueOf(),
+            granularity
         }
-    }, [onTimePeriodClose, stateMix])
+
+        if (onTimePeriodClose) {
+            onTimePeriodClose(closeTimePeriod)
+        } else {
+            resetState(closeTimePeriod)
+        }
+    }, [onTimePeriodClose, resetState])
+
+    const onClose = useCallback(() => {
+        resetOrClose(stateMix)
+    }, [resetOrClose, stateMix])
 
     const onChangeGranularity = useCallback((granularity?: TimeGranularity) => {
         if (granularity) {
@@ -98,15 +107,13 @@ export const TimePeriodPopover = memo(function TimePeriodPopover({ timePeriod, h
     }, [])
 
     const fixedRange = useCallback((value: number, unit: 'month' | 'year', granularity: TimeGranularity) => {
-        setStateMix(() => {
-            return {
-                fromInit: false,
-                mStart: moment().add(value, unit).startOf(unit),
-                mEnd: moment().add(value, unit).endOf(unit),
-                granularity,
-            }
+        resetOrClose({
+            fromInit: false,
+            mStart: moment().add(value, unit).startOf(unit),
+            mEnd: moment().add(value, unit).endOf(unit),
+            granularity,
         })
-    }, [])
+    }, [resetOrClose])
 
 
     const onThisMonth = useCallback(() => {
@@ -126,15 +133,13 @@ export const TimePeriodPopover = memo(function TimePeriodPopover({ timePeriod, h
     }, [fixedRange])
 
     const withIn = useCallback((value: number, unit: 'month' | 'year', granularity: TimeGranularity) => {
-        setStateMix(() => {
-            return {
-                fromInit: false,
-                mStart: moment().add(value, unit).add(1, 'day').startOf('day'),
-                mEnd: moment().endOf('day'),
-                granularity,
-            }
+        resetOrClose({
+            fromInit: false,
+            mStart: moment().add(value, unit).add(1, 'day').startOf('day'),
+            mEnd: moment().endOf('day'),
+            granularity,
         })
-    }, [])
+    }, [resetOrClose])
 
     const onInAMonth = useCallback(() => {
         withIn(-1, 'month', TimeGranularity.DAILY)
@@ -148,9 +153,14 @@ export const TimePeriodPopover = memo(function TimePeriodPopover({ timePeriod, h
         withIn(-1, 'year', TimeGranularity.MONTHLY)
     }, [withIn])
 
-    const onInThreeYears = useCallback(() => {
-        withIn(-3, 'year', TimeGranularity.MONTHLY)
-    }, [withIn])
+    const onUntilToday = useCallback(() => {
+        resetOrClose({
+            ...stateMix,
+            fromInit: true,
+            mStart: null,
+            mEnd: moment().endOf('day'),
+        })
+    }, [stateMix, resetOrClose])
 
     const onChangeStart = useCallback((m: moment.Moment | null) => {
         setStateMix((s) => {
@@ -236,14 +246,14 @@ export const TimePeriodPopover = memo(function TimePeriodPopover({ timePeriod, h
             <Stack direction='row' css={styles.bar} >
                 <Button css={styles.button} onClick={onThisMonth}>{ll('desktop.thisMonth')}</Button>
                 <Button css={styles.button} onClick={onLastMonth}>{ll('desktop.lastMonth')}</Button>
-                <Button css={styles.button} onClick={onInAMonth}>{ll('desktop.inAMonth')}</Button>
-                <Button css={styles.button} onClick={onInSixMonths}>{ll('desktop.inSixMonths')}</Button>
-            </Stack>
-            <Stack direction='row' css={styles.bar} >
                 <Button css={styles.button} onClick={onThisYear}>{ll('desktop.thisYear')}</Button>
                 <Button css={styles.button} onClick={onLastYear}>{ll('desktop.lastYear')}</Button>
+            </Stack>
+            <Stack direction='row' css={styles.bar} >
+                <Button css={styles.button} onClick={onInAMonth}>{ll('desktop.inAMonth')}</Button>
+                <Button css={styles.button} onClick={onInSixMonths}>{ll('desktop.inSixMonths')}</Button>
                 <Button css={styles.button} onClick={onInAYear}>{ll('desktop.inAYear')}</Button>
-                <Button css={styles.button} onClick={onInThreeYears}>{ll('desktop.inThreeYears')}</Button>
+                <Button css={styles.button} onClick={onUntilToday}>{ll('desktop.untilToday')}</Button>
             </Stack>
             <Divider flexItem css={styles.divider} />
             <FormControlLabel labelPlacement="start" control={<Switch checked={stateMix.fromInit} />} label={ll('desktop.startFromInitDay')} onChange={onToggleStartFromInit} />
