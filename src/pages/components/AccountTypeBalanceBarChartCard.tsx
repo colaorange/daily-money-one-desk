@@ -152,6 +152,7 @@ export const AccountTypeBalanceBarChartCard = observer(function AccountTypeBalan
             {chartProps ? <BarChart skipAnimation
                 colors={colorScheme.chartColorPalette}
                 dataset={chartProps.dataset}
+                xAxis={chartProps.xAxis}
                 series={chartProps.series}
                 margin={chartProps.margin}
                 sx={chartProps.sx}

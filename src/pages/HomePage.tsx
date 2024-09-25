@@ -207,7 +207,7 @@ export const HomePage = observer(function HomePage(props: HomePageProps) {
             </Grid2>
             <Grid2 size={12}>
                 <Stack css={styles.titleBar}>
-                    <Typography variant="h5">{ll('desktop.accountTypeBalanceSheet')}</Typography>
+                    <Typography variant="h5">{ll('desktop.accountBalanceSheet')}</Typography>
                     <div css={utilStyles.flex1} />
                     <Stack direction={'row'}>
                         {(balanceAccountTypeOrder || defaultAccountTypeOrder).map((type) => {
@@ -225,18 +225,18 @@ export const HomePage = observer(function HomePage(props: HomePageProps) {
             {(balanceAccountTypeOrder || defaultAccountTypeOrder).filter((a) => accountTypesOn.has(a)).map((type) => {
                 return <Fragment key={type}>
                     <Grid2 size={styles.accountsTileSize}>
-                        <AccountTypeBalancePieChartCard
-                            timePeriod={timePeriod}
-                            accountType={type}
-                            report={bookBalanceReport}
-                        />
-                    </Grid2>
-                    <Grid2 size={styles.accountsTileSize}>
                         <AccountTypeBalanceBarChartCard
                             timePeriod={timePeriod}
                             accountType={type}
                             report={bookBalanceReport}
                             bookAccounts={bookAccounts}
+                        />
+                    </Grid2>
+                    <Grid2 size={styles.accountsTileSize}>
+                        <AccountTypeBalancePieChartCard
+                            timePeriod={timePeriod}
+                            accountType={type}
+                            report={bookBalanceReport}
                         />
                     </Grid2>
                 </Fragment>

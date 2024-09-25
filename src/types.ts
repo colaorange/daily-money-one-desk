@@ -47,7 +47,6 @@ export type SortByDirection = 'asc' | 'desc' | undefined
 
 export enum TimeGranularity {
     DAILY = 'daily',
-    WEEKLY = 'weekly',
     MONTHLY = 'monthly',
     YEARLY = 'yearly'
 }
