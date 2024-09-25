@@ -1,73 +1,87 @@
 
 
+import { axisClasses } from '@mui/x-charts/ChartsAxis';
 import { accountTypeFactor, toCurrencySymbol } from "@/appUtils";
 import TimePeriodInfo from "@/components/TimePeriodInfo";
+import { usePreferences } from "@/contexts/useApi";
 import useI18n from "@/contexts/useI18n";
 import useTheme from "@/contexts/useTheme";
 import { TimePeriod } from "@/types";
 import { getNumberFormat } from "@/utils";
 import utilStyles from "@/utilStyles";
-import { AccountType, AccountTypeBalance, BookBalanceReport } from "@client/model";
-import { Box, Card, CardContent, CardHeader, CircularProgress, css, Stack, SxProps, Theme, Typography } from "@mui/material";
-import { BarChartProps, ChartsReferenceLine, ChartsXAxisProps, ChartsYAxisProps } from "@mui/x-charts";
+import { Account, AccountType, BookBalanceReport } from "@client/model";
+import { Card, CardContent, CircularProgress, css, Stack, SxProps, Theme, Typography } from "@mui/material";
+import { BarChartProps, ChartsReferenceLine, ChartsXAxisProps } from "@mui/x-charts";
 import { BarChart, BarItem } from '@mui/x-charts/BarChart';
-import { axisClasses } from '@mui/x-charts/ChartsAxis';
 import { observer } from "mobx-react-lite";
 import { PropsWithChildren, useMemo } from "react";
 
-export type AccountTypeBalanceCardProps = PropsWithChildren<{
+export type AccountTypeBalanceBarChartCardProps = PropsWithChildren<{
     timePeriod?: TimePeriod
     report?: BookBalanceReport
-    accountTypes: AccountType[]
+    accountType: AccountType
+    bookAccounts: Account[]
 }>
 
-export const AccountTypeBalanceCard = observer(function AccountTypeBalanceCard({ report, accountTypes, timePeriod }: AccountTypeBalanceCardProps) {
+export const AccountTypeBalanceBarChartCard = observer(function AccountTypeBalanceCard({ report, accountType, timePeriod, bookAccounts }: AccountTypeBalanceBarChartCardProps) {
 
 
     const { colorScheme, appStyles, theme } = useTheme()
     const i18n = useI18n()
+    const { label: ll } = i18n
+    const { fixBalanceFractionDigits, hideEmptyBalance } = usePreferences() || {}
 
     const chartProps = useMemo(() => {
         if (!report) {
             return undefined
         }
-        const { book, accountTypes: reportAccountTypes } = report
-        const { language, label: ll } = i18n
+        const { book, accounts: reportAccounts } = report
+        const { language } = i18n
 
 
         const fractionDigits = book.fractionDigits || 0
-        const numberFormat = getNumberFormat(language, { maximumFractionDigits: fractionDigits })
+        const numberFormat = getNumberFormat(language, { maximumFractionDigits: fractionDigits, minimumFractionDigits: fixBalanceFractionDigits ? fractionDigits : undefined })
 
+        const accountAmounts: { account: Account, amount: number }[] = []
 
-        //undefined when node tranaction in period
-
-        const accountTypeAmounts = accountTypes?.map((accountType) => {
-            const balance = reportAccountTypes[accountType] as AccountTypeBalance | undefined
-            const amount = !balance ? 0 : (balance.depositsAmount - balance.withdrawalsAmount) * accountTypeFactor(accountType)
-            return { accountType, amount }
+        bookAccounts.filter((a) => a.type === accountType).forEach((account) => {
+            const accountBalance = reportAccounts[account.id]
+            if (accountBalance) {
+                const amount = (accountBalance.depositsAmount - accountBalance.withdrawalsAmount) * accountTypeFactor(accountType)
+                // if !(account is hidden and amount is zero)
+                if (!(account.hidden && amount === 0)) {
+                    accountAmounts.push({
+                        account: account,
+                        amount
+                    })
+                }
+            } else if (!hideEmptyBalance && !account.hidden) {
+                accountAmounts.push({
+                    account,
+                    amount: 0
+                })
+            }
         })
 
-        const dataset = [{
-            type: 'amount'
-        }] as BarChartProps['dataset']
-
-
-        accountTypeAmounts.forEach(({ accountType, amount }) => {
-            dataset![0][accountType] = amount
+        accountAmounts.sort(({ amount: a1 }, { amount: a2 }) => {
+            return a2 - a1
         })
-
 
         const currencySymbol = book.symbol || toCurrencySymbol(i18n, book.currency || '')
-
-        function accountTypeLabel(type: string) {
-            return ll(`account.type.${type}`)
-        }
 
         function valueFormatter(value: number | null) {
             return `${value !== null ? numberFormat.format(value) : ''}`;
         }
 
-        const maxAmountTxtLength = Math.max(...accountTypeAmounts.map(({ amount }) => valueFormatter(amount).length))
+        const dataset = [{
+            type: 'amount'
+        }] as BarChartProps['dataset']
+
+        const maxAmountTxtLength = Math.max(...accountAmounts.map(({ amount }) => valueFormatter(amount).length))
+
+        accountAmounts.forEach(({ account, amount }) => {
+            dataset![0][account.id] = amount
+        })
 
         return {
             dataset,
@@ -80,25 +94,13 @@ export const AccountTypeBalanceCard = observer(function AccountTypeBalanceCard({
                     },
                 } as ChartsXAxisProps,
             ] as BarChartProps['xAxis'],
-            yAxis: [
-                {
-                    //don't show to save y axis space
-                    // label: currencySymbol,
-                } as ChartsYAxisProps
-            ] as BarChartProps['yAxis'],
-            series: accountTypeAmounts.map(({ accountType }) => {
+            series: accountAmounts.map(({ account }) => {
                 return {
-                    id: accountType,
-                    dataKey: accountType,
-                    label: accountTypeLabel(accountType),
-                    valueFormatter,
-                    color: colorScheme[`${accountType}Container`],
+                    dataKey: account.id,
+                    label: account.name,
+                    valueFormatter
                 }
             }) as BarChartProps['series'],
-            barLabel: (barItem: BarItem) => {
-                // return accountTypeLabel(barItem.seriesId as any) + '\n' + 
-                return valueFormatter(barItem.value || 0)
-            },
             margin: {
                 //30 for y axis space
                 left: maxAmountTxtLength * 8 /* + 30 */,
@@ -114,13 +116,7 @@ export const AccountTypeBalanceCard = observer(function AccountTypeBalanceCard({
             } as SxProps<Theme>,
             slotProps: {
                 legend: {
-                    position: { vertical: 'bottom', horizontal: 'middle' },
-                    padding: 0,
-                    itemMarkHeight: 14,
-                    itemMarkWidth: 14,
-                    labelStyle: {
-                        fontSize: 16
-                    }
+                    hidden: true
                 },
                 axisContent: {
                     sx: {
@@ -128,10 +124,11 @@ export const AccountTypeBalanceCard = observer(function AccountTypeBalanceCard({
                             textAlign: 'right'
                         }
                     }
-                }
+                },
+                noDataOverlay: { message: ll('noData') },
             } as BarChartProps['slotProps']
         }
-    }, [report, i18n, accountTypes, colorScheme])
+    }, [accountType, bookAccounts, fixBalanceFractionDigits, hideEmptyBalance, i18n, ll, report])
 
     const styles = useMemo(() => {
         return {
@@ -149,30 +146,28 @@ export const AccountTypeBalanceCard = observer(function AccountTypeBalanceCard({
         <CardContent css={styles.content}>
             <Stack direction='row' css={styles.header}>
                 {report?.book && <Typography variant="caption">{report?.book.name}</Typography>}
+                {accountType && <Typography variant="caption" color={colorScheme[accountType]}>{ll(`account.type.${accountType}`)}</Typography>}
                 {timePeriod && <TimePeriodInfo timePeriod={timePeriod} hideGranularity />}
             </Stack>
             {chartProps ? <BarChart skipAnimation
+                colors={colorScheme.chartColorPalette}
                 dataset={chartProps.dataset}
                 series={chartProps.series}
-                xAxis={chartProps.xAxis}
-                yAxis={chartProps.yAxis}
                 margin={chartProps.margin}
                 sx={chartProps.sx}
                 slotProps={chartProps.slotProps}
                 height={styles.height}
-                barLabel={chartProps.barLabel}
-            >
-                <ChartsReferenceLine
+            ><ChartsReferenceLine
                     y={0}
                     lineStyle={{ strokeDasharray: '10 5' }}
                     labelAlign="start"
                 />
-            </BarChart> : 
-            <Stack direction={'column'} flex={1} justifyContent={'center'}>
-                <CircularProgress />
-            </Stack>}
+            </BarChart> :
+                <Stack direction={'column'} flex={1} justifyContent={'center'}>
+                    <CircularProgress />
+                </Stack>}
         </CardContent>
     </Card>
 })
 
-export default AccountTypeBalanceCard
+export default AccountTypeBalanceBarChartCard

@@ -1,5 +1,5 @@
 
-import { errorHandler } from "@/appUtils";
+import { defaultAccountTypeOrder, errorHandler } from "@/appUtils";
 import AppToolbar from "@/components/AppToolbar";
 import BookSelect from "@/components/BookSelect";
 import TimePeriodInfo from "@/components/TimePeriodInfo";
@@ -11,23 +11,25 @@ import MainTemplate from "@/templates/MainTemplate";
 import { TimePeriod } from "@/types";
 import { runAsync } from "@/utils";
 import utilStyles from "@/utilStyles";
-import { AccountType, Book, BookBalanceReport } from "@client/model";
-import { css, Divider, Grid2, SxProps, Theme } from '@mui/material';
-import { observer } from "mobx-react-lite";
-import { PropsWithChildren, useCallback, useEffect, useMemo, useState } from "react";
-import AccountTypeBalanceCard from "./components/AccountTypeBalanceCard";
+import { Account, AccountType, Book, BookBalanceReport } from "@client/model";
+import { css, Divider, FormControlLabel, Grid2, Stack, Switch, SxProps, Theme, Typography } from '@mui/material';
 import { isEqual } from "lodash";
+import { observer } from "mobx-react-lite";
 import moment from "moment";
+import { Fragment, PropsWithChildren, useCallback, useEffect, useMemo, useState } from "react";
+import AccountTypeBalancePieChartCard from "./components/AccountTypeBalancePieChartCard";
+import AccountTypesBalanceBarChartCard from "./components/AccountTypesBalanceBarChartCard";
+import AccountTypeBalanceBarChartCard from "./components/AccountTypeBalanceBarChartCard";
+import { usePreferences } from "@/contexts/useApi";
+import { useI18nLabel } from "@/contexts/useI18n";
 
 export type HomePageProps = PropsWithChildren
-/**
-3. 本月(某月)花費結構 (Pie Chart)
-5. 本月(某月)收入結構 (Pie Chart)
- */
+
 
 export const HomePage = observer(function HomePage(props: HomePageProps) {
 
     const { appStyles, theme } = useTheme()
+    const ll = useI18nLabel()
 
     const [processing, setProcessing] = useState<boolean>()
 
@@ -39,6 +41,26 @@ export const HomePage = observer(function HomePage(props: HomePageProps) {
     const { books, currentBookId } = bookStore
     const { accounts } = accountStore
 
+    const bookAccounts = useMemo(() => {
+        return accounts ? accounts.filter((a) => a.bookId === currentBookId) : []
+    }, [accounts, currentBookId])
+
+    const { balanceAccountTypeOrder } = usePreferences() || {}
+
+    const [allOn, setAllOn] = useState<boolean>()
+    const [accountTypesOn, setAccountTypesOn] = useState<Set<AccountType>>(new Set([balanceAccountTypeOrder?.[0] || AccountType.Expense]))
+
+    const onToggleAccountTypesOn = useCallback((type: AccountType) => {
+        setAccountTypesOn((s) => {
+            const newS = new Set(s)
+            if (newS.has(type)) {
+                newS.delete(type)
+            } else {
+                newS.add(type)
+            }
+            return newS
+        })
+    }, [])
 
     const onBookChange = useCallback((book?: Book) => {
         bookStore.currentBookId = book?.id
@@ -89,11 +111,26 @@ export const HomePage = observer(function HomePage(props: HomePageProps) {
                     xl: theme.spacing(2),
                 },
             } as SxProps<Theme>,
-            mainTileSize: {
+            titleBar: css({
+                flexDirection: 'row',
+                alignItems: 'center',
+                flex: 'wrap',
+                flexWrap: 'wrap',
+                gap: theme.spacing(1),
+                rowGap: theme.spacing(1),
+                justifyContent: "flex-end"
+            }),
+            accountTypesTileSize: {
                 xs: 12,
                 sm: 12,
                 md: 6,
-                xl: 4
+                xl: 6
+            },
+            accountsTileSize: {
+                xs: 12,
+                sm: 12,
+                md: 6,
+                xl: 6
             },
             fullTileSize: {
                 xs: 12,
@@ -131,15 +168,79 @@ export const HomePage = observer(function HomePage(props: HomePageProps) {
         </AppToolbar>
         <Divider flexItem />
         <Grid2 container css={styles.container} sx={styles.containerSx} spacing={2}>
-            <Grid2 size={styles.fullTileSize} sx={styles.fullTileSx}>
-                <AccountTypeBalanceCard timePeriod={timePeriod} accountTypes={[AccountType.Asset, AccountType.Liability, AccountType.Income, AccountType.Expense, AccountType.Other]} report={bookBalanceReport} />
+            <Grid2 size={12}>
+                <Stack css={styles.titleBar}>
+                    <Typography variant="h5">{ll('desktop.accountTypeBalanceSheet')}</Typography>
+                    <div css={utilStyles.flex1} />
+                    <FormControlLabel
+                        control={<Switch color="primary" checked={!!allOn} onChange={() => { setAllOn(!allOn) }} />}
+                        label={ll(`desktop.allAccountTypes`)}
+                        labelPlacement="bottom"
+                    />
+                </Stack>
             </Grid2>
-            <Grid2 size={styles.mainTileSize}>
-                <AccountTypeBalanceCard timePeriod={timePeriod} accountTypes={[AccountType.Asset, AccountType.Liability]} report={bookBalanceReport} />
+            {allOn && <Grid2 size={styles.fullTileSize} sx={styles.fullTileSx}>
+                <AccountTypesBalanceBarChartCard
+                    timePeriod={timePeriod}
+                    accountTypes={[AccountType.Asset, AccountType.Liability, AccountType.Income, AccountType.Expense, AccountType.Other]}
+                    report={bookBalanceReport}
+                />
+            </Grid2>}
+            {!allOn && <>
+                <Grid2 size={styles.accountTypesTileSize}>
+                    <AccountTypesBalanceBarChartCard
+                        timePeriod={timePeriod}
+                        accountTypes={[AccountType.Asset, AccountType.Liability]}
+                        report={bookBalanceReport}
+                    />
+                </Grid2>
+                <Grid2 size={styles.accountTypesTileSize}>
+                    <AccountTypesBalanceBarChartCard
+                        timePeriod={timePeriod}
+                        accountTypes={[AccountType.Income, AccountType.Expense]}
+                        report={bookBalanceReport}
+                    />
+                </Grid2>
+            </>}
+            <Grid2 size={12}>
+                <Divider flexItem />
             </Grid2>
-            <Grid2 size={styles.mainTileSize}>
-                <AccountTypeBalanceCard timePeriod={timePeriod} accountTypes={[AccountType.Income, AccountType.Expense]} report={bookBalanceReport} />
+            <Grid2 size={12}>
+                <Stack css={styles.titleBar}>
+                    <Typography variant="h5">{ll('desktop.accountTypeBalanceSheet')}</Typography>
+                    <div css={utilStyles.flex1} />
+                    <Stack direction={'row'}>
+                        {(balanceAccountTypeOrder || defaultAccountTypeOrder).map((type) => {
+                            return <Fragment key={type}>
+                                <FormControlLabel
+                                    control={<Switch color="primary" checked={accountTypesOn.has(type)} onChange={() => { onToggleAccountTypesOn(type) }} />}
+                                    label={ll(`account.type.${type}`)}
+                                    labelPlacement="bottom"
+                                />
+                            </Fragment>
+                        })}
+                    </Stack>
+                </Stack>
             </Grid2>
+            {(balanceAccountTypeOrder || defaultAccountTypeOrder).filter((a) => accountTypesOn.has(a)).map((type) => {
+                return <Fragment key={type}>
+                    <Grid2 size={styles.accountsTileSize}>
+                        <AccountTypeBalancePieChartCard
+                            timePeriod={timePeriod}
+                            accountType={type}
+                            report={bookBalanceReport}
+                        />
+                    </Grid2>
+                    <Grid2 size={styles.accountsTileSize}>
+                        <AccountTypeBalanceBarChartCard
+                            timePeriod={timePeriod}
+                            accountType={type}
+                            report={bookBalanceReport}
+                            bookAccounts={bookAccounts}
+                        />
+                    </Grid2>
+                </Fragment>
+            })}
         </Grid2>
     </MainTemplate>
 })

@@ -86,3 +86,13 @@ export function errorHandler() {
         throw error
     }
 }
+
+export const defaultAccountTypeOrder = [
+    AccountType.Income,
+    AccountType.Asset,
+    AccountType.Expense,
+    AccountType.Liability,
+    AccountType.Other,
+]
+
+// const defaultAccountTypeSet = new Set(defaultAccountTypeOrder)
