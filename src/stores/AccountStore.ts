@@ -19,8 +19,12 @@ export class AccountStore {
         return this._accounts
     }
 
-    listBookAccounts(bookId: string): Account[] | undefined {
-        return this._accounts ? this._accounts.filter((a) => a.bookId === bookId) : undefined
+    listBookAccounts(bookId: string): Account[] {
+        return this._accounts ? this._accounts.filter((a) => a.bookId === bookId) : []
+    }
+
+    mapBookAccounts(bookId: string): Map<string, Account> {
+        return new Map((this._accounts ? this._accounts.filter((a) => a.bookId === bookId) : []).map(a => [a.id, a]))
     }
 
     getAccount(uid: string): Account | undefined {
@@ -29,11 +33,12 @@ export class AccountStore {
 
 
     async fetchAccounts(force?: boolean): Promise<void> {
-        if (!force && this._fetchingAccounts > 0) {
+        if (!force && (this._accounts || this._fetchingAccounts > 0)){
             return
         }
         this._fetchingAccounts++
         try {
+            //all accounts in all books, include hidden account
             const accounts = (await new AccountApi(this.configuration).listAccountAll()).data
             runInAction(() => {
                 this._accounts = accounts

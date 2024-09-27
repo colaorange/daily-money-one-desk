@@ -1,6 +1,7 @@
 
 
-import { accountTypeFactor, toCurrencySymbol } from "@/appUtils";
+import { accountTypeBarColor, accountTypeFactor, toCurrencySymbol } from "@/appUtils";
+import { FullLoading } from "@/components/FullLoading";
 import TimePeriodInfo from "@/components/TimePeriodInfo";
 import { usePreferences } from "@/contexts/useApi";
 import useI18n from "@/contexts/useI18n";
@@ -8,8 +9,8 @@ import useTheme from "@/contexts/useTheme";
 import { TimePeriod } from "@/types";
 import { getNumberFormat } from "@/utils";
 import utilStyles from "@/utilStyles";
-import { AccountType, AccountTypeBalance, BookBalanceReport } from "@client/model";
-import { Card, CardContent, CircularProgress, css, Stack, SxProps, Theme, Typography } from "@mui/material";
+import { AccountType, Balance, Book, BookBalanceReport } from "@client/model";
+import { Card, CardContent, css, Stack, SxProps, Theme, Typography } from "@mui/material";
 import { BarChartProps, ChartsReferenceLine, ChartsXAxisProps, ChartsYAxisProps } from "@mui/x-charts";
 import { BarChart, BarItem } from '@mui/x-charts/BarChart';
 import { axisClasses } from '@mui/x-charts/ChartsAxis';
@@ -17,12 +18,15 @@ import { observer } from "mobx-react-lite";
 import { PropsWithChildren, useMemo } from "react";
 
 export type AccountTypesBalanceBarChartCardProps = PropsWithChildren<{
+    book: Book
+    accountTypes: AccountType[]
+
     timePeriod?: TimePeriod
     report?: BookBalanceReport
-    accountTypes: AccountType[]
+    refreshing?: boolean
 }>
 
-export const AccountTypesBalanceBarChartCard = observer(function AccountTypeBalanceCard({ report, accountTypes, timePeriod }: AccountTypesBalanceBarChartCardProps) {
+export const AccountTypesBalanceBarChartCard = observer(function AccountTypeBalanceCard({ book, report, accountTypes, timePeriod, refreshing }: AccountTypesBalanceBarChartCardProps) {
 
 
     const { colorScheme, appStyles, theme } = useTheme()
@@ -30,10 +34,12 @@ export const AccountTypesBalanceBarChartCard = observer(function AccountTypeBala
     const { fixBalanceFractionDigits } = usePreferences() || {}
 
     const chartProps = useMemo(() => {
-        if (!report) {
+
+        if (!book || !report) {
             return undefined
         }
-        const { book, accountTypes: reportAccountTypes } = report
+
+        const { accountTypes: reportAccountTypes } = report
         const { language, label: ll } = i18n
 
 
@@ -44,7 +50,7 @@ export const AccountTypesBalanceBarChartCard = observer(function AccountTypeBala
         //undefined when node tranaction in period
 
         const accountTypeAmounts = accountTypes?.map((accountType) => {
-            const balance = reportAccountTypes[accountType] as AccountTypeBalance | undefined
+            const balance = reportAccountTypes[accountType] as Balance | undefined
             const amount = !balance ? 0 : (balance.depositsAmount - balance.withdrawalsAmount) * accountTypeFactor(accountType)
             return { accountType, amount }
         })
@@ -57,7 +63,6 @@ export const AccountTypesBalanceBarChartCard = observer(function AccountTypeBala
         accountTypeAmounts.forEach(({ accountType, amount }) => {
             dataset![0][accountType] = amount
         })
-
 
         const currencySymbol = book.symbol || toCurrencySymbol(i18n, book.currency || '')
 
@@ -94,7 +99,7 @@ export const AccountTypesBalanceBarChartCard = observer(function AccountTypeBala
                     dataKey: accountType,
                     label: accountTypeLabel(accountType),
                     valueFormatter,
-                    color: colorScheme[`${accountType}Container`],
+                    color: accountTypeBarColor(accountType, colorScheme),
                 }
             }) as BarChartProps['series'],
             barLabel: (barItem: BarItem) => {
@@ -103,7 +108,7 @@ export const AccountTypesBalanceBarChartCard = observer(function AccountTypeBala
             },
             margin: {
                 //30 for y axis space
-                left: maxAmountTxtLength * 8 /* + 30 */,
+                left: (maxAmountTxtLength + 1) * 8 /* + 30 */,
                 right: 4,
                 top: 8,
                 // bottom: 4,
@@ -111,7 +116,7 @@ export const AccountTypesBalanceBarChartCard = observer(function AccountTypeBala
             sx: {
                 [`.${axisClasses.left} .${axisClasses.label}`]: {
                     //25 for y axis space
-                    transform: `translate(-${maxAmountTxtLength * 8/* - 25*/}px, 0)`,
+                    transform: `translate(-${(maxAmountTxtLength + 1) * 8/* - 25*/}px, 0)`,
                 }
             } as SxProps<Theme>,
             slotProps: {
@@ -134,12 +139,13 @@ export const AccountTypesBalanceBarChartCard = observer(function AccountTypeBala
                 noDataOverlay: { message: ll('noData') },
             } as BarChartProps['slotProps']
         }
-    }, [report, i18n, fixBalanceFractionDigits, accountTypes, colorScheme])
+    }, [book, report, i18n, fixBalanceFractionDigits, accountTypes, colorScheme])
 
     const styles = useMemo(() => {
         return {
             content: css(utilStyles.vlayout, appStyles.barChart, {
-                minHeight: 300
+                minHeight: 300,
+                position: 'relative'
             }),
             header: css({
                 gap: theme.spacing(1)
@@ -151,7 +157,7 @@ export const AccountTypesBalanceBarChartCard = observer(function AccountTypeBala
     return <Card>
         <CardContent css={styles.content}>
             <Stack direction='row' css={styles.header}>
-                {report?.book && <Typography variant="caption">{report?.book.name}</Typography>}
+                {book && <Typography variant="caption">{book.name}</Typography>}
                 {timePeriod && <TimePeriodInfo timePeriod={timePeriod} hideGranularity />}
             </Stack>
             {chartProps ? <BarChart skipAnimation
@@ -165,15 +171,13 @@ export const AccountTypesBalanceBarChartCard = observer(function AccountTypeBala
                 height={styles.height}
                 barLabel={chartProps.barLabel}
             >
-                <ChartsReferenceLine
+                {chartProps.dataset?.length && chartProps.dataset?.length > 0 && <ChartsReferenceLine
                     y={0}
                     lineStyle={{ strokeDasharray: '10 5' }}
                     labelAlign="start"
-                />
-            </BarChart> :
-                <Stack direction={'column'} flex={1} justifyContent={'center'}>
-                    <CircularProgress />
-                </Stack>}
+                />}
+            </BarChart> : <FullLoading />}
+            {chartProps && refreshing && <FullLoading css={utilStyles.absoluteCenter} delay={400} />}
         </CardContent>
     </Card>
 })

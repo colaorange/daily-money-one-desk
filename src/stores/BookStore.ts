@@ -36,7 +36,7 @@ export class BookStore {
     }
 
     async fetchBooks(force?: boolean): Promise<void> {
-        if (!force && this._fetchingBooks > 0) {
+        if (!force && (this._books || this._fetchingBooks > 0)) {
             return
         }
         this._fetchingBooks++

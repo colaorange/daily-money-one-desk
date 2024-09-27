@@ -20,6 +20,7 @@ export type AppStyles = {
     outlineIconButton: SerializedStyles
     toolbarSelect: SerializedStyles
     barChart: SerializedStyles
+    lineChart: SerializedStyles
 }
 
 export type ThemeContextValue = {
@@ -197,6 +198,8 @@ export const ThemeProvider = memo(function ThemeProvider({ children }: ThemeProv
                 '& .MuiBarElement-series-other': {
                     fill: colorScheme.otherContainer
                 }
+            }),
+            lineChart: css({
             })
         }
         return {

@@ -1,7 +1,7 @@
 
 
-import { axisClasses } from '@mui/x-charts/ChartsAxis';
 import { accountTypeFactor, toCurrencySymbol } from "@/appUtils";
+import { FullLoading } from '@/components/FullLoading';
 import TimePeriodInfo from "@/components/TimePeriodInfo";
 import { usePreferences } from "@/contexts/useApi";
 import useI18n from "@/contexts/useI18n";
@@ -9,22 +9,25 @@ import useTheme from "@/contexts/useTheme";
 import { TimePeriod } from "@/types";
 import { getNumberFormat } from "@/utils";
 import utilStyles from "@/utilStyles";
-import { Account, AccountType, BookBalanceReport } from "@client/model";
-import { Card, CardContent, CircularProgress, css, Stack, SxProps, Theme, Typography } from "@mui/material";
+import { Account, AccountType, Book, BookBalanceReport } from "@client/model";
+import { Box, Card, CardContent, css, Stack, SxProps, Theme, Typography } from "@mui/material";
 import { BarChartProps, ChartsReferenceLine, ChartsXAxisProps } from "@mui/x-charts";
-import { BarChart, BarItem } from '@mui/x-charts/BarChart';
+import { BarChart } from '@mui/x-charts/BarChart';
+import { axisClasses } from '@mui/x-charts/ChartsAxis';
 import { observer } from "mobx-react-lite";
 import { PropsWithChildren, useMemo } from "react";
 
-export type AccountTypeBalanceBarChartCardProps = PropsWithChildren<{
-    timePeriod?: TimePeriod
-    report?: BookBalanceReport
+export type AccountsBalanceBarChartCardProps = PropsWithChildren<{
+    book: Book
     accountType: AccountType
     bookAccounts: Account[]
+
+    timePeriod?: TimePeriod
+    report?: BookBalanceReport
+    refreshing?: boolean
 }>
 
-export const AccountTypeBalanceBarChartCard = observer(function AccountTypeBalanceCard({ report, accountType, timePeriod, bookAccounts }: AccountTypeBalanceBarChartCardProps) {
-
+export const AccountsBalanceBarChartCard = observer(function AccountTypeBalanceCard({ book, report, accountType, timePeriod, bookAccounts, refreshing }: AccountsBalanceBarChartCardProps) {
 
     const { colorScheme, appStyles, theme } = useTheme()
     const i18n = useI18n()
@@ -32,12 +35,11 @@ export const AccountTypeBalanceBarChartCard = observer(function AccountTypeBalan
     const { fixBalanceFractionDigits, hideEmptyBalance } = usePreferences() || {}
 
     const chartProps = useMemo(() => {
-        if (!report) {
+        if (!book || !report) {
             return undefined
         }
-        const { book, accounts: reportAccounts } = report
+        const { accounts: reportAccounts } = report
         const { language } = i18n
-
 
         const fractionDigits = book.fractionDigits || 0
         const numberFormat = getNumberFormat(language, { maximumFractionDigits: fractionDigits, minimumFractionDigits: fixBalanceFractionDigits ? fractionDigits : undefined })
@@ -103,7 +105,7 @@ export const AccountTypeBalanceBarChartCard = observer(function AccountTypeBalan
             }) as BarChartProps['series'],
             margin: {
                 //30 for y axis space
-                left: maxAmountTxtLength * 8 /* + 30 */,
+                left: (maxAmountTxtLength + 1) * 8 /* + 30 */,
                 right: 4,
                 top: 8,
                 // bottom: 4,
@@ -111,7 +113,7 @@ export const AccountTypeBalanceBarChartCard = observer(function AccountTypeBalan
             sx: {
                 [`.${axisClasses.left} .${axisClasses.label}`]: {
                     //25 for y axis space
-                    transform: `translate(-${maxAmountTxtLength * 8/* - 25*/}px, 0)`,
+                    transform: `translate(-${(maxAmountTxtLength + 1) * 8/* - 25*/}px, 0)`,
                 }
             } as SxProps<Theme>,
             slotProps: {
@@ -128,12 +130,13 @@ export const AccountTypeBalanceBarChartCard = observer(function AccountTypeBalan
                 noDataOverlay: { message: ll('noData') },
             } as BarChartProps['slotProps']
         }
-    }, [accountType, bookAccounts, fixBalanceFractionDigits, hideEmptyBalance, i18n, ll, report])
+    }, [accountType, bookAccounts, fixBalanceFractionDigits, hideEmptyBalance, i18n, ll, book, report])
 
     const styles = useMemo(() => {
         return {
             content: css(utilStyles.vlayout, appStyles.barChart, {
-                minHeight: 300
+                minHeight: 300,
+                position: 'relative'
             }),
             header: css({
                 gap: theme.spacing(1)
@@ -145,30 +148,31 @@ export const AccountTypeBalanceBarChartCard = observer(function AccountTypeBalan
     return <Card>
         <CardContent css={styles.content}>
             <Stack direction='row' css={styles.header}>
-                {report?.book && <Typography variant="caption">{report?.book.name}</Typography>}
+                {book && <Typography variant="caption">{book.name}</Typography>}
                 {accountType && <Typography variant="caption" color={colorScheme[accountType]}>{ll(`account.type.${accountType}`)}</Typography>}
                 {timePeriod && <TimePeriodInfo timePeriod={timePeriod} hideGranularity />}
             </Stack>
-            {chartProps ? <BarChart skipAnimation
-                colors={colorScheme.chartColorPalette}
-                dataset={chartProps.dataset}
-                xAxis={chartProps.xAxis}
-                series={chartProps.series}
-                margin={chartProps.margin}
-                sx={chartProps.sx}
-                slotProps={chartProps.slotProps}
-                height={styles.height}
-            ><ChartsReferenceLine
-                    y={0}
-                    lineStyle={{ strokeDasharray: '10 5' }}
-                    labelAlign="start"
-                />
-            </BarChart> :
-                <Stack direction={'column'} flex={1} justifyContent={'center'}>
-                    <CircularProgress />
-                </Stack>}
+            {chartProps ? <Stack alignSelf={'stretch'}>
+                <BarChart skipAnimation
+                    colors={colorScheme.chartColorPalette}
+                    dataset={chartProps.dataset}
+                    xAxis={chartProps.xAxis}
+                    series={chartProps.series}
+                    margin={chartProps.margin}
+                    sx={chartProps.sx}
+                    slotProps={chartProps.slotProps}
+                    height={styles.height}
+                >
+                    {chartProps.dataset?.length && chartProps.dataset?.length > 0 && <ChartsReferenceLine
+                        y={0}
+                        lineStyle={{ strokeDasharray: '10 5' }}
+                        labelAlign="start"
+                    />}
+                </BarChart>
+            </Stack> : <FullLoading />}
+            {chartProps && refreshing && <FullLoading css={utilStyles.absoluteCenter} delay={400} />}
         </CardContent>
     </Card>
 })
 
-export default AccountTypeBalanceBarChartCard
+export default AccountsBalanceBarChartCard

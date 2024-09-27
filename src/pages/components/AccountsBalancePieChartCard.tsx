@@ -1,6 +1,7 @@
 
 
-import { accountTypeFactor, toCurrencySymbol } from "@/appUtils";
+import { accountTypeFactor } from "@/appUtils";
+import { FullLoading } from "@/components/FullLoading";
 import TimePeriodInfo from "@/components/TimePeriodInfo";
 import { usePreferences } from "@/contexts/useApi";
 import useI18n from "@/contexts/useI18n";
@@ -8,20 +9,24 @@ import useTheme from "@/contexts/useTheme";
 import { TimePeriod } from "@/types";
 import { getNumberFormat } from "@/utils";
 import utilStyles from "@/utilStyles";
-import { AccountType, BookBalanceReport } from "@client/model";
-import { Card, CardContent, CircularProgress, css, Stack, Typography } from "@mui/material";
+import { Account, AccountType, Book, BookBalanceReport } from "@client/model";
+import { Card, CardContent, css, Stack, Typography } from "@mui/material";
 import { PieChartProps } from "@mui/x-charts";
 import { PieChart } from '@mui/x-charts/PieChart';
 import { observer } from "mobx-react-lite";
 import { PropsWithChildren, useMemo } from "react";
 
-export type AccountTypeBalancePieChartCardProps = PropsWithChildren<{
+export type AccountsBalancePieChartCardProps = PropsWithChildren<{
+    book: Book
+    accountType: AccountType
+    bookAccounts: Account[]
+
     timePeriod?: TimePeriod
     report?: BookBalanceReport
-    accountType: AccountType
+    refreshing?: boolean
 }>
 
-export const AccountTypeBalancePieChartCard = observer(function AccountTypeBalanceCard({ report, accountType, timePeriod }: AccountTypeBalancePieChartCardProps) {
+export const AccountsBalancePieChartCard = observer(function AccountTypeBalanceCard({ book, report, accountType, timePeriod, bookAccounts, refreshing }: AccountsBalancePieChartCardProps) {
 
 
     const { colorScheme, appStyles, theme } = useTheme()
@@ -30,19 +35,25 @@ export const AccountTypeBalancePieChartCard = observer(function AccountTypeBalan
     const { fixBalanceFractionDigits } = usePreferences() || {}
 
     const chartProps = useMemo(() => {
-        if (!report) {
+        if (!book || !report) {
             return undefined
         }
-        const { book, accounts: reportAccounts } = report
+        const { accounts: reportAccounts } = report
         const { language } = i18n
 
+        const accountMap = new Map(bookAccounts.map(a => [a.id, a]))
 
         const fractionDigits = book.fractionDigits || 0
         const numberFormat = getNumberFormat(language, { maximumFractionDigits: fractionDigits, minimumFractionDigits: fixBalanceFractionDigits ? fractionDigits : undefined })
 
-        const accountAmounts = Object.values(reportAccounts).filter((a) => a.account.type === accountType).map((accountBalance) => {
-            const amount = (accountBalance.depositsAmount - accountBalance.withdrawalsAmount) * accountTypeFactor(accountType)
-            return { account: accountBalance.account, amount }
+        const accountAmounts = Object.keys(reportAccounts).filter((aid) => {
+            const account = accountMap.get(aid)
+            return account?.type === accountType
+        }).map((aid) => {
+            const account = accountMap.get(aid)
+            const balance = reportAccounts[aid]
+            const amount = (balance.depositsAmount - balance.withdrawalsAmount) * accountTypeFactor(accountType)
+            return { account: account!, amount }
         }).filter((a) => a.amount > 0).sort(({ amount: a1 }, { amount: a2 }) => {
             return a2 - a1
         })
@@ -83,12 +94,13 @@ export const AccountTypeBalancePieChartCard = observer(function AccountTypeBalan
                 noDataOverlay: { message: ll('noData') },
             } as PieChartProps['slotProps']
         }
-    }, [accountType, fixBalanceFractionDigits, i18n, ll, report])
+    }, [accountType, book, bookAccounts, fixBalanceFractionDigits, i18n, ll, report])
 
     const styles = useMemo(() => {
         return {
             content: css(utilStyles.vlayout, appStyles.barChart, {
-                minHeight: 300
+                minHeight: 300,
+                position: 'relative'
             }),
             header: css({
                 gap: theme.spacing(1)
@@ -100,7 +112,7 @@ export const AccountTypeBalancePieChartCard = observer(function AccountTypeBalan
     return <Card>
         <CardContent css={styles.content}>
             <Stack direction='row' css={styles.header}>
-                {report?.book && <Typography variant="caption">{report?.book.name}</Typography>}
+                {book && <Typography variant="caption">{book.name}</Typography>}
                 {accountType && <Typography variant="caption" color={colorScheme[accountType]}>{ll(`account.type.${accountType}`)}</Typography>}
                 {timePeriod && <TimePeriodInfo timePeriod={timePeriod} hideGranularity />}
             </Stack>
@@ -110,12 +122,10 @@ export const AccountTypeBalancePieChartCard = observer(function AccountTypeBalan
                 slotProps={chartProps.slotProps}
                 height={styles.height}
             >
-            </PieChart> :
-                <Stack direction={'column'} flex={1} justifyContent={'center'}>
-                    <CircularProgress />
-                </Stack>}
+            </PieChart> : <FullLoading />}
+            {chartProps && refreshing && <FullLoading css={utilStyles.absoluteCenter} delay={400}/>}
         </CardContent>
     </Card>
 })
 
-export default AccountTypeBalancePieChartCard
+export default AccountsBalancePieChartCard

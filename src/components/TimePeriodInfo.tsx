@@ -1,7 +1,7 @@
-import { DEFAULT_DATE_FORMAT } from "@/constants";
+import { DEFAULT_DATE_FORMAT, DEFAULT_MONTH_FORMAT } from "@/constants";
 import { usePreferences } from "@/contexts/useApi";
 import { useI18nLabel } from "@/contexts/useI18n";
-import { TimePeriod } from "@/types";
+import { TimeGranularity, TimePeriod } from "@/types";
 import { css, Stack, Typography } from "@mui/material";
 import moment from "moment";
 import { memo, useMemo } from "react";
@@ -17,7 +17,7 @@ export const TimePeriodInfo = memo(function TimePeriodInfo({ timePeriod, hideGra
     const { start, end, granularity } = timePeriod
     const ll = useI18nLabel()
     const prefs = usePreferences()
-    const { dateFormat = DEFAULT_DATE_FORMAT } = prefs || {}
+    const { dateFormat = DEFAULT_DATE_FORMAT, monthFormat = DEFAULT_MONTH_FORMAT } = prefs || {}
 
     const startm = start !== null && moment(Math.min(start, end)).startOf('day')
     const endm = moment(start ? Math.max(start, end) : end).endOf('day')
@@ -32,11 +32,36 @@ export const TimePeriodInfo = memo(function TimePeriodInfo({ timePeriod, hideGra
         }
     }, [hideGranularity])
 
+    const startLabel = useMemo(()=>{
+        if(!startm){
+            return ll('desktop.initDay')
+        }
+        switch(granularity){
+            case TimeGranularity.DAILY:
+                return startm.format(dateFormat)
+            case TimeGranularity.MONTHLY:
+                return startm.format(monthFormat)
+            case TimeGranularity.YEARLY:
+                return startm.format('YYYY')
+        }
+    },[dateFormat, granularity, ll, monthFormat, startm])
+
+    const endLabel = useMemo(()=>{
+        switch(granularity){
+            case TimeGranularity.DAILY:
+                return endm.format(dateFormat)
+            case TimeGranularity.MONTHLY:
+                return endm.format(monthFormat)
+            case TimeGranularity.YEARLY:
+                return endm.format('YYYY')
+        }
+    },[dateFormat, endm, granularity, monthFormat])
+
     return <Stack direction='column' alignItems={'center'} >
         <Stack direction='row' sx={{ gap: 1 }}>
-            <Typography variant="caption" css={styles.text} >{startm ? startm.format(dateFormat) : ll('desktop.initDay')}</Typography>
+            <Typography variant="caption" css={styles.text} >{startLabel}</Typography>
             <Typography variant="caption" css={styles.text} >-</Typography>
-            <Typography variant="caption" css={styles.text} >{endm.format(dateFormat)}</Typography>
+            <Typography variant="caption" css={styles.text} >{endLabel}</Typography>
         </Stack>
         {!hideGranularity && <Typography variant="caption" css={styles.text} >{ll('desktop.timeGranularity')} : {ll(`desktop.timeGranularity.${granularity}`)}</Typography>}
     </Stack>

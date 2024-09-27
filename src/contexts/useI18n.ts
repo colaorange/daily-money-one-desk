@@ -1,5 +1,6 @@
 import { useContext } from "react"
-import { I18nContext, I18nContextValue, I18nLabel } from "./I18nProvider"
+import { I18nContext, I18nContextValue } from "./I18nProvider"
+import { I18nLabel } from "@/types"
 
 
 export function useI18n(): I18nContextValue {

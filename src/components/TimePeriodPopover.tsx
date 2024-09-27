@@ -129,7 +129,7 @@ export const TimePeriodPopover = memo(function TimePeriodPopover({ timePeriod, h
     }, [fixedRange])
 
     const onLastYear = useCallback(() => {
-        fixedRange(-1, 'year', TimeGranularity.DAILY)
+        fixedRange(-1, 'year', TimeGranularity.MONTHLY)
     }, [fixedRange])
 
     const withIn = useCallback((value: number, unit: 'month' | 'year', granularity: TimeGranularity) => {
@@ -146,7 +146,7 @@ export const TimePeriodPopover = memo(function TimePeriodPopover({ timePeriod, h
     }, [withIn])
 
     const onInSixMonths = useCallback(() => {
-        withIn(-6, 'month', TimeGranularity.DAILY)
+        withIn(-6, 'month', TimeGranularity.MONTHLY)
     }, [withIn])
 
     const onInAYear = useCallback(() => {
@@ -159,6 +159,7 @@ export const TimePeriodPopover = memo(function TimePeriodPopover({ timePeriod, h
             fromInit: true,
             mStart: null,
             mEnd: moment().endOf('day'),
+            granularity: TimeGranularity.YEARLY
         })
     }, [stateMix, resetOrClose])
 

@@ -67,7 +67,6 @@ export const ApiProvider = memo(function ApiProvider({ basePath, custom: custom,
                     logDebug('Fail to authorize by session connection token ', err)
                 }
             }
-
             setStateMix({
                 setting,
                 authorization: (connectionToken && preferences) ? {
@@ -81,14 +80,6 @@ export const ApiProvider = memo(function ApiProvider({ basePath, custom: custom,
             })
         })
     }, [basePath])
-
-
-    const configuration = useCallback(() => {
-        return new Configuration({
-            basePath,
-            apiKey: stateMix?.authorization?.connectionToken
-        })
-    }, [basePath, stateMix])
 
 
     const value = useMemo(() => {

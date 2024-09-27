@@ -1,18 +1,18 @@
 import inspect from "browser-util-inspect"
 import { ValidationError, Validator } from "jsonschema"
 import { AppError, I18nLabel } from './types'
-import { AccountType } from "@client/model"
+import { AccountType, ColorScheme } from "@client/model"
 import { I18nContextValue } from "./contexts/I18nProvider"
 
 
 export function isReversedAccountType(type: AccountType): boolean {
     switch (type) {
-        case AccountType.Income:
-        case AccountType.Liability:
+        case AccountType.INCOME:
+        case AccountType.LIABILITY:
             return true
-        case AccountType.Asset:
-        case AccountType.Expense:
-        case AccountType.Other:
+        case AccountType.ASSET:
+        case AccountType.EXPENSE:
+        case AccountType.OTHER:
         default:
             return false
     }
@@ -88,11 +88,57 @@ export function errorHandler() {
 }
 
 export const defaultAccountTypeOrder = [
-    AccountType.Income,
-    AccountType.Asset,
-    AccountType.Expense,
-    AccountType.Liability,
-    AccountType.Other,
+    AccountType.INCOME,
+    AccountType.ASSET,
+    AccountType.EXPENSE,
+    AccountType.LIABILITY,
+    AccountType.OTHER,
 ]
 
 // const defaultAccountTypeSet = new Set(defaultAccountTypeOrder)
+
+
+export function accountTypeAreaColor(accountType: AccountType, colorScheme: ColorScheme){
+    switch(accountType){
+        case "income":
+            return colorScheme.incomeContainer
+        case "asset":
+            return colorScheme.assetContainer
+        case "expense":
+            return colorScheme.expenseContainer
+        case "liability":
+            return colorScheme.liabilityContainer
+        case "other":
+            return colorScheme.otherContainer
+    }
+}
+
+export function accountTypeBarColor(accountType: AccountType, colorScheme: ColorScheme){
+    switch(accountType){
+        case "income":
+            return colorScheme.incomeContainer
+        case "asset":
+            return colorScheme.assetContainer
+        case "expense":
+            return colorScheme.expenseContainer
+        case "liability":
+            return colorScheme.liabilityContainer
+        case "other":
+            return colorScheme.otherContainer
+    }
+}
+
+export function accountTypeLineColor(accountType: AccountType, colorScheme: ColorScheme){
+    switch(accountType){
+        case "income":
+            return colorScheme.onIncomeContainer
+        case "asset":
+            return colorScheme.onAssetContainer
+        case "expense":
+            return colorScheme.onExpenseContainer
+        case "liability":
+            return colorScheme.onLiabilityContainer
+        case "other":
+            return colorScheme.onOtherContainer
+    }
+}
