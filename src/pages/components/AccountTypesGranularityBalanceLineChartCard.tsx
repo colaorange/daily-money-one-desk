@@ -20,12 +20,13 @@ import moment from "moment";
 import { PropsWithChildren, useMemo } from "react";
 
 export type AccountTypesGranularityBalanceLineChartCardProps = PropsWithChildren<{
-    book?: Book
+    book: Book
     accountTypes: AccountType[]
 
     timePeriod?: TimePeriod
     report?: BookGranularityBalanceReport
     refreshing?: boolean
+    cumulative?: boolean
 }>
 
 type DatasetItem = {
@@ -34,7 +35,7 @@ type DatasetItem = {
     [key in AccountType]?: number
 }
 
-export const AccountTypesGranularityBalanceLineChartCard = observer(function AccountTypesGranularityBalanceLineChartCard({ book, report, accountTypes, timePeriod, refreshing }: AccountTypesGranularityBalanceLineChartCardProps) {
+export const AccountTypesGranularityBalanceLineChartCard = observer(function AccountTypesGranularityBalanceLineChartCard({ book, report, accountTypes, timePeriod, refreshing, cumulative }: AccountTypesGranularityBalanceLineChartCardProps) {
 
 
     const { colorScheme, appStyles, theme } = useTheme()
@@ -42,7 +43,7 @@ export const AccountTypesGranularityBalanceLineChartCard = observer(function Acc
     const { fixBalanceFractionDigits, monthFormat, dateFormat } = usePreferences() || {}
 
     const chartProps = useMemo(() => {
-        if (!book || !report || !timePeriod) {
+        if (!report || !timePeriod) {
             return undefined
         }
         const { reports } = report
@@ -93,10 +94,12 @@ export const AccountTypesGranularityBalanceLineChartCard = observer(function Acc
                 item[accountType] = amount
 
                 //handle accumulation, pick first number or 0
-                const accAmount = ([acculumulationItem?.[accountType], initItem?.[accountType]].find((n) => n !== undefined) || 0) + amount
-                maxAccAmountTxtLength = Math.max(maxAccAmountTxtLength, valueFormatter(accAmount).length)
-                item[`${accountType}Accumulation`] = accAmount
-                acculumulationItem[accountType] = accAmount
+                if (cumulative) {
+                    const accAmount = ([acculumulationItem?.[accountType], initItem?.[accountType]].find((n) => n !== undefined) || 0) + amount
+                    maxAccAmountTxtLength = Math.max(maxAccAmountTxtLength, valueFormatter(accAmount).length)
+                    item[`${accountType}Accumulation`] = accAmount
+                    acculumulationItem[accountType] = accAmount
+                }
             })
 
             if (time === InitialAccountTransDatetime) {
@@ -133,10 +136,10 @@ export const AccountTypesGranularityBalanceLineChartCard = observer(function Acc
                 {
                     id: 'amount',
                 } as ChartsYAxisProps,
-                {
+                cumulative ? {
                     id: 'accumulation',
-                } as ChartsYAxisProps
-            ] as LineChartProps['yAxis'],
+                } as ChartsYAxisProps : undefined
+            ].filter((a) => !!a) as LineChartProps['yAxis'],
             series: [...accountTypes.map((accountType) => {
                 return {
                     yAxisId: 'amount',
@@ -145,32 +148,33 @@ export const AccountTypesGranularityBalanceLineChartCard = observer(function Acc
                     valueFormatter,
                     color: accountTypeLineColor(accountType, colorScheme),
                 }
-            }), ...accountTypes.map((accountType) => {
+            }), ...(cumulative ? accountTypes.map((accountType) => {
                 return {
                     yAxisId: 'accumulation',
                     dataKey: `${accountType}Accumulation`,
-                    label: accountTypeLabel(accountType) + '*',
+                    label: accountTypeLabel(accountType) + '+',
                     valueFormatter,
                     color: accountTypeAreaColor(accountType, colorScheme),
                     area: true
                 }
-            }) as LineChartProps['series']],
+            }) : []) as LineChartProps['series']],
             margin: {
                 //30 for y axis space
                 left: (maxAmountTxtLength + 1) * 8 /* + 30 */,
-                right: (maxAccAmountTxtLength + 1) * 8,
+                right: cumulative ? (maxAccAmountTxtLength + 1) * 8 : 8,
                 top: 8,
                 // bottom: 4,
             },
             sx: {
-                [`.${axisClasses.left} .${axisClasses.label}`]: {
-                    //25 for y axis space
-                    transform: `translate(-${(maxAmountTxtLength + 1) * 8/* - 25*/}px, 0)`,
-                },
-                [`.${axisClasses.right} .${axisClasses.label}`]: {
-                    //25 for y axis space
-                    transform: `translate(${(maxAmountTxtLength + 1) * 8/* - 25*/}px, 0)`,
-                }
+                //y axis label
+                // [`.${axisClasses.left} .${axisClasses.label}`]: {
+                //     //25 for y axis space
+                //     transform: `translate(-${(maxAmountTxtLength + 1) * 8/* - 25*/}px, 0)`,
+                // },
+                // [`.${axisClasses.right} .${axisClasses.label}`]: {
+                //     //25 for y axis space
+                //     transform: `translate(${(maxAmountTxtLength + 1) * 8/* - 25*/}px, 0)`,
+                // }
             } as SxProps<Theme>,
             slotProps: {
                 legend: {
@@ -181,6 +185,14 @@ export const AccountTypesGranularityBalanceLineChartCard = observer(function Acc
                     labelStyle: {
                         fontSize: 16
                     },
+                    //don't show accumulation in legend
+                    seriesToDisplay: accountTypes.map((accountType) => {
+                        return {
+                            id: accountType,
+                            label: accountTypeLabel(accountType),
+                            color: accountTypeLineColor(accountType, colorScheme),
+                        }
+                    })
                 },
                 axisContent: {
                     sx: {
@@ -192,7 +204,7 @@ export const AccountTypesGranularityBalanceLineChartCard = observer(function Acc
                 noDataOverlay: { message: ll('noData') },
             } as LineChartProps['slotProps']
         }
-    }, [book, report, timePeriod, i18n, fixBalanceFractionDigits, accountTypes, dateFormat, monthFormat, colorScheme])
+    }, [book, report, cumulative, timePeriod, i18n, fixBalanceFractionDigits, accountTypes, dateFormat, monthFormat, colorScheme])
 
     const styles = useMemo(() => {
         return {
@@ -219,11 +231,11 @@ export const AccountTypesGranularityBalanceLineChartCard = observer(function Acc
                 xAxis={chartProps.xAxis}
                 yAxis={chartProps.yAxis}
                 margin={chartProps.margin}
-                sx={chartProps.sx}
+                // sx={chartProps.sx}
                 slotProps={chartProps.slotProps}
                 height={styles.height}
-                rightAxis='amount'
-                leftAxis='accumulation'
+                leftAxis='amount'
+                rightAxis={cumulative ? 'accumulation' : undefined}
             >
                 {chartProps.dataset?.length && chartProps.dataset?.length > 0 && <ChartsReferenceLine
                     y={0}

@@ -98,7 +98,7 @@ export const defaultAccountTypeOrder = [
 // const defaultAccountTypeSet = new Set(defaultAccountTypeOrder)
 
 
-export function accountTypeAreaColor(accountType: AccountType, colorScheme: ColorScheme){
+export function accountTypeBarColor(accountType: AccountType, colorScheme: ColorScheme){
     switch(accountType){
         case "income":
             return colorScheme.incomeContainer
@@ -113,7 +113,7 @@ export function accountTypeAreaColor(accountType: AccountType, colorScheme: Colo
     }
 }
 
-export function accountTypeBarColor(accountType: AccountType, colorScheme: ColorScheme){
+export function accountTypeAreaColor(accountType: AccountType, colorScheme: ColorScheme){
     switch(accountType){
         case "income":
             return colorScheme.incomeContainer

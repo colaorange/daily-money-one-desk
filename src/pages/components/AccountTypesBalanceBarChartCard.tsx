@@ -114,10 +114,11 @@ export const AccountTypesBalanceBarChartCard = observer(function AccountTypeBala
                 // bottom: 4,
             },
             sx: {
-                [`.${axisClasses.left} .${axisClasses.label}`]: {
-                    //25 for y axis space
-                    transform: `translate(-${(maxAmountTxtLength + 1) * 8/* - 25*/}px, 0)`,
-                }
+                // y axis label
+                // [`.${axisClasses.left} .${axisClasses.label}`]: {
+                //     //25 for y axis space
+                //     transform: `translate(-${(maxAmountTxtLength + 1) * 8/* - 25*/}px, 0)`,
+                // }
             } as SxProps<Theme>,
             slotProps: {
                 legend: {
@@ -166,7 +167,7 @@ export const AccountTypesBalanceBarChartCard = observer(function AccountTypeBala
                 xAxis={chartProps.xAxis}
                 yAxis={chartProps.yAxis}
                 margin={chartProps.margin}
-                sx={chartProps.sx}
+                // sx={chartProps.sx}
                 slotProps={chartProps.slotProps}
                 height={styles.height}
                 barLabel={chartProps.barLabel}

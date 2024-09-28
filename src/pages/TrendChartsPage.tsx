@@ -53,6 +53,7 @@ export const TrendPage = observer(function TrendPage(props: TrendPageProps) {
 
     const [allOn, setAllOn] = useState<boolean>()
     const [accountTypesOn, setAccountTypesOn] = useState<Set<AccountType>>(new Set([balanceAccountTypeOrder?.[0] || AccountType.EXPENSE]))
+    const [accumulationOn, setAccumulationOn] = useState<boolean>()
 
     const onToggleAccountTypesOn = useCallback((type: AccountType) => {
         setAccountTypesOn((s) => {
@@ -180,6 +181,11 @@ export const TrendPage = observer(function TrendPage(props: TrendPageProps) {
                         <Typography variant="h5">{ll('desktop.accountTypeBalanceSheet')}</Typography>
                         <div css={utilStyles.flex1} />
                         <FormControlLabel
+                            control={<Switch color="primary" checked={!!accumulationOn} onChange={() => { setAccumulationOn(!accumulationOn) }} />}
+                            label={ll(`desktop.accumulatedAmount`)}
+                            labelPlacement="bottom"
+                        />
+                        <FormControlLabel
                             control={<Switch color="primary" checked={!!allOn} onChange={() => { setAllOn(!allOn) }} />}
                             label={ll(`desktop.allAccountTypes`)}
                             labelPlacement="bottom"
@@ -192,6 +198,7 @@ export const TrendPage = observer(function TrendPage(props: TrendPageProps) {
                         timePeriod={timePeriod}
                         accountTypes={[AccountType.ASSET, AccountType.LIABILITY, AccountType.INCOME, AccountType.EXPENSE, AccountType.OTHER]}
                         report={bookGranularityBalanceReport}
+                        cumulative={accumulationOn}
                         refreshing={processing}
                     />
                 </Grid2>}
@@ -202,6 +209,7 @@ export const TrendPage = observer(function TrendPage(props: TrendPageProps) {
                             timePeriod={timePeriod}
                             accountTypes={[AccountType.ASSET, AccountType.LIABILITY]}
                             report={bookGranularityBalanceReport}
+                            cumulative={accumulationOn}
                             refreshing={processing}
                         />
                     </Grid2>
@@ -211,6 +219,7 @@ export const TrendPage = observer(function TrendPage(props: TrendPageProps) {
                             timePeriod={timePeriod}
                             accountTypes={[AccountType.INCOME, AccountType.EXPENSE]}
                             report={bookGranularityBalanceReport}
+                            cumulative={accumulationOn}
                             refreshing={processing}
                         />
                     </Grid2>
