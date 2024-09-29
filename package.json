@@ -6,9 +6,10 @@
     "scripts": {
         "dev": "vite --host 0.0.0.0 --port 8088",
         "build": "vite build --manifest manifest.json",
+        "server": "http-server --port 8088 dist",
+        "build-server": "yarn build && yarn server",
         "lint": "tsc --noEmit && eslint .",
         "preview": "vite preview",
-        "build-server": "yarn build && http-server --port 8088 dist",
         "//1.": "",
         "syncApi": "ts-node --esm --project ./tsconfig.ts-node.json -r tsconfig-paths/register ./src/cli/syncApi.ts"
     },

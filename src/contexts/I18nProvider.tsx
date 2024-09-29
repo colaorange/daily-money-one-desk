@@ -2,7 +2,9 @@
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment"
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider/LocalizationProvider"
 import i18nextDefault, { i18n as I18nextInstance } from "i18next"
-import moment from 'moment-timezone';
+//it loads large data when use default directly
+// import moment from 'moment-timezone'; 
+import moment from 'moment-timezone/builds/moment-timezone-with-data-10-year-range';
 import { PropsWithChildren, createContext, memo, useMemo } from "react"
 import useApi from "./useApi"
 import { I18nHasLabel, I18nLabel } from "@/types"
@@ -122,7 +124,6 @@ export const I18nProvider = memo(function I18nProvider({ children }: I18nProvide
                 moment.tz.setDefault(preferences?.timeZone);
                 //it is global, we don't need to take care this in moment every where
             }
-
             moment.updateLocale(language, {
                 week: {
                     dow: toMomentDow(preferences.firstDayOfWeek)
