@@ -58,6 +58,10 @@ export const AccountsBalancePieChartCard = observer(function AccountTypeBalanceC
             return a2 - a1
         })
 
+        if (accountAmounts.length === 0) {
+            return null
+        }
+
         function valueFormatter(value: number | null) {
             return `${value !== null ? numberFormat.format(value) : ''}`;
         }
@@ -103,27 +107,32 @@ export const AccountsBalancePieChartCard = observer(function AccountTypeBalanceC
                 position: 'relative'
             }),
             header: css({
-                gap: theme.spacing(1)
+                gap: theme.spacing(1),
+                justifyContent: 'center'
             }),
             height: 300
         }
     }, [theme, appStyles])
 
     return <Card>
-        <CardContent css={styles.content}>
+        <CardContent>
             <Stack direction='row' css={styles.header}>
                 {book && <Typography variant="caption">{book.name}</Typography>}
                 {accountType && <Typography variant="caption" color={colorScheme[accountType]}>{ll(`account.type.${accountType}`)}</Typography>}
                 {timePeriod && <TimePeriodInfo timePeriod={timePeriod} hideGranularity />}
             </Stack>
-            {chartProps ? <PieChart skipAnimation
-                colors={colorScheme.chartColorPalette}
-                series={chartProps.series}
-                slotProps={chartProps.slotProps}
-                height={styles.height}
-            >
-            </PieChart> : <FullLoading />}
-            {chartProps && refreshing && <FullLoading css={utilStyles.absoluteCenter} delay={400}/>}
+            <Stack css={styles.content}>
+                {chartProps === undefined && <FullLoading />}
+                {chartProps === null && <Typography css={utilStyles.vclayout} flex={1}>{ll('noData')}</Typography>}
+                {chartProps && <PieChart skipAnimation
+                    colors={colorScheme.chartColorPalette}
+                    series={chartProps.series}
+                    slotProps={chartProps.slotProps}
+                    height={styles.height}
+                >
+                </PieChart>}
+                {chartProps && refreshing && <FullLoading css={utilStyles.absoluteCenter} delay={400} />}
+            </Stack>
         </CardContent>
     </Card>
 })

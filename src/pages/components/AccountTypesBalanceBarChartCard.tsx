@@ -31,6 +31,7 @@ export const AccountTypesBalanceBarChartCard = observer(function AccountTypeBala
 
     const { colorScheme, appStyles, theme } = useTheme()
     const i18n = useI18n()
+    const { language, label: ll } = i18n
     const { fixBalanceFractionDigits } = usePreferences() || {}
 
     const chartProps = useMemo(() => {
@@ -40,9 +41,7 @@ export const AccountTypesBalanceBarChartCard = observer(function AccountTypeBala
         }
 
         const { accountTypes: reportAccountTypes } = report
-        const { language, label: ll } = i18n
-
-
+        
         const fractionDigits = book.fractionDigits || 0
         const numberFormat = getNumberFormat(language, { maximumFractionDigits: fractionDigits, minimumFractionDigits: fixBalanceFractionDigits ? fractionDigits : undefined })
 
@@ -140,7 +139,7 @@ export const AccountTypesBalanceBarChartCard = observer(function AccountTypeBala
                 noDataOverlay: { message: ll('noData') },
             } as BarChartProps['slotProps']
         }
-    }, [book, report, i18n, fixBalanceFractionDigits, accountTypes, colorScheme])
+    }, [book, report, language, fixBalanceFractionDigits, accountTypes, i18n, ll, colorScheme])
 
     const styles = useMemo(() => {
         return {
@@ -149,36 +148,41 @@ export const AccountTypesBalanceBarChartCard = observer(function AccountTypeBala
                 position: 'relative'
             }),
             header: css({
-                gap: theme.spacing(1)
+                gap: theme.spacing(1),
+                justifyContent: 'center'
             }),
             height: 300
         }
     }, [theme, appStyles])
 
     return <Card>
-        <CardContent css={styles.content}>
+        <CardContent>
             <Stack direction='row' css={styles.header}>
                 {book && <Typography variant="caption">{book.name}</Typography>}
                 {timePeriod && <TimePeriodInfo timePeriod={timePeriod} hideGranularity />}
             </Stack>
-            {chartProps ? <BarChart skipAnimation
-                dataset={chartProps.dataset}
-                series={chartProps.series}
-                xAxis={chartProps.xAxis}
-                yAxis={chartProps.yAxis}
-                margin={chartProps.margin}
-                // sx={chartProps.sx}
-                slotProps={chartProps.slotProps}
-                height={styles.height}
-                barLabel={chartProps.barLabel}
-            >
-                {chartProps.dataset?.length && chartProps.dataset?.length > 0 && <ChartsReferenceLine
-                    y={0}
-                    lineStyle={{ strokeDasharray: '10 5' }}
-                    labelAlign="start"
-                />}
-            </BarChart> : <FullLoading />}
-            {chartProps && refreshing && <FullLoading css={utilStyles.absoluteCenter} delay={400} />}
+            <Stack css={styles.content}>
+                {chartProps === undefined && <FullLoading />}
+                {chartProps === null && <Typography css={utilStyles.vclayout} flex={1}>{ll('noData')}</Typography>}
+                {chartProps && <BarChart skipAnimation
+                    dataset={chartProps.dataset}
+                    series={chartProps.series}
+                    xAxis={chartProps.xAxis}
+                    yAxis={chartProps.yAxis}
+                    margin={chartProps.margin}
+                    // sx={chartProps.sx}
+                    slotProps={chartProps.slotProps}
+                    height={styles.height}
+                    barLabel={chartProps.barLabel}
+                >
+                    <ChartsReferenceLine
+                        y={0}
+                        lineStyle={{ strokeDasharray: '10 5' }}
+                        labelAlign="start"
+                    />
+                </BarChart>}
+                {chartProps && refreshing && <FullLoading css={utilStyles.absoluteCenter} delay={400} />}
+            </Stack>
         </CardContent>
     </Card>
 })

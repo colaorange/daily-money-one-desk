@@ -13,7 +13,6 @@ import { Account, AccountType, Book, BookBalanceReport } from "@client/model";
 import { Box, Card, CardContent, css, Stack, SxProps, Theme, Typography } from "@mui/material";
 import { BarChartProps, ChartsReferenceLine, ChartsXAxisProps } from "@mui/x-charts";
 import { BarChart } from '@mui/x-charts/BarChart';
-import { axisClasses } from '@mui/x-charts/ChartsAxis';
 import { observer } from "mobx-react-lite";
 import { PropsWithChildren, useMemo } from "react";
 
@@ -31,7 +30,7 @@ export const AccountsBalanceBarChartCard = observer(function AccountTypeBalanceC
 
     const { colorScheme, appStyles, theme } = useTheme()
     const i18n = useI18n()
-    const { label: ll } = i18n
+    const { language, label: ll } = i18n
     const { fixBalanceFractionDigits, hideEmptyBalance } = usePreferences() || {}
 
     const chartProps = useMemo(() => {
@@ -39,7 +38,7 @@ export const AccountsBalanceBarChartCard = observer(function AccountTypeBalanceC
             return undefined
         }
         const { accounts: reportAccounts } = report
-        const { language } = i18n
+        
 
         const fractionDigits = book.fractionDigits || 0
         const numberFormat = getNumberFormat(language, { maximumFractionDigits: fractionDigits, minimumFractionDigits: fixBalanceFractionDigits ? fractionDigits : undefined })
@@ -65,6 +64,10 @@ export const AccountsBalanceBarChartCard = observer(function AccountTypeBalanceC
             }
         })
 
+        if (accountAmounts.length === 0) {
+            return null
+        }
+
         accountAmounts.sort(({ amount: a1 }, { amount: a2 }) => {
             return a2 - a1
         })
@@ -75,9 +78,9 @@ export const AccountsBalanceBarChartCard = observer(function AccountTypeBalanceC
             return `${value !== null ? numberFormat.format(value) : ''}`;
         }
 
-        const dataset = [{
+        const dataset = (accountAmounts.length > 0 ? [{
             type: 'amount'
-        }] as BarChartProps['dataset']
+        }] : []) as BarChartProps['dataset']
 
         const maxAmountTxtLength = Math.max(...accountAmounts.map(({ amount }) => valueFormatter(amount).length))
 
@@ -87,7 +90,7 @@ export const AccountsBalanceBarChartCard = observer(function AccountTypeBalanceC
 
         return {
             dataset,
-            xAxis: [
+            xAxis: (accountAmounts.length > 0 ? [
                 {
                     scaleType: 'band',
                     dataKey: 'type',
@@ -95,7 +98,7 @@ export const AccountsBalanceBarChartCard = observer(function AccountTypeBalanceC
                         return ctx.location === 'tooltip' ? `${ll('balance.amount')}${currencySymbol ? ` (${currencySymbol})` : ''}` : ''
                     },
                 } as ChartsXAxisProps,
-            ] as BarChartProps['xAxis'],
+            ] : []) as BarChartProps['xAxis'],
             series: accountAmounts.map(({ account }) => {
                 return {
                     dataKey: account.id,
@@ -127,34 +130,36 @@ export const AccountsBalanceBarChartCard = observer(function AccountTypeBalanceC
                             textAlign: 'right'
                         }
                     }
-                },
-                noDataOverlay: { message: ll('noData') },
-            } as BarChartProps['slotProps']
+                }
+            } as BarChartProps['slotProps'],
         }
-    }, [accountType, bookAccounts, fixBalanceFractionDigits, hideEmptyBalance, i18n, ll, book, report])
+    }, [accountType, bookAccounts, fixBalanceFractionDigits, hideEmptyBalance, i18n, language, ll, book, report])
 
     const styles = useMemo(() => {
         return {
             content: css(utilStyles.vlayout, appStyles.barChart, {
                 minHeight: 300,
-                position: 'relative'
+                position: 'relative',
             }),
             header: css({
-                gap: theme.spacing(1)
+                gap: theme.spacing(1),
+                justifyContent: 'center'
             }),
             height: 300
         }
     }, [theme, appStyles])
 
     return <Card>
-        <CardContent css={styles.content}>
+        <CardContent>
             <Stack direction='row' css={styles.header}>
                 {book && <Typography variant="caption">{book.name}</Typography>}
                 {accountType && <Typography variant="caption" color={colorScheme[accountType]}>{ll(`account.type.${accountType}`)}</Typography>}
                 {timePeriod && <TimePeriodInfo timePeriod={timePeriod} hideGranularity />}
             </Stack>
-            {chartProps ? <Stack alignSelf={'stretch'}>
-                <BarChart skipAnimation
+            <Stack css={styles.content}>
+                {chartProps === undefined && <FullLoading />}
+                {chartProps === null && <Typography css={utilStyles.vclayout} flex={1}>{ll('noData')}</Typography>}
+                {chartProps && <BarChart skipAnimation
                     colors={colorScheme.chartColorPalette}
                     dataset={chartProps.dataset}
                     xAxis={chartProps.xAxis}
@@ -164,14 +169,14 @@ export const AccountsBalanceBarChartCard = observer(function AccountTypeBalanceC
                     slotProps={chartProps.slotProps}
                     height={styles.height}
                 >
-                    {chartProps.dataset?.length && chartProps.dataset?.length > 0 && <ChartsReferenceLine
+                    <ChartsReferenceLine
                         y={0}
                         lineStyle={{ strokeDasharray: '10 5' }}
                         labelAlign="start"
-                    />}
-                </BarChart>
-            </Stack> : <FullLoading />}
-            {chartProps && refreshing && <FullLoading css={utilStyles.absoluteCenter} delay={400} />}
+                    />
+                </BarChart>}
+                {chartProps && refreshing && <FullLoading css={utilStyles.absoluteCenter} delay={400} />}
+            </Stack>
         </CardContent>
     </Card>
 })
