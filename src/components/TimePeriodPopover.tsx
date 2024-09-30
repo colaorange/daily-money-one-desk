@@ -1,14 +1,14 @@
 import { useI18nLabel } from "@/contexts/useI18n";
 import useTheme from "@/contexts/useTheme";
 import { TimeGranularity, TimePeriod } from "@/types";
-import { Button, css, Divider, FormControlLabel, Popover, PopoverProps, Stack, Switch } from "@mui/material";
+import { Button, css, Divider, FormControlLabel, FormHelperText, Popover, PopoverProps, Stack, Switch } from "@mui/material";
 
 import { DEFAULT_DATE_FORMAT } from "@/constants";
 import { usePreferences } from "@/contexts/useApi";
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import moment from "moment";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
-import { FaAngleDoubleLeft, FaAngleDoubleRight, FaFastBackward, FaFastForward, FaStepBackward, FaStepForward } from "react-icons/fa";
+import { FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";
 import { FaAngleLeft, FaAngleRight, FaStop } from "react-icons/fa6";
 import TimeGranularitySelect from "./TimeGranularitySelect";
 import TimePeriodShiftButton from "./TimePeriodShiftButton";
@@ -34,6 +34,7 @@ type StateMix = {
     mStart: moment.Moment | null
     mEnd: moment.Moment
     granularity: TimeGranularity
+    error?: string
 }
 
 export const TimePeriodPopover = memo(function TimePeriodPopover({ timePeriod, hideGranularity, granularityModes = Object.values(TimeGranularity), onTimePeriodClose, ...rest }: TimePeriodPopoverProps) {
@@ -84,12 +85,20 @@ export const TimePeriodPopover = memo(function TimePeriodPopover({ timePeriod, h
             granularity
         }
 
+        if (granularity === TimeGranularity.DAILY &&
+            (closeTimePeriod.start === null || Math.abs(moment(closeTimePeriod.end).diff(moment(closeTimePeriod.start), 'day')) > 90)) {
+            setStateMix((s) => {
+                return { ...s, error: ll('message.dayGranularityRangeInvalid', { max: 90 }) }
+            })
+            return
+        }
+
         if (onTimePeriodClose) {
             onTimePeriodClose(closeTimePeriod)
         } else {
             resetState(closeTimePeriod)
         }
-    }, [onTimePeriodClose, resetState])
+    }, [ll, onTimePeriodClose, resetState])
 
     const onClose = useCallback(() => {
         resetOrClose(stateMix)
@@ -100,7 +109,8 @@ export const TimePeriodPopover = memo(function TimePeriodPopover({ timePeriod, h
             setStateMix((s) => {
                 return {
                     ...s,
-                    granularity
+                    granularity,
+                    error: ''
                 }
             })
         }
@@ -167,7 +177,8 @@ export const TimePeriodPopover = memo(function TimePeriodPopover({ timePeriod, h
         setStateMix((s) => {
             return {
                 ...s,
-                mStart: m?.isValid() ? m : s.mStart
+                mStart: m?.isValid() ? m : s.mStart,
+                error: ''
             }
         })
     }, [])
@@ -175,7 +186,8 @@ export const TimePeriodPopover = memo(function TimePeriodPopover({ timePeriod, h
         setStateMix((s) => {
             return {
                 ...s,
-                mEnd: m?.isValid() ? m : s.mEnd
+                mEnd: m?.isValid() ? m : s.mEnd,
+                error: ''
             }
         })
     }, [])
@@ -187,6 +199,7 @@ export const TimePeriodPopover = memo(function TimePeriodPopover({ timePeriod, h
                 ...s,
                 fromInit,
                 mStart: (!fromInit && !s.mStart) ? s.mEnd.clone().add(-1, 'month').add(-1, 'day').startOf('day') : s.mStart,
+                error: ''
             }
         })
     }, [])
@@ -239,7 +252,7 @@ export const TimePeriodPopover = memo(function TimePeriodPopover({ timePeriod, h
         {...rest}
     >
         <Stack direction='column' css={styles.popover} sx={{
-            maxWidth: {
+            width: {
                 md: '400px',
                 xs: '60vw',
             }
@@ -278,6 +291,9 @@ export const TimePeriodPopover = memo(function TimePeriodPopover({ timePeriod, h
                 </TimePeriodShiftButton>
             </Stack>
             {!hideGranularity && <TimeGranularitySelect value={stateMix.granularity} onChange={onChangeGranularity} candidates={granularityModes} />}
+            {stateMix.error && <Stack direction='column'>
+                <FormHelperText error>{stateMix.error}</FormHelperText>
+            </Stack>}
             <Divider flexItem css={styles.divider} />
             <Stack alignSelf={'flex-end'} direction={'row'}>
                 <Button css={styles.button} onClick={onClose}>{ll('action.close')}</Button>

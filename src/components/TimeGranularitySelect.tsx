@@ -14,7 +14,7 @@ export type TimeGranularitySelectProps = {
 
 export const TimeGranularitySelect = memo(function TimeGranularitySelect({ value, label, candidates = Object.values(TimeGranularity), onChange, sx = { minWidth: { sm: 100 } } }: TimeGranularitySelectProps) {
     const ll = useI18nLabel()
-    const timeGranularityLabel = label || ll('desktop.timeGranularity')
+    const timeGranularityLabel = label || ll('timeGranularity')
     return <FormControl>
         <InputLabel>{timeGranularityLabel}</InputLabel>
         <Select
@@ -27,7 +27,7 @@ export const TimeGranularitySelect = memo(function TimeGranularitySelect({ value
             } : undefined}
         >
             {candidates?.map((b) => {
-                return <MenuItem key={b} value={b}>{ll(`desktop.timeGranularity.${b}`)}</MenuItem>
+                return <MenuItem key={b} value={b}>{ll(`timeGranularity.${b}`)}</MenuItem>
             })}
         </Select>
     </FormControl>

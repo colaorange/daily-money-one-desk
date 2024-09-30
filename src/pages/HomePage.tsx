@@ -14,7 +14,7 @@ import MainTemplate from "@/templates/MainTemplate";
 import { TimePeriod } from "@/types";
 import { runAsync } from "@/utils";
 import utilStyles from "@/utilStyles";
-import { AccountType, Book, BookBalanceReport } from "@client/model";
+import { AccountType, Book, BookBalanceReport, TimeGranularity } from "@client/model";
 import { css, Divider, FormControlLabel, Grid2, Stack, Switch, SxProps, Theme, Typography } from '@mui/material';
 import { isEqual } from "lodash";
 import { observer } from "mobx-react-lite";
@@ -161,23 +161,23 @@ export const HomePage = observer(function HomePage(props: HomePageProps) {
         }
     }, [theme])
 
-    const yearShift = timePeriod.start && Math.abs(moment(timePeriod.start).diff(timePeriod.end, 'day')) >= 364
+    const yearShift = timePeriod.granularity === TimeGranularity.YEARLY || (timePeriod.start && Math.abs(moment(timePeriod.start).diff(timePeriod.end, 'day')) >= 364)
 
     return <MainTemplate>
         <AppToolbar sxGap={1}>
             <BookSelect bookId={currentBookId} books={books} onBookChange={onBookChange} css={appStyles.toolbarSelect} disabled={processing} />
             <span css={utilStyles.flex1} />
-            <TimePeriodInfo timePeriod={timePeriod} hideGranularity />
+            <TimePeriodInfo timePeriod={timePeriod}/>
             <TimePeriodShiftButton varient={yearShift ? "previousYear" : "previousMonth"} timePeriod={timePeriod} onShift={onTimePeriodChange} disabled={processing} />
             <TimePeriodShiftButton varient={yearShift ? "nextYear" : "nextMonth"} timePeriod={timePeriod} onShift={onTimePeriodChange} disabled={processing} />
-            <TimePeriodPopoverButton timePeriod={timePeriod} onTimePeriodChange={onTimePeriodChange} hideGranularity disabled={processing} />
+            <TimePeriodPopoverButton timePeriod={timePeriod} onTimePeriodChange={onTimePeriodChange} disabled={processing} />
         </AppToolbar>
         <Divider flexItem />
         {book && bookAccounts ? <>
             <Grid2 container css={styles.container} sx={styles.containerSx} spacing={2}>
                 <Grid2 size={12}>
                     <Stack css={styles.titleBar}>
-                        <Typography variant="h5">{ll('desktop.accountTypeBalanceSheet')}</Typography>
+                        <Typography variant="h5">{ll('desktop.balanceSheets')}</Typography>
                         <div css={utilStyles.flex1} />
                         <FormControlLabel
                             control={<Switch color="primary" checked={!!allOn} onChange={() => { setAllOn(!allOn) }} />}
@@ -220,7 +220,7 @@ export const HomePage = observer(function HomePage(props: HomePageProps) {
                 </Grid2>
                 <Grid2 size={12}>
                     <Stack css={styles.titleBar}>
-                        <Typography variant="h5">{ll('desktop.accountBalanceSheet')}</Typography>
+                        <Typography variant="h5">{ll('desktop.accountSummary')}</Typography>
                         <div css={utilStyles.flex1} />
                         <Stack direction={'row'}>
                             {(balanceAccountTypeOrder || defaultAccountTypeOrder).map((type) => {
@@ -260,7 +260,7 @@ export const HomePage = observer(function HomePage(props: HomePageProps) {
                     </Fragment>
                 })}
             </Grid2>
-        </>: <FullLoading />}
+        </> : <FullLoading />}
     </MainTemplate>
 })
 

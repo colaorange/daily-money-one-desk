@@ -14,7 +14,7 @@ import MainTemplate from "@/templates/MainTemplate";
 import { TimePeriod } from "@/types";
 import { runAsync } from "@/utils";
 import utilStyles from "@/utilStyles";
-import { AccountType, Book, BookGranularityBalanceReport } from "@client/model";
+import { AccountType, Book, BookGranularityBalanceReport, TimeGranularity } from "@client/model";
 import { css, Divider, FormControlLabel, Grid2, Stack, Switch, SxProps, Theme, Typography } from '@mui/material';
 import { isEqual } from "lodash";
 import { observer } from "mobx-react-lite";
@@ -162,7 +162,7 @@ export const TrendPage = observer(function TrendPage(props: TrendPageProps) {
         }
     }, [theme])
 
-    const yearShift = timePeriod.start && Math.abs(moment(timePeriod.start).diff(timePeriod.end, 'day')) >= 364
+    const yearShift = timePeriod.granularity === TimeGranularity.YEARLY || (timePeriod.start && Math.abs(moment(timePeriod.start).diff(timePeriod.end, 'day')) >= 364)
 
     return <MainTemplate>
         <AppToolbar sxGap={1}>
@@ -178,7 +178,7 @@ export const TrendPage = observer(function TrendPage(props: TrendPageProps) {
             <Grid2 container css={styles.container} sx={styles.containerSx} spacing={2}>
                 <Grid2 size={12}>
                     <Stack css={styles.titleBar}>
-                        <Typography variant="h5">{ll('desktop.accountTypeBalanceSheet')}</Typography>
+                        <Typography variant="h5">{ll('desktop.accountTypeTrend')}</Typography>
                         <div css={utilStyles.flex1} />
                         <FormControlLabel
                             control={<Switch color="primary" checked={!!accumulationOn} onChange={() => { setAccumulationOn(!accumulationOn) }} />}
@@ -229,7 +229,7 @@ export const TrendPage = observer(function TrendPage(props: TrendPageProps) {
                 </Grid2>
                 <Grid2 size={12}>
                     <Stack css={styles.titleBar}>
-                        <Typography variant="h5">{ll('desktop.accountBalanceSheet')}</Typography>
+                        <Typography variant="h5">{ll('desktop.accountTrend')}</Typography>
                         <div css={utilStyles.flex1} />
                         <Stack direction={'row'}>
                             {(balanceAccountTypeOrder || defaultAccountTypeOrder).map((type) => {

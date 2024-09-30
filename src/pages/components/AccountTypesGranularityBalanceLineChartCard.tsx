@@ -12,7 +12,7 @@ import { getNumberFormat } from "@/utils";
 import utilStyles from "@/utilStyles";
 import { AccountType, Balance, BalanceReport, Book, BookGranularityBalanceReport } from "@client/model";
 import { Card, CardContent, css, Stack, SxProps, Theme, Typography } from "@mui/material";
-import { ChartsReferenceLine, ChartsXAxisProps, ChartsYAxisProps, LineChartProps } from "@mui/x-charts";
+import { ChartsReferenceLine, chartsTooltipClasses, ChartsXAxisProps, ChartsYAxisProps, LineChartProps } from "@mui/x-charts";
 import { axisClasses } from '@mui/x-charts/ChartsAxis';
 import { LineChart } from '@mui/x-charts/LineChart';
 import { observer } from "mobx-react-lite";
@@ -138,6 +138,7 @@ export const AccountTypesGranularityBalanceLineChartCard = observer(function Acc
                 } as ChartsYAxisProps,
                 cumulative ? {
                     id: 'accumulation',
+                    label: ll('desktop.accumulatedAmount')
                 } as ChartsYAxisProps : undefined
             ].filter((a) => !!a) as LineChartProps['yAxis'],
             series: [...accountTypes.map((accountType) => {
@@ -161,7 +162,7 @@ export const AccountTypesGranularityBalanceLineChartCard = observer(function Acc
             margin: {
                 //30 for y axis space
                 left: (maxAmountTxtLength + 1) * 8 /* + 30 */,
-                right: cumulative ? (maxAccAmountTxtLength + 1) * 8 : 8,
+                right: cumulative ? (maxAccAmountTxtLength + 1) * 8 + 30 : 8,
                 top: 8,
                 // bottom: 4,
             },
@@ -171,10 +172,10 @@ export const AccountTypesGranularityBalanceLineChartCard = observer(function Acc
                 //     //25 for y axis space
                 //     transform: `translate(-${(maxAmountTxtLength + 1) * 8/* - 25*/}px, 0)`,
                 // },
-                // [`.${axisClasses.right} .${axisClasses.label}`]: {
-                //     //25 for y axis space
-                //     transform: `translate(${(maxAmountTxtLength + 1) * 8/* - 25*/}px, 0)`,
-                // }
+                [`.${axisClasses.right} .${axisClasses.label}`]: {
+                    //25 for y axis space
+                    transform: `translate(${(maxAmountTxtLength + 1) * 8 - 25}px, 0)`,
+                }
             } as SxProps<Theme>,
             slotProps: {
                 legend: {
@@ -196,7 +197,7 @@ export const AccountTypesGranularityBalanceLineChartCard = observer(function Acc
                 },
                 axisContent: {
                     sx: {
-                        ['.MuiChartsTooltip-valueCell']: {
+                        [`.${chartsTooltipClasses.valueCell}`]: {
                             textAlign: 'right'
                         }
                     }
@@ -235,7 +236,7 @@ export const AccountTypesGranularityBalanceLineChartCard = observer(function Acc
                     xAxis={chartProps.xAxis}
                     yAxis={chartProps.yAxis}
                     margin={chartProps.margin}
-                    // sx={chartProps.sx}
+                    sx={chartProps.sx}
                     slotProps={chartProps.slotProps}
                     height={styles.height}
                     leftAxis='amount'

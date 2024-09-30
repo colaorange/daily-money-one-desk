@@ -11,7 +11,7 @@ import { getNumberFormat } from "@/utils";
 import utilStyles from "@/utilStyles";
 import { AccountType, Balance, Book, BookBalanceReport } from "@client/model";
 import { Card, CardContent, css, Stack, SxProps, Theme, Typography } from "@mui/material";
-import { BarChartProps, ChartsReferenceLine, ChartsXAxisProps, ChartsYAxisProps } from "@mui/x-charts";
+import { BarChartProps, ChartsReferenceLine, chartsTooltipClasses, ChartsXAxisProps, ChartsYAxisProps } from "@mui/x-charts";
 import { BarChart, BarItem } from '@mui/x-charts/BarChart';
 import { axisClasses } from '@mui/x-charts/ChartsAxis';
 import { observer } from "mobx-react-lite";
@@ -131,7 +131,7 @@ export const AccountTypesBalanceBarChartCard = observer(function AccountTypeBala
                 },
                 axisContent: {
                     sx: {
-                        ['.MuiChartsTooltip-valueCell']: {
+                        [`.${chartsTooltipClasses.valueCell}`]: {
                             textAlign: 'right'
                         }
                     }
@@ -170,7 +170,7 @@ export const AccountTypesBalanceBarChartCard = observer(function AccountTypeBala
                     xAxis={chartProps.xAxis}
                     yAxis={chartProps.yAxis}
                     margin={chartProps.margin}
-                    // sx={chartProps.sx}
+                    sx={chartProps.sx}
                     slotProps={chartProps.slotProps}
                     height={styles.height}
                     barLabel={chartProps.barLabel}

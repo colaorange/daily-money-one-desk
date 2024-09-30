@@ -63,7 +63,7 @@ export const TimePeriodInfo = memo(function TimePeriodInfo({ timePeriod, hideGra
             <Typography variant="caption" css={styles.text} >-</Typography>
             <Typography variant="caption" css={styles.text} >{endLabel}</Typography>
         </Stack>
-        {!hideGranularity && <Typography variant="caption" css={styles.text} >{ll('desktop.timeGranularity')} : {ll(`desktop.timeGranularity.${granularity}`)}</Typography>}
+        {!hideGranularity && <Typography variant="caption" css={styles.text} >{ll('timeGranularity')} : {ll(`timeGranularity.${granularity}`)}</Typography>}
     </Stack>
 })
 
