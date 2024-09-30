@@ -56,3 +56,9 @@ export type TimePeriod = {
     end: number,
     granularity: TimeGranularity
 }
+
+export enum AccumulationType {
+    NONE = 'none',
+    NORAML = 'normal',
+    PLUS_INIT = 'plus-init'
+}

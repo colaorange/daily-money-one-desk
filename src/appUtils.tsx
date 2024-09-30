@@ -98,8 +98,8 @@ export const defaultAccountTypeOrder = [
 // const defaultAccountTypeSet = new Set(defaultAccountTypeOrder)
 
 
-export function accountTypeBarColor(accountType: AccountType, colorScheme: ColorScheme){
-    switch(accountType){
+export function accountTypeBarColor(accountType: AccountType, colorScheme: ColorScheme) {
+    switch (accountType) {
         case "income":
             return colorScheme.incomeContainer
         case "asset":
@@ -113,8 +113,8 @@ export function accountTypeBarColor(accountType: AccountType, colorScheme: Color
     }
 }
 
-export function accountTypeAreaColor(accountType: AccountType, colorScheme: ColorScheme){
-    switch(accountType){
+export function accountTypeAreaColor(accountType: AccountType, colorScheme: ColorScheme) {
+    switch (accountType) {
         case "income":
             return colorScheme.incomeContainer
         case "asset":
@@ -128,8 +128,8 @@ export function accountTypeAreaColor(accountType: AccountType, colorScheme: Colo
     }
 }
 
-export function accountTypeLineColor(accountType: AccountType, colorScheme: ColorScheme){
-    switch(accountType){
+export function accountTypeLineColor(accountType: AccountType, colorScheme: ColorScheme) {
+    switch (accountType) {
         case "income":
             return colorScheme.onIncomeContainer
         case "asset":
@@ -141,4 +141,10 @@ export function accountTypeLineColor(accountType: AccountType, colorScheme: Colo
         case "other":
             return colorScheme.onOtherContainer
     }
+}
+
+export function pickPaletteColor(index: number, colorScheme: ColorScheme, processor?: (color: string) => string) {
+    const palette = colorScheme.chartColorPalette
+    const color = palette[index % palette.length];
+    return processor ? processor(color) : color
 }

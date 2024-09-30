@@ -175,7 +175,7 @@ export const AccountsBalanceBarChartCard = observer(function AccountTypeBalanceC
                         labelAlign="start"
                     />
                 </BarChart>}
-                {chartProps && refreshing && <FullLoading css={utilStyles.absoluteCenter} delay={400} />}
+                {refreshing && <FullLoading css={utilStyles.absoluteCenter} delay={400} />}
             </Stack>
         </CardContent>
     </Card>

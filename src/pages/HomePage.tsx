@@ -143,21 +143,7 @@ export const HomePage = observer(function HomePage(props: HomePageProps) {
                 sm: 12,
                 md: 12,
                 xl: 12
-            },
-            fullTileSx: {
-                height: {
-                    xs: 0,
-                    sm: 0,
-                    md: 'auto',
-                    xl: 'auto',
-                },
-                overflow: {
-                    xs: 'hidden',
-                    sm: 'hidden',
-                    md: 'auto',
-                    xl: 'auto',
-                }
-            },
+            }
         }
     }, [theme])
 
@@ -183,10 +169,11 @@ export const HomePage = observer(function HomePage(props: HomePageProps) {
                             control={<Switch color="primary" checked={!!allOn} onChange={() => { setAllOn(!allOn) }} />}
                             label={ll(`desktop.allAccountTypes`)}
                             labelPlacement="bottom"
+                            slotProps={{ typography: { variant: 'caption' } }}
                         />
                     </Stack>
                 </Grid2>
-                {allOn && <Grid2 size={styles.fullTileSize} sx={styles.fullTileSx}>
+                {allOn && <Grid2 size={styles.fullTileSize}>
                     <AccountTypesBalanceBarChartCard
                         book={book}
                         timePeriod={timePeriod}
@@ -229,6 +216,7 @@ export const HomePage = observer(function HomePage(props: HomePageProps) {
                                         control={<Switch color="primary" checked={accountTypesOn.has(type)} onChange={() => { onToggleAccountTypesOn(type) }} />}
                                         label={ll(`account.type.${type}`)}
                                         labelPlacement="bottom"
+                                        slotProps={{ typography: { variant: 'caption' } }}
                                     />
                                 </Fragment>
                             })}

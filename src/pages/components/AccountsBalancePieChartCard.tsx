@@ -131,7 +131,7 @@ export const AccountsBalancePieChartCard = observer(function AccountTypeBalanceC
                     height={styles.height}
                 >
                 </PieChart>}
-                {chartProps && refreshing && <FullLoading css={utilStyles.absoluteCenter} delay={400} />}
+                {refreshing && <FullLoading css={utilStyles.absoluteCenter} delay={400} />}
             </Stack>
         </CardContent>
     </Card>

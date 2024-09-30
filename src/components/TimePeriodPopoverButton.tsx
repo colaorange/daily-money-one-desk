@@ -29,7 +29,7 @@ export const TimePeriodPopoverButton = memo(function TimePeriodPopoverButton({ t
     }, [onTimePeriodChange])
 
     return <Box>
-        <IconButton size="small" aria-label="menu" css={appStyles.outlineIconButton} onClick={onClick} disabled={disabled}>
+        <IconButton size="small" css={appStyles.outlineIconButton} onClick={onClick} disabled={disabled}>
             <FaCalendarDays />
         </IconButton>
 

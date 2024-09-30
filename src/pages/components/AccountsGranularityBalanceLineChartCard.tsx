@@ -1,6 +1,7 @@
 
 
-import { accountTypeAreaColor, accountTypeFactor, accountTypeLineColor, toCurrencySymbol } from "@/appUtils";
+import { accountTypeFactor, pickPaletteColor, toCurrencySymbol } from "@/appUtils";
+import AccountsPopoverButton from "@/components/AccountsPopoverButton";
 import { FullLoading } from "@/components/FullLoading";
 import TimePeriodInfo from "@/components/TimePeriodInfo";
 import { InitialAccountTransDatetime } from "@/constants";
@@ -10,18 +11,20 @@ import useTheme from "@/contexts/useTheme";
 import { AccumulationType, TimeGranularity, TimePeriod } from "@/types";
 import { getNumberFormat } from "@/utils";
 import utilStyles from "@/utilStyles";
-import { AccountType, Balance, BalanceReport, Book, BookGranularityBalanceReport } from "@client/model";
-import { Card, CardContent, css, Stack, SxProps, Theme, Typography } from "@mui/material";
+import { Account, AccountType, BalanceReport, Book, BookGranularityBalanceReport } from "@client/model";
+import { Card, CardContent, CardHeader, css, Stack, SxProps, Theme, Typography } from "@mui/material";
 import { ChartsReferenceLine, chartsTooltipClasses, ChartsXAxisProps, ChartsYAxisProps, LineChartProps } from "@mui/x-charts";
 import { axisClasses } from '@mui/x-charts/ChartsAxis';
 import { LineChart } from '@mui/x-charts/LineChart';
+import Color from "color";
 import { observer } from "mobx-react-lite";
 import moment from "moment";
-import { PropsWithChildren, useMemo } from "react";
+import { PropsWithChildren, useMemo, useState } from "react";
 
-export type AccountTypesGranularityBalanceLineChartCardProps = PropsWithChildren<{
+export type AccountsGranularityBalanceLineChartCardProps = PropsWithChildren<{
     book: Book
-    accountTypes: AccountType[]
+    accountType: AccountType
+    bookAccounts: Account[]
 
     timePeriod?: TimePeriod
     report?: BookGranularityBalanceReport
@@ -32,16 +35,21 @@ export type AccountTypesGranularityBalanceLineChartCardProps = PropsWithChildren
 type DatasetItem = {
     time?: number
 } & {
-    [key in AccountType]?: number
+    [key: string]: number
 }
 
-export const AccountTypesGranularityBalanceLineChartCard = observer(function AccountTypesGranularityBalanceLineChartCard({ book, report, accountTypes, timePeriod, refreshing, accumulationType }: AccountTypesGranularityBalanceLineChartCardProps) {
-
+export const AccountsGranularityBalanceLineChartCard = observer(function AccountsGranularityBalanceLineChartCard({ book, report, accountType, bookAccounts, timePeriod, refreshing, accumulationType }: AccountsGranularityBalanceLineChartCardProps) {
 
     const { colorScheme, appStyles, theme } = useTheme()
     const i18n = useI18n()
     const { language, label: ll } = i18n
-    const { fixBalanceFractionDigits, monthFormat, dateFormat } = usePreferences() || {}
+    const { fixBalanceFractionDigits, monthFormat, dateFormat, hideEmptyBalance } = usePreferences() || {}
+
+    const typeAccounts = useMemo(() => {
+        return bookAccounts.filter((a) => a.type === accountType)
+    }, [accountType, bookAccounts])
+
+    const [specificAccountIds, setSpecificAccountIds] = useState<Set<string>>(new Set())
 
     const chartProps = useMemo(() => {
         if (!report || !timePeriod) {
@@ -54,10 +62,6 @@ export const AccountTypesGranularityBalanceLineChartCard = observer(function Acc
 
         const currencySymbol = book.symbol || toCurrencySymbol(i18n, book.currency || '')
 
-        function accountTypeLabel(type: string) {
-            return ll(`account.type.${type}`)
-        }
-
         function valueFormatter(value: number | null) {
             return `${value !== null ? numberFormat.format(value) : ''}`;
         }
@@ -68,42 +72,68 @@ export const AccountTypesGranularityBalanceLineChartCard = observer(function Acc
 
         let initItem: DatasetItem
         const accItem: DatasetItem = {
-            asset: 0,
-            expense: 0,
-            liability: 0,
-            income: 0,
-            other: 0,
         }
+
+        const accountIdsToShow = new Set<string>()
 
         Object.keys(reports).map((key) => {
             const report: BalanceReport = reports[key]
 
             const time = parseInt(key)
-            const { accountTypes: reportAccountTypes } = report
-            const accountTypeAmounts = accountTypes?.map((accountType) => {
-                const balance = reportAccountTypes[accountType] as Balance | undefined
-                const amount = !balance ? 0 : (balance.depositsAmount - balance.withdrawalsAmount) * accountTypeFactor(accountType)
-                return { accountType, amount }
-            })
+            const { accounts: reportAccounts } = report
+
+            // const accountAmounts: { account: Account, amount: number }[] = []
 
             const item: DatasetItem = {
                 time
             }
-            accountTypeAmounts.forEach(({ accountType, amount }) => {
-                maxAmountTxtLength = Math.max(maxAmountTxtLength, valueFormatter(amount).length)
-                item[accountType] = amount
 
-                //handle accumulation, pick first number or 0
-                if (accumulationType !== AccumulationType.NONE) {
-                    if (time === InitialAccountTransDatetime && accumulationType !== AccumulationType.PLUS_INIT) {
-                        //ignore init
-                        return
+            typeAccounts.filter((a) => (specificAccountIds.size === 0 || specificAccountIds.has(a.id))).forEach((account) => {
+                const accountBalance = reportAccounts[account.id]
+                if (accountBalance) {
+                    const amount = (accountBalance.depositsAmount - accountBalance.withdrawalsAmount) * accountTypeFactor(accountType)
+                    // if !(account is hidden and amount is zero)
+                    if (!(account.hidden && amount === 0)) {
+                        accountIdsToShow.add(account.id)
+                        item[account.id] = amount
+                        maxAmountTxtLength = Math.max(maxAmountTxtLength, valueFormatter(amount).length)
+
+                        //handle accumulation, pick first number or 0
+                        if (accumulationType !== AccumulationType.NONE) {
+                            if (time === InitialAccountTransDatetime && accumulationType !== AccumulationType.PLUS_INIT) {
+                                //ignore init
+                                return
+                            }
+                            const accAmount = (accItem?.[account.id] || 0) + amount
+                            maxAccAmountTxtLength = Math.max(maxAccAmountTxtLength, valueFormatter(accAmount).length)
+                            item[`${account.id}-Accumulation`] = accAmount
+                            accItem[account.id] = accAmount
+                        }
                     }
-
-                    const accAmount = (accItem?.[accountType] || 0) + amount
-                    maxAccAmountTxtLength = Math.max(maxAccAmountTxtLength, valueFormatter(accAmount).length)
-                    item[`${accountType}-Accumulation`] = accAmount
-                    accItem[accountType] = accAmount
+                } else if (!hideEmptyBalance && !account.hidden) {
+                    accountIdsToShow.add(account.id)
+                    item[account.id] = 0
+                    if (accumulationType !== AccumulationType.NONE) {
+                        if (time === InitialAccountTransDatetime && accumulationType !== AccumulationType.PLUS_INIT) {
+                            //ignore init
+                            return
+                        }
+                        const accAmount = (accItem?.[account.id] || 0)
+                        item[`${account.id}-Accumulation`] = accAmount
+                        accItem[account.id] = accAmount
+                    }
+                } else {
+                    //prevent chart compaint not number type for empty filed in series
+                    item[account.id] = 0
+                    if (accumulationType !== AccumulationType.NONE) {
+                        if (time === InitialAccountTransDatetime && accumulationType !== AccumulationType.PLUS_INIT) {
+                            //ignore init
+                            return
+                        }
+                        const accAmount = (accItem?.[account.id] || 0)
+                        item[`${account.id}-Accumulation`] = accAmount
+                        accItem[account.id] = accAmount
+                    }
                 }
             })
 
@@ -114,8 +144,17 @@ export const AccountTypesGranularityBalanceLineChartCard = observer(function Acc
             }
         })
 
-        if (dataset!.length === 0) {
+
+        const accountsToShow = typeAccounts.filter((a) => {
+            return accountIdsToShow.has(a.id)
+        })
+
+        if (accountsToShow.length === 0) {
             return null
+        }
+
+        const seriesColorProcessor = (color: string) => {
+            return (colorScheme.dark ? Color(color).lighten(0.75) : Color(color).darken(0.6)).rgb().toString()
         }
 
         return {
@@ -150,21 +189,21 @@ export const AccountTypesGranularityBalanceLineChartCard = observer(function Acc
                     label: ll(accumulationType === AccumulationType.NORAML ? 'desktop.accumulatedAmount' : 'desktop.initNAccumulatedAmount')
                 } as ChartsYAxisProps : undefined
             ].filter((a) => !!a) as LineChartProps['yAxis'],
-            series: [...accountTypes.map((accountType) => {
+            series: [...accountsToShow.map((account, idx) => {
                 return {
                     yAxisId: 'amount',
-                    dataKey: accountType,
-                    label: accountTypeLabel(accountType),
+                    dataKey: account.id,
+                    label: account.name,
                     valueFormatter,
-                    color: accountTypeLineColor(accountType, colorScheme),
+                    color: pickPaletteColor(idx, colorScheme, seriesColorProcessor),
                 }
-            }), ...(accumulationType !== AccumulationType.NONE ? accountTypes.map((accountType) => {
+            }), ...(accumulationType !== AccumulationType.NONE ? accountsToShow.map((account, idx) => {
                 return {
                     yAxisId: 'accumulation',
-                    dataKey: `${accountType}-Accumulation`,
-                    label: accountTypeLabel(accountType) + (accumulationType === AccumulationType.PLUS_INIT ? '++' : '+'),
+                    dataKey: `${account.id}-Accumulation`,
+                    label: account.name + (accumulationType === AccumulationType.PLUS_INIT ? '++' : '+'),
                     valueFormatter,
-                    color: accountTypeAreaColor(accountType, colorScheme),
+                    color: pickPaletteColor(idx, colorScheme),
                     area: true
                 }
             }) : []) as LineChartProps['series']],
@@ -196,11 +235,11 @@ export const AccountTypesGranularityBalanceLineChartCard = observer(function Acc
                         fontSize: 16
                     },
                     //don't show accumulation in legend
-                    seriesToDisplay: accountTypes.map((accountType) => {
+                    seriesToDisplay: accountsToShow.map((account, idx) => {
                         return {
-                            id: accountType,
-                            label: accountTypeLabel(accountType),
-                            color: accountTypeLineColor(accountType, colorScheme),
+                            id: account.id,
+                            label: account.name,
+                            color: pickPaletteColor(idx, colorScheme, seriesColorProcessor)
                         }
                     })
                 },
@@ -212,9 +251,10 @@ export const AccountTypesGranularityBalanceLineChartCard = observer(function Acc
                     }
                 },
                 noDataOverlay: { message: ll('noData') },
+
             } as LineChartProps['slotProps']
         }
-    }, [report, timePeriod, book.fractionDigits, book.symbol, book.currency, language, fixBalanceFractionDigits, i18n, accumulationType, accountTypes, ll, dateFormat, monthFormat, colorScheme])
+    }, [accountType, book.currency, book.fractionDigits, book.symbol, colorScheme, accumulationType, dateFormat, fixBalanceFractionDigits, hideEmptyBalance, i18n, language, ll, monthFormat, report, specificAccountIds, timePeriod, typeAccounts])
 
     const styles = useMemo(() => {
         return {
@@ -226,20 +266,28 @@ export const AccountTypesGranularityBalanceLineChartCard = observer(function Acc
                 gap: theme.spacing(1),
                 justifyContent: 'center'
             }),
+            checkbox: css({
+
+            }),
             height: 300
         }
     }, [theme, appStyles])
 
     return <Card>
         <CardContent >
-            <Stack direction='row' css={styles.header}>
-                {book && <Typography variant="caption">{book.name}</Typography>}
-                {timePeriod && <TimePeriodInfo timePeriod={timePeriod} hideGranularity />}
-            </Stack>
+            <CardHeader title={
+                <Stack direction='row' css={styles.header}>
+                    {book && <Typography variant="caption">{book.name}</Typography>}
+                    {timePeriod && <TimePeriodInfo timePeriod={timePeriod} hideGranularity />}
+                </Stack>}
+                action={<AccountsPopoverButton accounts={typeAccounts} selectedAccountIds={specificAccountIds} disabled={refreshing} onSelectedAccountsChange={setSpecificAccountIds} />}
+            />
+
             <Stack css={styles.content}>
                 {chartProps === undefined && <FullLoading />}
                 {chartProps === null && <Typography css={utilStyles.vclayout} flex={1}>{ll('noData')}</Typography>}
                 {chartProps && <LineChart skipAnimation
+                    colors={colorScheme.chartColorPalette}
                     dataset={chartProps.dataset}
                     series={chartProps.series}
                     xAxis={chartProps.xAxis}
@@ -260,7 +308,7 @@ export const AccountTypesGranularityBalanceLineChartCard = observer(function Acc
                 {refreshing && <FullLoading css={utilStyles.absoluteCenter} delay={400} />}
             </Stack>
         </CardContent>
-    </Card>
+    </Card >
 })
 
-export default AccountTypesGranularityBalanceLineChartCard
+export default AccountsGranularityBalanceLineChartCard

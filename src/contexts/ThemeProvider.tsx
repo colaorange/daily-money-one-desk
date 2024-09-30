@@ -144,8 +144,8 @@ export const ThemeProvider = memo(function ThemeProvider({ children }: ThemeProv
         const appStyles: AppStyles = {
             outlineIconButton: css({
                 borderRadius: theme.spacing(0.5),
-                height: 46,
-                width: 46,
+                height: 40,
+                width: 40,
                 border: '1px solid',
                 borderColor: appScheme.outlineColor,
                 ':hover': {

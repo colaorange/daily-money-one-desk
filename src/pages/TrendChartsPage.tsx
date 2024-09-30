@@ -6,22 +6,24 @@ import { FullLoading } from "@/components/FullLoading";
 import TimePeriodInfo from "@/components/TimePeriodInfo";
 import TimePeriodPopoverButton from "@/components/TimePeriodPopoverButton";
 import TimePeriodShiftButton from "@/components/TimePeriodShiftButton";
+import { InitialAccountTransDatetime } from "@/constants";
 import { usePreferences } from "@/contexts/useApi";
 import { useI18nLabel } from "@/contexts/useI18n";
 import useStore from "@/contexts/useStore";
 import useTheme from "@/contexts/useTheme";
 import MainTemplate from "@/templates/MainTemplate";
-import { TimePeriod } from "@/types";
+import { AccumulationType, TimePeriod } from "@/types";
 import { runAsync } from "@/utils";
 import utilStyles from "@/utilStyles";
 import { AccountType, Book, BookGranularityBalanceReport, TimeGranularity } from "@client/model";
-import { css, Divider, FormControlLabel, Grid2, Stack, Switch, SxProps, Theme, Typography } from '@mui/material';
+import { css, Divider, FormControlLabel, Grid2, Stack, Switch, SxProps, Theme, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from '@mui/material';
 import { isEqual } from "lodash";
 import { observer } from "mobx-react-lite";
 import moment from "moment";
 import { Fragment, PropsWithChildren, useCallback, useEffect, useMemo, useState } from "react";
+import { TbBadge, TbBadgeOff, TbBadges } from "react-icons/tb";
+import AccountsGranularityBalanceLineChartCard from "./components/AccountsGranularityBalanceLineChartCard";
 import AccountTypesGranularityBalanceLineChartCard from "./components/AccountTypesGranularityBalanceLineChartCard";
-import { InitialAccountTransDatetime } from "@/constants";
 
 export type TrendPageProps = PropsWithChildren
 
@@ -46,14 +48,14 @@ export const TrendPage = observer(function TrendPage(props: TrendPageProps) {
     }, [books, currentBookId])
 
     const bookAccounts = useMemo(() => {
-        return accounts && accounts.filter((a) => a.bookId === currentBookId)
+        return accounts && accounts.filter((a) => a.bookId === currentBookId).sort((a, b) => (b.priority || 0) - (a.priority || 0))
     }, [accounts, currentBookId])
 
     const { balanceAccountTypeOrder } = usePreferences() || {}
 
     const [allOn, setAllOn] = useState<boolean>()
     const [accountTypesOn, setAccountTypesOn] = useState<Set<AccountType>>(new Set([balanceAccountTypeOrder?.[0] || AccountType.EXPENSE]))
-    const [accumulationOn, setAccumulationOn] = useState<boolean>()
+    const [accumulationType, setAccumulationType] = useState<AccumulationType>(AccumulationType.NONE)
 
     const onToggleAccountTypesOn = useCallback((type: AccountType) => {
         setAccountTypesOn((s) => {
@@ -144,21 +146,7 @@ export const TrendPage = observer(function TrendPage(props: TrendPageProps) {
                 sm: 12,
                 md: 12,
                 xl: 12
-            },
-            fullTileSx: {
-                height: {
-                    xs: 0,
-                    sm: 0,
-                    md: 'auto',
-                    xl: 'auto',
-                },
-                overflow: {
-                    xs: 'hidden',
-                    sm: 'hidden',
-                    md: 'auto',
-                    xl: 'auto',
-                }
-            },
+            }
         }
     }, [theme])
 
@@ -167,6 +155,28 @@ export const TrendPage = observer(function TrendPage(props: TrendPageProps) {
     return <MainTemplate>
         <AppToolbar sxGap={1}>
             <BookSelect bookId={currentBookId} books={books} onBookChange={onBookChange} css={appStyles.toolbarSelect} disabled={processing} />
+            <ToggleButtonGroup
+                value={accumulationType}
+                exclusive
+                onChange={(evt, value) => {
+                    setAccumulationType(value)
+                }}
+            >
+
+                <ToggleButton value={AccumulationType.NONE}>
+                    <TbBadgeOff />
+                </ToggleButton>
+                <Tooltip title={ll('desktop.accumulatedAmount')}>
+                    <ToggleButton value={AccumulationType.NORAML}>
+                        <TbBadge />
+                    </ToggleButton>
+                </Tooltip>
+                <Tooltip title={ll('desktop.initNAccumulatedAmount')}>
+                    <ToggleButton value={AccumulationType.PLUS_INIT}>
+                        <TbBadges />
+                    </ToggleButton>
+                </Tooltip>
+            </ToggleButtonGroup>
             <span css={utilStyles.flex1} />
             <TimePeriodInfo timePeriod={timePeriod} />
             <TimePeriodShiftButton varient={yearShift ? "previousYear" : "previousMonth"} timePeriod={timePeriod} onShift={onTimePeriodChange} disabled={processing} />
@@ -181,24 +191,20 @@ export const TrendPage = observer(function TrendPage(props: TrendPageProps) {
                         <Typography variant="h5">{ll('desktop.accountTypeTrend')}</Typography>
                         <div css={utilStyles.flex1} />
                         <FormControlLabel
-                            control={<Switch color="primary" checked={!!accumulationOn} onChange={() => { setAccumulationOn(!accumulationOn) }} />}
-                            label={ll(`desktop.accumulatedAmount`)}
-                            labelPlacement="bottom"
-                        />
-                        <FormControlLabel
                             control={<Switch color="primary" checked={!!allOn} onChange={() => { setAllOn(!allOn) }} />}
                             label={ll(`desktop.allAccountTypes`)}
                             labelPlacement="bottom"
+                            slotProps={{ typography: { variant: 'caption' } }}
                         />
                     </Stack>
                 </Grid2>
-                {allOn && <Grid2 size={styles.fullTileSize} sx={styles.fullTileSx}>
+                {allOn && <Grid2 size={styles.fullTileSize}>
                     <AccountTypesGranularityBalanceLineChartCard
                         book={book}
                         timePeriod={timePeriod}
                         accountTypes={[AccountType.ASSET, AccountType.LIABILITY, AccountType.INCOME, AccountType.EXPENSE, AccountType.OTHER]}
                         report={bookGranularityBalanceReport}
-                        cumulative={accumulationOn}
+                        accumulationType={accumulationType}
                         refreshing={processing}
                     />
                 </Grid2>}
@@ -209,7 +215,7 @@ export const TrendPage = observer(function TrendPage(props: TrendPageProps) {
                             timePeriod={timePeriod}
                             accountTypes={[AccountType.ASSET, AccountType.LIABILITY]}
                             report={bookGranularityBalanceReport}
-                            cumulative={accumulationOn}
+                            accumulationType={accumulationType}
                             refreshing={processing}
                         />
                     </Grid2>
@@ -219,7 +225,7 @@ export const TrendPage = observer(function TrendPage(props: TrendPageProps) {
                             timePeriod={timePeriod}
                             accountTypes={[AccountType.INCOME, AccountType.EXPENSE]}
                             report={bookGranularityBalanceReport}
-                            cumulative={accumulationOn}
+                            accumulationType={accumulationType}
                             refreshing={processing}
                         />
                     </Grid2>
@@ -238,6 +244,7 @@ export const TrendPage = observer(function TrendPage(props: TrendPageProps) {
                                         control={<Switch color="primary" checked={accountTypesOn.has(type)} onChange={() => { onToggleAccountTypesOn(type) }} />}
                                         label={ll(`account.type.${type}`)}
                                         labelPlacement="bottom"
+                                        slotProps={{ typography: { variant: 'caption' } }}
                                     />
                                 </Fragment>
                             })}
@@ -246,28 +253,21 @@ export const TrendPage = observer(function TrendPage(props: TrendPageProps) {
                 </Grid2>
                 {(balanceAccountTypeOrder || defaultAccountTypeOrder).filter((a) => accountTypesOn.has(a)).map((type) => {
                     return <Fragment key={type}>
-                        {/* <Grid2 size={styles.accountsTileSize}>
-                            <AccountsBalanceBarChartCard
+                        <Grid2 size={styles.fullTileSize}>
+                            <AccountsGranularityBalanceLineChartCard
                                 book={book}
                                 timePeriod={timePeriod}
                                 accountType={type}
                                 report={bookGranularityBalanceReport}
                                 bookAccounts={bookAccounts}
+                                accumulationType={accumulationType}
+                                refreshing={processing}
                             />
                         </Grid2>
-                        <Grid2 size={styles.accountsTileSize}>
-                            <AccountsBalancePieChartCard
-                                book={book}
-                                timePeriod={timePeriod}
-                                accountType={type}
-                                report={bookGranularityBalanceReport}
-                                bookAccounts={bookAccounts}
-                            />
-                        </Grid2> */}
                     </Fragment>
                 })}
             </Grid2>
-        </>: <FullLoading />}
+        </> : <FullLoading />}
     </MainTemplate>
 })
 
