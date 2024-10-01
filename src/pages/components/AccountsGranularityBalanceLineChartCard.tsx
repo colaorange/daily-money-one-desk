@@ -303,6 +303,7 @@ export const AccountsGranularityBalanceLineChartCard = observer(function Account
             <CardHeader title={
                 <Stack direction='row' css={styles.header}>
                     {book && <Typography variant="caption">{book.name}</Typography>}
+                    {accountType && <Typography variant="caption" color={colorScheme[accountType]}>{ll(`account.type.${accountType}`)}</Typography>}
                     {timePeriod && <TimePeriodInfo timePeriod={timePeriod} hideGranularity />}
                 </Stack>}
                 action={<AccountsPopoverButton accounts={typeAccounts} selectedAccountIds={selectedAccountIds} disabled={refreshing} onSelectedAccountsChange={onSelectedAccountsChange} icon={<FaFilter/>} />}

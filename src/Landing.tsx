@@ -13,6 +13,7 @@ import { Paper, TextField, Typography } from '@mui/material'
 import Button from '@mui/material/Button'
 import { AxiosError } from 'axios'
 import { memo, PropsWithChildren, useCallback, useMemo, useState } from 'react'
+import { AdsLevel } from './types'
 
 export type LandingProps = PropsWithChildren
 
@@ -54,15 +55,23 @@ export const Landing = memo(function Landing(props: LandingProps) {
         try {
             const result = (await api.authorize(connectionToken)).data
             if (!result.error) {
-                const preferences = (await new BasicApi(new Configuration({
+                const authedApi = new BasicApi(new Configuration({
                     basePath,
                     apiKey: connectionToken
-                })).getPreference()).data
+                }))
+
+                const preferences = (await authedApi.getPreference()).data
 
                 setAuhtorization({
                     connectionToken,
                     preferences
                 })
+
+                if (!preferences.adsLevel || (preferences.adsLevel < AdsLevel.NONE)) {
+                    authedApi.watchAds().catch(() => {//eat
+                    })
+                }
+
             } else {
                 setAuthResult({
                     error: true,
