@@ -7,6 +7,7 @@ import TimePeriodInfo from "@/components/TimePeriodInfo";
 import { InitialAccountTransDatetime } from "@/constants";
 import { usePreferences } from "@/contexts/useApi";
 import useI18n from "@/contexts/useI18n";
+import useStore from "@/contexts/useStore";
 import useTheme from "@/contexts/useTheme";
 import { AccumulationType, TimeGranularity, TimePeriod } from "@/types";
 import { getNumberFormat } from "@/utils";
@@ -19,7 +20,8 @@ import { LineChart } from '@mui/x-charts/LineChart';
 import Color from "color";
 import { observer } from "mobx-react-lite";
 import moment from "moment";
-import { PropsWithChildren, useMemo, useState } from "react";
+import { PropsWithChildren, useCallback, useEffect, useMemo, useState } from "react";
+import { FaFilter } from "react-icons/fa6";
 
 export type AccountsGranularityBalanceLineChartCardProps = PropsWithChildren<{
     book: Book
@@ -44,12 +46,28 @@ export const AccountsGranularityBalanceLineChartCard = observer(function Account
     const i18n = useI18n()
     const { language, label: ll } = i18n
     const { fixBalanceFractionDigits, monthFormat, dateFormat, hideEmptyBalance } = usePreferences() || {}
+    const { cacheStore } = useStore()
 
     const typeAccounts = useMemo(() => {
         return bookAccounts.filter((a) => a.type === accountType)
     }, [accountType, bookAccounts])
 
-    const [specificAccountIds, setSpecificAccountIds] = useState<Set<string>>(new Set())
+    const cacheKey = useMemo(() => {
+        return `AccountsGranularityBalanceLineChartCard-${book.id}-selectedAccountIds`
+    }, [book.id])
+
+    const [selectedAccountIds, setSelectedAccountIds] = useState<Set<string>>(new Set())
+
+    const onSelectedAccountsChange = useCallback((ids: Set<string>) => {
+        cacheStore.set(cacheKey, Array.from(ids))
+        setSelectedAccountIds(ids)
+    }, [cacheKey, cacheStore])
+
+    useEffect(() => {
+        //reset when book changes
+        const ids = new Set(cacheStore.get(cacheKey) as string[] || [])
+        setSelectedAccountIds(ids)
+    }, [cacheKey, cacheStore])
 
     const chartProps = useMemo(() => {
         if (!report || !timePeriod) {
@@ -87,14 +105,15 @@ export const AccountsGranularityBalanceLineChartCard = observer(function Account
             const item: DatasetItem = {
                 time
             }
-
-            typeAccounts.filter((a) => (specificAccountIds.size === 0 || specificAccountIds.has(a.id))).forEach((account) => {
+            typeAccounts.filter((a) => (selectedAccountIds.size === 0 || selectedAccountIds.has(a.id))).forEach((account) => {
                 const accountBalance = reportAccounts[account.id]
                 if (accountBalance) {
                     const amount = (accountBalance.depositsAmount - accountBalance.withdrawalsAmount) * accountTypeFactor(accountType)
                     // if !(account is hidden and amount is zero)
                     if (!(account.hidden && amount === 0)) {
-                        accountIdsToShow.add(account.id)
+                        if (time !== InitialAccountTransDatetime) {
+                            accountIdsToShow.add(account.id)
+                        }
                         item[account.id] = amount
                         maxAmountTxtLength = Math.max(maxAmountTxtLength, valueFormatter(amount).length)
 
@@ -111,7 +130,9 @@ export const AccountsGranularityBalanceLineChartCard = observer(function Account
                         }
                     }
                 } else if (!hideEmptyBalance && !account.hidden) {
-                    accountIdsToShow.add(account.id)
+                    if (time !== InitialAccountTransDatetime) {
+                        accountIdsToShow.add(account.id)
+                    }
                     item[account.id] = 0
                     if (accumulationType !== AccumulationType.NONE) {
                         if (time === InitialAccountTransDatetime && accumulationType !== AccumulationType.PLUS_INIT) {
@@ -156,6 +177,8 @@ export const AccountsGranularityBalanceLineChartCard = observer(function Account
         const seriesColorProcessor = (color: string) => {
             return (colorScheme.dark ? Color(color).lighten(0.75) : Color(color).darken(0.6)).rgb().toString()
         }
+        const minTime = dataset?.[0].time || undefined
+        const maxTime = dataset?.[dataset?.length - 1].time || undefined
 
         return {
             dataset,
@@ -178,6 +201,8 @@ export const AccountsGranularityBalanceLineChartCard = observer(function Account
                         }
                         return ctx.location === 'tooltip' ? `${label} ${currencySymbol ? ` (${currencySymbol})` : ''}` : label
                     },
+                    min: minTime,
+                    max: maxTime
                 } as ChartsXAxisProps,
             ] as LineChartProps['xAxis'],
             yAxis: [
@@ -254,7 +279,7 @@ export const AccountsGranularityBalanceLineChartCard = observer(function Account
 
             } as LineChartProps['slotProps']
         }
-    }, [accountType, book.currency, book.fractionDigits, book.symbol, colorScheme, accumulationType, dateFormat, fixBalanceFractionDigits, hideEmptyBalance, i18n, language, ll, monthFormat, report, specificAccountIds, timePeriod, typeAccounts])
+    }, [accountType, book.currency, book.fractionDigits, book.symbol, colorScheme, accumulationType, dateFormat, fixBalanceFractionDigits, hideEmptyBalance, i18n, language, ll, monthFormat, report, selectedAccountIds, timePeriod, typeAccounts])
 
     const styles = useMemo(() => {
         return {
@@ -280,7 +305,7 @@ export const AccountsGranularityBalanceLineChartCard = observer(function Account
                     {book && <Typography variant="caption">{book.name}</Typography>}
                     {timePeriod && <TimePeriodInfo timePeriod={timePeriod} hideGranularity />}
                 </Stack>}
-                action={<AccountsPopoverButton accounts={typeAccounts} selectedAccountIds={specificAccountIds} disabled={refreshing} onSelectedAccountsChange={setSpecificAccountIds} />}
+                action={<AccountsPopoverButton accounts={typeAccounts} selectedAccountIds={selectedAccountIds} disabled={refreshing} onSelectedAccountsChange={onSelectedAccountsChange} icon={<FaFilter/>} />}
             />
 
             <Stack css={styles.content}>

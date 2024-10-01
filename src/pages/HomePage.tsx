@@ -14,7 +14,7 @@ import MainTemplate from "@/templates/MainTemplate";
 import { TimePeriod } from "@/types";
 import { runAsync } from "@/utils";
 import utilStyles from "@/utilStyles";
-import { AccountType, Book, BookBalanceReport, TimeGranularity } from "@client/model";
+import { AccountType, Book, BookBalanceReport, ReportBookGranularityBalanceOption, TimeGranularity } from "@client/model";
 import { css, Divider, FormControlLabel, Grid2, Stack, Switch, SxProps, Theme, Typography } from '@mui/material';
 import { isEqual } from "lodash";
 import { observer } from "mobx-react-lite";
@@ -35,7 +35,7 @@ export const HomePage = observer(function HomePage(props: HomePageProps) {
 
     const [processing, setProcessing] = useState<boolean>()
 
-    const { bookStore, accountStore, reportStore, sharedStore } = useStore()
+    const { bookStore, accountStore, reportStore, sharedStore, cacheStore } = useStore()
 
     const [bookBalanceReport, setBookBalanceReport] = useState<BookBalanceReport>()
 
@@ -89,20 +89,26 @@ export const HomePage = observer(function HomePage(props: HomePageProps) {
         if (currentBookId && accounts && timePeriod) {
             setProcessing(true)
             runAsync(async () => {
-                const report = await reportStore.reportBookBalance(currentBookId, {
+                const option: ReportBookGranularityBalanceOption = {
                     accountTypes: [AccountType.INCOME, AccountType.ASSET, AccountType.EXPENSE, AccountType.LIABILITY, AccountType.OTHER],
                     accountIds: accounts.filter((a) => a.bookId === currentBookId && !a.hidden).map((a) => a.id),
                     transDatetimeRange: {
                         from: (timePeriod.start === null || timePeriod.start < 0) ? InitialAccountTransDatetime : timePeriod.start,
                         to: timePeriod.end
                     }
-                })
+                }
+                const cacheKey = `HomePagePage-${currentBookId}-report-${JSON.stringify(option)}`
+                let report: BookBalanceReport | null = cacheStore.get(cacheKey) as BookBalanceReport
+                if (!report) {
+                    report = await reportStore.reportBookBalance(currentBookId, option)
+                    cacheStore.set(cacheKey, report)
+                }
                 setBookBalanceReport(report)
             }, errorHandler()).finally(() => {
                 setProcessing(false)
             })
         }
-    }, [reportStore, currentBookId, accounts, timePeriod])
+    }, [reportStore, currentBookId, accounts, timePeriod, cacheStore])
 
     const styles = useMemo(() => {
         return {
@@ -153,7 +159,7 @@ export const HomePage = observer(function HomePage(props: HomePageProps) {
         <AppToolbar sxGap={1}>
             <BookSelect bookId={currentBookId} books={books} onBookChange={onBookChange} css={appStyles.toolbarSelect} disabled={processing} />
             <span css={utilStyles.flex1} />
-            <TimePeriodInfo timePeriod={timePeriod}/>
+            <TimePeriodInfo timePeriod={timePeriod} />
             <TimePeriodShiftButton varient={yearShift ? "previousYear" : "previousMonth"} timePeriod={timePeriod} onShift={onTimePeriodChange} disabled={processing} />
             <TimePeriodShiftButton varient={yearShift ? "nextYear" : "nextMonth"} timePeriod={timePeriod} onShift={onTimePeriodChange} disabled={processing} />
             <TimePeriodPopoverButton timePeriod={timePeriod} onTimePeriodChange={onTimePeriodChange} disabled={processing} />

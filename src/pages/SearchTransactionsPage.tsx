@@ -1,3 +1,4 @@
+import { UnderConsturction } from "@/components/UnderContruction"
 import { useAccountStore, useBookStore } from "@/contexts/useStore"
 import MainTemplate from "@/templates/MainTemplate"
 import { Typography } from "@mui/material"
@@ -26,7 +27,7 @@ export const SearchTransactionsPage = observer(function AboutPage(props: SearchT
     }, [accountStore, accounts])
 
     return <MainTemplate>
-        <Typography>SearchTransactionsPage</Typography>
+        <UnderConsturction/>
     </MainTemplate>
 })
 

@@ -4,6 +4,7 @@ import useApi from "./useApi"
 import { AccountStore } from "@/stores/AccountStore"
 import { SharedStore } from "@/stores/SharedStore"
 import { ReportStore } from "@/stores/ReportStore"
+import { CacheStore } from "@/stores/CacheStore"
 
 export type StoreProviderProps = PropsWithChildren
 
@@ -12,6 +13,7 @@ export type StoreContextValue = {
     bookStore: BookStore
     accountStore: AccountStore
     reportStore: ReportStore
+    cacheStore: CacheStore
 }
 
 export const StoreContext = createContext<StoreContextValue | undefined>(undefined)
@@ -33,7 +35,8 @@ export const StoreProvider = memo(function StoreProvider({ children }: StoreProv
             }),
             reportStore: new ReportStore({
                 configuration
-            })
+            }),
+            cacheStore: new CacheStore()
         } : undefined
         return value
     }, [api, preferences?.primaryBookId])

@@ -13,9 +13,10 @@ export type AccountsPopoverButtonProps = {
     selectedAccountIds: Set<string>
     onSelectedAccountsChange?: (selectedAccountIds: Set<string>) => void
     disabled?: boolean
+    icon?: React.ReactNode
 }
 
-export const AccountsPopoverButton = memo(function AccountsPopoverButton({ accounts, selectedAccountIds, onSelectedAccountsChange, disabled }: AccountsPopoverButtonProps) {
+export const AccountsPopoverButton = memo(function AccountsPopoverButton({ accounts, selectedAccountIds, onSelectedAccountsChange, disabled, icon }: AccountsPopoverButtonProps) {
     const { appStyles } = useTheme()
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
     const onClick = useCallback((evt: React.MouseEvent<HTMLButtonElement>) => {
@@ -32,7 +33,7 @@ export const AccountsPopoverButton = memo(function AccountsPopoverButton({ accou
     return <Box>
         <Badge badgeContent={selectedAccountIds.size} color="primary" hidden={selectedAccountIds.size <= 0}>
             <IconButton size="small" onClick={onClick} disabled={disabled}>
-                <FaBookmark />
+                {icon || <FaBookmark />}
             </IconButton>
         </Badge>
 

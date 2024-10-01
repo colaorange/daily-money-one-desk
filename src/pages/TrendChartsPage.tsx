@@ -15,7 +15,7 @@ import MainTemplate from "@/templates/MainTemplate";
 import { AccumulationType, TimePeriod } from "@/types";
 import { runAsync } from "@/utils";
 import utilStyles from "@/utilStyles";
-import { AccountType, Book, BookGranularityBalanceReport, TimeGranularity } from "@client/model";
+import { AccountType, Book, BookGranularityBalanceReport, ReportBookGranularityBalanceOption, TimeGranularity } from "@client/model";
 import { css, Divider, FormControlLabel, Grid2, Stack, Switch, SxProps, Theme, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from '@mui/material';
 import { isEqual } from "lodash";
 import { observer } from "mobx-react-lite";
@@ -35,7 +35,7 @@ export const TrendPage = observer(function TrendPage(props: TrendPageProps) {
 
     const [processing, setProcessing] = useState<boolean>()
 
-    const { bookStore, accountStore, reportStore, sharedStore } = useStore()
+    const { bookStore, accountStore, reportStore, sharedStore, cacheStore } = useStore()
 
     const [bookGranularityBalanceReport, setBookGranularityBalanceReport] = useState<BookGranularityBalanceReport>()
 
@@ -90,7 +90,7 @@ export const TrendPage = observer(function TrendPage(props: TrendPageProps) {
         if (currentBookId && accounts && timePeriod) {
             setProcessing(true)
             runAsync(async () => {
-                const report = await reportStore.reportBookGranularityBalance(currentBookId, {
+                const option: ReportBookGranularityBalanceOption = {
                     accountTypes: [AccountType.INCOME, AccountType.ASSET, AccountType.EXPENSE, AccountType.LIABILITY, AccountType.OTHER],
                     accountIds: accounts.filter((a) => a.bookId === currentBookId && !a.hidden).map((a) => a.id),
                     transDatetimeRange: {
@@ -98,14 +98,19 @@ export const TrendPage = observer(function TrendPage(props: TrendPageProps) {
                         to: timePeriod.end
                     },
                     granularity: timePeriod.granularity
-                })
-
+                }
+                const cacheKey = `TrendChartsPage-${currentBookId}-report-${JSON.stringify(option)}`
+                let report: BookGranularityBalanceReport | null = cacheStore.get(cacheKey) as BookGranularityBalanceReport
+                if (!report) {
+                    report = await reportStore.reportBookGranularityBalance(currentBookId, option)
+                    cacheStore.set(cacheKey, report)
+                }
                 setBookGranularityBalanceReport(report)
             }, errorHandler()).finally(() => {
                 setProcessing(false)
             })
         }
-    }, [reportStore, currentBookId, accounts, timePeriod])
+    }, [reportStore, currentBookId, accounts, timePeriod, bookStore, cacheStore])
 
     const styles = useMemo(() => {
         return {

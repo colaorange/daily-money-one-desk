@@ -3,6 +3,7 @@ import BookSelect from "@/components/BookSelect"
 import TimePeriodInfo from "@/components/TimePeriodInfo"
 import TimePeriodPopoverButton from "@/components/TimePeriodPopoverButton"
 import TimePeriodShiftButton from "@/components/TimePeriodShiftButton"
+import { UnderConsturction } from "@/components/UnderContruction"
 import { useAccountStore, useBookStore, useSharedStore } from "@/contexts/useStore"
 import useTheme from "@/contexts/useTheme"
 import MainTemplate from "@/templates/MainTemplate"
@@ -57,10 +58,7 @@ export const BalanceSheetsPage = observer(function BalanceSheetsPage(props: Bala
             <TimePeriodPopoverButton timePeriod={timePeriod} onTimePeriodChange={onTimePeriodChange} hideGranularity />
         </AppToolbar>
         <Divider flexItem />
-        <Stack direction={"column"}>
-
-
-        </Stack>
+        <UnderConsturction />
     </MainTemplate>
 })
 

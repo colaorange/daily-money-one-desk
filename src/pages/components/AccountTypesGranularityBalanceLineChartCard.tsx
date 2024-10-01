@@ -118,6 +118,9 @@ export const AccountTypesGranularityBalanceLineChartCard = observer(function Acc
             return null
         }
 
+        const minTime = dataset![0].time || undefined
+        const maxTime = dataset![dataset!.length - 1].time || undefined
+
         return {
             dataset,
             xAxis: [
@@ -139,6 +142,8 @@ export const AccountTypesGranularityBalanceLineChartCard = observer(function Acc
                         }
                         return ctx.location === 'tooltip' ? `${label} ${currencySymbol ? ` (${currencySymbol})` : ''}` : label
                     },
+                    min: minTime,
+                    max: maxTime
                 } as ChartsXAxisProps,
             ] as LineChartProps['xAxis'],
             yAxis: [

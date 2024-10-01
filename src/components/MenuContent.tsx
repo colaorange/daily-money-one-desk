@@ -7,7 +7,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
 import { Fragment, useCallback } from 'react';
-import { FaBalanceScale, FaHome, FaSearch, FaChartLine, FaReceipt } from 'react-icons/fa';
+import { FaBalanceScale, FaHome, FaSearch, FaChartLine, FaReceipt, FaPaypal } from 'react-icons/fa';
 import { FaFacebook, FaGooglePlay } from 'react-icons/fa6';
 import { Link, NavigateFunction, useLocation, useNavigate } from 'react-router-dom';
 
@@ -37,6 +37,10 @@ const secondaryListItems: MenuAction[] = [
     {
         text: 'Facebook', icon: <FaFacebook size={iconSize} />,
         href: 'https://www.facebook.com/colaorange.daily.money/'
+    },
+    {
+        text: 'ads.hereDonate', icon: <FaPaypal size={iconSize} />,
+        href: 'https://paypal.me/colaorange'
     },
 
 ];

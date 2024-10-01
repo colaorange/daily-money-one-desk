@@ -3,13 +3,14 @@ import BookSelect from "@/components/BookSelect"
 import TimePeriodInfo from "@/components/TimePeriodInfo"
 import TimePeriodPopoverButton from "@/components/TimePeriodPopoverButton"
 import TimePeriodShiftButton from "@/components/TimePeriodShiftButton"
+import { UnderConsturction } from "@/components/UnderContruction"
 import { useAccountStore, useBookStore, useSharedStore } from "@/contexts/useStore"
 import useTheme from "@/contexts/useTheme"
 import MainTemplate from "@/templates/MainTemplate"
 import { TimePeriod } from "@/types"
 import utilStyles from "@/utilStyles"
 import { Book } from "@client/model"
-import { Divider, Stack, Typography } from "@mui/material"
+import { Divider } from "@mui/material"
 import { observer } from "mobx-react-lite"
 import { PropsWithChildren, useCallback, useEffect } from "react"
 
@@ -61,10 +62,7 @@ export const TransactionsPage = observer(function AboutPage(props: TransactionsP
             <TimePeriodPopoverButton timePeriod={timePeriod} onTimePeriodChange={onTimePeriodChange} hideGranularity />
         </AppToolbar>
         <Divider flexItem />
-        <Stack direction={"column"}>
-
-
-        </Stack>
+        <UnderConsturction />
     </MainTemplate>
 })
 

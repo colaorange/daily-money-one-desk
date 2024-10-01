@@ -1,3 +1,4 @@
+import _ from "lodash"
 import { logError, logWarn } from "./logger"
 
 
@@ -62,4 +63,20 @@ export function getNumberFormat(language: string = 'en', option: { maximumFracti
 export function getMaxDigits(num: number): number {
     if (num === 0) return 1;
     return Math.floor(Math.log10(Math.abs(num))) + 1;
+}
+
+
+export function sortObjectByKey(obj: any) {
+    if (_.isArray(obj)) {
+        return obj.map(sortObjectByKey);
+    } else if (_.isObject(obj)) {
+        return _(obj)
+            .toPairs()
+            .sortBy(0)
+            .fromPairs()
+            .mapValues(sortObjectByKey)
+            .value();
+    } else {
+        return obj;
+    }
 }
