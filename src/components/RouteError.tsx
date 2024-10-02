@@ -1,13 +1,14 @@
-import { appErrMessage } from "@/appUtils"
-import { useI18nLabel } from "@/contexts/useI18n"
-import utilStyles from "@/utilStyles"
-import { css } from '@emotion/react'
-import { Box, Button, Typography, useTheme } from "@mui/material"
-
-import { memo, useMemo } from "react"
-import { BiSolidError } from "react-icons/bi"
+import { appErrMessage } from "@/appUtils";
+import { useI18nLabel } from "@/contexts/useI18n";
+import utilStyles from "@/utilStyles";
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
+import { css } from '@mui/material/styles';
+import { memo, useMemo } from "react";
+import { BiSolidError } from "react-icons/bi";
 import { BsFillQuestionCircleFill, BsSignStop } from "react-icons/bs";
-import { isRouteErrorResponse, useNavigate, useRouteError } from "react-router-dom"
+import { isRouteErrorResponse, useNavigate, useRouteError } from "react-router-dom";
 /**
  * a full screen error indicator for initialization
  */

@@ -1,6 +1,5 @@
 import utilStyles from "@/utilStyles"
-import { CircularProgress } from "@mui/material"
-import { clsx } from "clsx"
+import CircularProgress from '@mui/material/CircularProgress';
 import { memo } from "react"
 
 /**

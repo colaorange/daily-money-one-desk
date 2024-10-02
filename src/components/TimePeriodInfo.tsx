@@ -2,7 +2,9 @@ import { DEFAULT_DATE_FORMAT, DEFAULT_MONTH_FORMAT } from "@/constants";
 import { usePreferences } from "@/contexts/useApi";
 import { useI18nLabel } from "@/contexts/useI18n";
 import { TimeGranularity, TimePeriod } from "@/types";
-import { css, Stack, Typography } from "@mui/material";
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import { css } from '@mui/material/styles';
 import moment from "moment";
 import { memo, useMemo } from "react";
 
@@ -32,11 +34,11 @@ export const TimePeriodInfo = memo(function TimePeriodInfo({ timePeriod, hideGra
         }
     }, [hideGranularity])
 
-    const startLabel = useMemo(()=>{
-        if(!startm){
+    const startLabel = useMemo(() => {
+        if (!startm) {
             return ll('desktop.initDay')
         }
-        switch(granularity){
+        switch (granularity) {
             case TimeGranularity.DAILY:
                 return startm.format(dateFormat)
             case TimeGranularity.MONTHLY:
@@ -44,10 +46,10 @@ export const TimePeriodInfo = memo(function TimePeriodInfo({ timePeriod, hideGra
             case TimeGranularity.YEARLY:
                 return startm.format('YYYY')
         }
-    },[dateFormat, granularity, ll, monthFormat, startm])
+    }, [dateFormat, granularity, ll, monthFormat, startm])
 
-    const endLabel = useMemo(()=>{
-        switch(granularity){
+    const endLabel = useMemo(() => {
+        switch (granularity) {
             case TimeGranularity.DAILY:
                 return endm.format(dateFormat)
             case TimeGranularity.MONTHLY:
@@ -55,7 +57,7 @@ export const TimePeriodInfo = memo(function TimePeriodInfo({ timePeriod, hideGra
             case TimeGranularity.YEARLY:
                 return endm.format('YYYY')
         }
-    },[dateFormat, endm, granularity, monthFormat])
+    }, [dateFormat, endm, granularity, monthFormat])
 
     return <Stack direction='column' alignItems={'center'} >
         <Stack direction='row' sx={{ gap: 1 }}>

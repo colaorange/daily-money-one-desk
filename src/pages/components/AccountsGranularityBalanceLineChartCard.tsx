@@ -13,7 +13,12 @@ import { AccumulationType, TimeGranularity, TimePeriod } from "@/types";
 import { getNumberFormat } from "@/utils";
 import utilStyles from "@/utilStyles";
 import { Account, AccountType, BalanceReport, Book, BookGranularityBalanceReport } from "@client/model";
-import { Card, CardContent, CardHeader, css, Stack, SxProps, Theme, Typography } from "@mui/material";
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import CardHeader from '@mui/material/CardHeader';
+import Stack from '@mui/material/Stack';
+import { css, SxProps, Theme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import { ChartsReferenceLine, chartsTooltipClasses, ChartsXAxisProps, ChartsYAxisProps, LineChartProps } from "@mui/x-charts";
 import { axisClasses } from '@mui/x-charts/ChartsAxis';
 import { LineChart } from '@mui/x-charts/LineChart';
@@ -53,8 +58,8 @@ export const AccountsGranularityBalanceLineChartCard = observer(function Account
     }, [accountType, bookAccounts])
 
     const cacheKey = useMemo(() => {
-        return `AccountsGranularityBalanceLineChartCard-${book.id}-selectedAccountIds`
-    }, [book.id])
+        return `AccountsGranularityBalanceLineChartCard-${book.id}-${accountType}-selectedAccountIds`
+    }, [book.id, accountType])
 
     const [selectedAccountIds, setSelectedAccountIds] = useState<Set<string>>(new Set())
 
@@ -226,10 +231,11 @@ export const AccountsGranularityBalanceLineChartCard = observer(function Account
                 return {
                     yAxisId: 'accumulation',
                     dataKey: `${account.id}-Accumulation`,
-                    label: account.name + (accumulationType === AccumulationType.PLUS_INIT ? '++' : '+'),
+                    label: account.name + '+',
                     valueFormatter,
                     color: pickPaletteColor(idx, colorScheme),
-                    area: true
+                    area: true,
+                    showMark: false
                 }
             }) : []) as LineChartProps['series']],
             margin: {
@@ -306,7 +312,7 @@ export const AccountsGranularityBalanceLineChartCard = observer(function Account
                     {accountType && <Typography variant="caption" color={colorScheme[accountType]}>{ll(`account.type.${accountType}`)}</Typography>}
                     {timePeriod && <TimePeriodInfo timePeriod={timePeriod} hideGranularity />}
                 </Stack>}
-                action={<AccountsPopoverButton accounts={typeAccounts} selectedAccountIds={selectedAccountIds} disabled={refreshing} onSelectedAccountsChange={onSelectedAccountsChange} icon={<FaFilter/>} />}
+                action={<AccountsPopoverButton accounts={typeAccounts} selectedAccountIds={selectedAccountIds} disabled={refreshing} onSelectedAccountsChange={onSelectedAccountsChange} icon={<FaFilter />} />}
             />
 
             <Stack css={styles.content}>

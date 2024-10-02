@@ -1,7 +1,7 @@
 import useTheme from "@/contexts/useTheme";
 import { TimeGranularity, TimePeriod } from "@/types";
-import { Box, IconButton } from "@mui/material";
-
+import Box from '@mui/material/Box';
+import IconButton from '@mui/material/IconButton';
 import { memo, useCallback, useState } from "react";
 import { FaCalendarDays } from "react-icons/fa6";
 import TimePeriodPopover from "./TimePeriodPopover";

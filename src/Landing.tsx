@@ -1,19 +1,26 @@
-import '@/App.css'
-import dmoLogo from '@/assets/dmo.png'
-import reactLogo from '@/assets/react.svg'
-import viteLogo from '@/assets/vite.svg'
-import useApi from '@/contexts/useApi'
-import { useI18nLabel } from '@/contexts/useI18n'
-import utilStyles from '@/utilStyles'
-import { BasicApi } from '@client/api'
-import { Configuration } from '@client/configuration'
-import { Fail } from '@client/model'
-import { css, keyframes } from '@emotion/react'
-import { Paper, TextField, Typography } from '@mui/material'
-import Button from '@mui/material/Button'
-import { AxiosError } from 'axios'
-import { memo, PropsWithChildren, useCallback, useMemo, useState } from 'react'
-import { AdsLevel } from './types'
+import '@/App.css';
+import dmoLogo from '@/assets/dmo.png';
+import reactLogo from '@/assets/react.svg';
+import viteLogo from '@/assets/vite.svg';
+import useApi from '@/contexts/useApi';
+import { useI18nLabel } from '@/contexts/useI18n';
+import utilStyles from '@/utilStyles';
+import { BasicApi } from '@client/api';
+import { Configuration } from '@client/configuration';
+import { Fail } from '@client/model';
+import { css, keyframes } from '@emotion/react';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+import Paper from '@mui/material/Paper';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+
+import { AxiosError } from 'axios';
+import { memo, PropsWithChildren, useCallback, useMemo, useState } from 'react';
+import { AdsLevel } from './types';
 
 export type LandingProps = PropsWithChildren
 
@@ -21,11 +28,16 @@ export const Landing = memo(function Landing(props: LandingProps) {
     const { basePath, custom, setAuhtorization } = useApi()
     const ll = useI18nLabel()
 
+    const [tokenVisible, setTokenVisible] = useState<boolean>()
     const [connectionToken, setConnectionToken] = useState('')
     const [authResult, setAuthResult] = useState<{
         error?: boolean,
         message?: string
     }>()
+
+    const onToggleTokenVisible = useCallback(() => {
+        setTokenVisible((tv) => !tv)
+    }, [])
 
     const doError = useCallback((err: any) => {
         if (err instanceof AxiosError) {
@@ -147,7 +159,7 @@ export const Landing = memo(function Landing(props: LandingProps) {
             <TextField
                 label={ll('serverMode.connectionToken')}
                 variant='outlined'
-                type='password'
+                type={tokenVisible ? 'text' : 'password'}
                 autoComplete='password'
                 value={connectionToken} onChange={(evt) => {
                     setConnectionToken(evt.target.value)
@@ -155,6 +167,18 @@ export const Landing = memo(function Landing(props: LandingProps) {
                 }}
                 error={!!authResult?.error}
                 helperText={authResult?.message}
+                slotProps={{
+                    input: {
+                        endAdornment: <InputAdornment position="end">
+                            <IconButton
+                                onClick={onToggleTokenVisible}
+                                edge="end"
+                            >
+                                {tokenVisible ? <Visibility /> : <VisibilityOff />}
+                            </IconButton>
+                        </InputAdornment>
+                    }
+                }}
             />
             <Button variant="contained" onClick={doAuth}>
                 {ll('action.authorize')}

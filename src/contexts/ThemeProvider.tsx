@@ -1,9 +1,9 @@
-import Color from "color"
-import { PropsWithChildren, createContext, memo, useMemo } from "react"
-import { usePublicSetting } from "./useApi"
-import { createTheme, Theme, css, ThemeProvider as MuiThemeProvider } from "@mui/material"
-import { ColorScheme } from "@client/model"
-import { SerializedStyles } from "@emotion/react"
+import { ColorScheme } from "@client/model";
+import { SerializedStyles } from "@emotion/react";
+import { Theme, ThemeProvider as MuiThemeProvider, createTheme, css } from '@mui/material/styles';
+import Color from "color";
+import { createContext, memo, PropsWithChildren, useMemo } from "react";
+import { usePublicSetting } from "./useApi";
 
 export type ThemeProviderProps = PropsWithChildren
 
@@ -13,7 +13,6 @@ export type AppScheme = {
     toolbarBgColor: string
     outlineColor: string
     toolbarHeight: number
-    
 }
 
 export type AppStyles = {
@@ -30,6 +29,8 @@ export type ThemeContextValue = {
     appStyles: AppStyles
 }
 
+const defaultTheme = createTheme({})
+
 export const ThemeContext = createContext<ThemeContextValue | undefined>(undefined)
 
 export const ThemeProvider = memo(function ThemeProvider({ children }: ThemeProviderProps) {
@@ -38,7 +39,6 @@ export const ThemeProvider = memo(function ThemeProvider({ children }: ThemeProv
 
     const value = useMemo(() => {
         const toolbarHeight = 64
-        const defaultTheme = createTheme({})
         const theme = createTheme({
             mixins: {
                 toolbar: {
@@ -165,7 +165,7 @@ export const ThemeProvider = memo(function ThemeProvider({ children }: ThemeProv
                 }
             }),
             toolbarSelect: css({
-                height: toolbarHeight - 20, 
+                height: toolbarHeight - 20,
             }),
             barChart: css({
                 '& .MuiBarLabel-series-income': {

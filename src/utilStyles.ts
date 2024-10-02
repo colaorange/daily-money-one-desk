@@ -67,6 +67,9 @@ export const utilStyles = {
         left: '50%',
         transform: 'translate(-50%, -50%)'
     }),
+    roate180: css({
+        transform: "rotate(180deg)"
+    }),
 }
 
 export default utilStyles

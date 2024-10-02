@@ -1,6 +1,8 @@
 
-import { CircularProgress, css, Stack, StackProps } from "@mui/material"
-import { memo, useEffect, useMemo, useState } from "react"
+import CircularProgress from '@mui/material/CircularProgress';
+import Stack, { StackProps } from '@mui/material/Stack';
+import { css } from '@mui/material/styles';
+import { memo, useEffect, useMemo, useState } from "react";
 
 /**
  * a full parent loading indicator for container initialization

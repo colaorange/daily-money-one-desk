@@ -1,10 +1,16 @@
+import { DEFAULT_DATE_FORMAT } from "@/constants";
+import { usePreferences } from "@/contexts/useApi";
 import { useI18nLabel } from "@/contexts/useI18n";
 import useTheme from "@/contexts/useTheme";
 import { TimeGranularity, TimePeriod } from "@/types";
-import { Button, css, Divider, FormControlLabel, FormHelperText, Popover, PopoverProps, Stack, Switch } from "@mui/material";
-
-import { DEFAULT_DATE_FORMAT } from "@/constants";
-import { usePreferences } from "@/contexts/useApi";
+import Button from '@mui/material/Button';
+import Divider from '@mui/material/Divider';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormHelperText from '@mui/material/FormHelperText';
+import Popover, { PopoverProps } from '@mui/material/Popover';
+import Stack from '@mui/material/Stack';
+import Switch from '@mui/material/Switch';
+import { css } from '@mui/material/styles';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import moment from "moment";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";

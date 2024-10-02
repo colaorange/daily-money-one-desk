@@ -1,17 +1,16 @@
 import '@/App.css';
-import { createTheme, ThemeProvider as MuiThemeProvider } from '@mui/material';
-import { PropsWithChildren, useCallback, useEffect, useMemo } from 'react';
+import { ThemeProvider as MuiThemeProvider, createTheme } from '@mui/material/styles';
+import { PropsWithChildren, useCallback, useMemo } from 'react';
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 import { appErrMessage } from './appUtils';
+import UnhandledErrorBoundary from './boundaries/UnhandledErrorBoundary';
 import { UnhandledError } from './components/UnhandledError';
-import AlertProvider, { AlertLevel } from './contexts/AlertProvider';
+import AlertProvider from './contexts/AlertProvider';
 import ApiProvider from './contexts/ApiProvider';
 import I18nProvider from './contexts/I18nProvider';
-import useAlert from './contexts/userAlert';
-import Router from './Router';
-import ThemeProvider from './contexts/ThemeProvider';
 import StoreProvider from './contexts/StoreProvider';
-import UnhandledErrorBoundary from './boundaries/UnhandledErrorBoundary';
+import ThemeProvider from './contexts/ThemeProvider';
+import Router from './Router';
 
 const defaultTheme = createTheme({});
 

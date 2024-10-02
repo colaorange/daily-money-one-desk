@@ -1,5 +1,5 @@
 import { useI18nLabel } from '@/contexts/useI18n';
-import { Box } from '@mui/material';
+import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -7,7 +7,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
 import { Fragment, useCallback } from 'react';
-import { FaBalanceScale, FaHome, FaSearch, FaChartLine, FaReceipt, FaPaypal } from 'react-icons/fa';
+import { FaBalanceScale, FaChartLine, FaHome, FaPaypal, FaReceipt, FaSearch } from 'react-icons/fa';
 import { FaFacebook, FaGooglePlay } from 'react-icons/fa6';
 import { Link, NavigateFunction, useLocation, useNavigate } from 'react-router-dom';
 

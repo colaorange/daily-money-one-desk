@@ -1,5 +1,6 @@
-import { drawerClasses, Stack } from '@mui/material';
 import Divider from '@mui/material/Divider';
+import { drawerClasses } from '@mui/material/Drawer';
+import Stack from '@mui/material/Stack';
 import Drawer from './Drawer';
 import MenuContent from './MenuContent';
 import MenuLogout from './MenuLogout';
@@ -21,7 +22,7 @@ export default function SideMenu() {
             <Divider />
             <Stack
                 sx={{
-                    flex:1,
+                    flex: 1,
                     overflowY: 'auto',
                     overflowX: 'hidden',
                 }}

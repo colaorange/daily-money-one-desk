@@ -2,7 +2,7 @@
 import { PropsWithChildren, ReactNode, createContext, memo, useCallback, useMemo } from "react";
 
 import { hint } from "@/utils";
-import { Typography } from "@mui/material";
+import Typography from '@mui/material/Typography';
 import { SnackbarProvider, useSnackbar } from 'notistack';
 
 export type AlertProviderProps = PropsWithChildren

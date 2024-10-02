@@ -1,12 +1,12 @@
 import useTheme from "@/contexts/useTheme";
 
-import { Badge, Box, IconButton } from "@mui/material";
-
-import { memo, useCallback, useState } from "react";
-import { FaCalendarDays } from "react-icons/fa6";
-import AccountsPopover from "./AccountsPopover";
 import { Account } from "@client/model";
+import Badge from '@mui/material/Badge';
+import Box from '@mui/material/Box';
+import IconButton from '@mui/material/IconButton';
+import { memo, useCallback, useState } from "react";
 import { FaBookmark } from "react-icons/fa";
+import AccountsPopover from "./AccountsPopover";
 
 export type AccountsPopoverButtonProps = {
     accounts: Account[]

@@ -1,15 +1,16 @@
-import utilStyles from "@/utilStyles"
-import { css } from '@emotion/react'
-import { Button, Typography, useTheme } from "@mui/material"
-import { clsx } from "clsx"
-import { memo, useMemo } from "react"
-import { BiSolidError } from "react-icons/bi"
+import utilStyles from "@/utilStyles";
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
+import { css, useTheme } from '@mui/material/styles';
+import { memo, useMemo } from "react";
+import { BiSolidError } from "react-icons/bi";
 
 /**
- * a full screen error indicator for initialization
+ * a full screen error indicator for initialization,
  */
 export const InitError = memo(function InitError({ message }: { message: string }) {
 
+    //not in our theme scope
     const theme = useTheme()
     const styles = useMemo(() => {
         return {

@@ -1,22 +1,26 @@
-import AppNavbar from "@/components/AppNavbar"
-import SideMenu from "@/components/SideMenu"
-import utilStyles from "@/utilStyles"
+import AppNavbar from "@/components/AppNavbar";
+import SideMenu from "@/components/SideMenu";
+import useTheme from "@/contexts/useTheme";
+import utilStyles from "@/utilStyles";
 
-import { Box, css, SxProps, Theme, useTheme } from "@mui/material"
-import { memo, PropsWithChildren, useMemo } from "react"
+import Box from '@mui/material/Box';
+import { css, SxProps, Theme } from '@mui/material/styles';
+
+
+import { memo, PropsWithChildren, useMemo } from "react";
 
 export type MainTemplateProps = PropsWithChildren
 
 export const MainTemplate = memo(function MainTemplate(props: MainTemplateProps) {
     const { children } = props
 
-    const theme = useTheme()
+    const { theme } = useTheme()
 
     const styles = useMemo(() => {
         return {
             rootSx: {
                 display: 'flex',
-                paddingTop: {  xs: `calc(${theme.mixins.toolbar.minHeight}px)`, sm: `calc(${theme.mixins.toolbar.minHeight}px)`,  md: 0 },
+                paddingTop: { xs: `calc(${theme.mixins.toolbar.minHeight}px)`, sm: `calc(${theme.mixins.toolbar.minHeight}px)`, md: 0 },
                 height: '100vh',
                 color: theme.palette.text.primary,
                 bgcolor: theme.palette.background.default,
@@ -34,8 +38,8 @@ export const MainTemplate = memo(function MainTemplate(props: MainTemplateProps)
         <SideMenu />
         <AppNavbar />
         <main css={styles.main}>
-        {children}
-    </main>
+            {children}
+        </main>
     </Box >
 })
 

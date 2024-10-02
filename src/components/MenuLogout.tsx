@@ -1,7 +1,7 @@
 import useApi from '@/contexts/useApi';
 import { useI18nLabel } from '@/contexts/useI18n';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
-import { Button } from '@mui/material';
+import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 
 

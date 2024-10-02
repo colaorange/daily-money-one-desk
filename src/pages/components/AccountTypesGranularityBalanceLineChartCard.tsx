@@ -11,7 +11,11 @@ import { AccumulationType, TimeGranularity, TimePeriod } from "@/types";
 import { getNumberFormat } from "@/utils";
 import utilStyles from "@/utilStyles";
 import { AccountType, Balance, BalanceReport, Book, BookGranularityBalanceReport } from "@client/model";
-import { Card, CardContent, css, Stack, SxProps, Theme, Typography } from "@mui/material";
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Stack from '@mui/material/Stack';
+import { css, SxProps, Theme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import { ChartsReferenceLine, chartsTooltipClasses, ChartsXAxisProps, ChartsYAxisProps, LineChartProps } from "@mui/x-charts";
 import { axisClasses } from '@mui/x-charts/ChartsAxis';
 import { LineChart } from '@mui/x-charts/LineChart';
@@ -167,10 +171,11 @@ export const AccountTypesGranularityBalanceLineChartCard = observer(function Acc
                 return {
                     yAxisId: 'accumulation',
                     dataKey: `${accountType}-Accumulation`,
-                    label: accountTypeLabel(accountType) + (accumulationType === AccumulationType.PLUS_INIT ? '++' : '+'),
+                    label: accountTypeLabel(accountType) + '+',
                     valueFormatter,
                     color: accountTypeAreaColor(accountType, colorScheme),
-                    area: true
+                    area: true,
+                    showMark: false
                 }
             }) : []) as LineChartProps['series']],
             margin: {

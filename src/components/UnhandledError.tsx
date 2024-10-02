@@ -1,7 +1,10 @@
-import utilStyles from "@/utilStyles"
-import { css } from '@emotion/react'
-import { Box, Button, Typography, useTheme } from "@mui/material"
-import { memo, useMemo } from "react"
+import useTheme from "@/contexts/useTheme";
+import utilStyles from "@/utilStyles";
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
+import { css } from '@mui/material/styles';
+import { memo, useMemo } from "react";
 import { AiFillBug } from "react-icons/ai";
 
 /**
@@ -9,7 +12,7 @@ import { AiFillBug } from "react-icons/ai";
  */
 export const UnhandledError = memo(function UnhandledError({ message }: { message: string }) {
 
-    const theme = useTheme()
+    const { theme } = useTheme()
     const styles = useMemo(() => {
         return {
             errTxtSty: css({

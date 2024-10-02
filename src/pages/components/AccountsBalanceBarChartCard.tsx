@@ -10,7 +10,11 @@ import { TimePeriod } from "@/types";
 import { getNumberFormat } from "@/utils";
 import utilStyles from "@/utilStyles";
 import { Account, AccountType, Book, BookBalanceReport } from "@client/model";
-import { Box, Card, CardContent, css, Stack, SxProps, Theme, Typography } from "@mui/material";
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Stack from '@mui/material/Stack';
+import { css, SxProps, Theme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import { BarChartProps, ChartsReferenceLine, chartsTooltipClasses, ChartsXAxisProps } from "@mui/x-charts";
 import { BarChart } from '@mui/x-charts/BarChart';
 import { observer } from "mobx-react-lite";
@@ -38,7 +42,7 @@ export const AccountsBalanceBarChartCard = observer(function AccountTypeBalanceC
             return undefined
         }
         const { accounts: reportAccounts } = report
-        
+
 
         const fractionDigits = book.fractionDigits || 0
         const numberFormat = getNumberFormat(language, { maximumFractionDigits: fractionDigits, minimumFractionDigits: fixBalanceFractionDigits ? fractionDigits : undefined })

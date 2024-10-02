@@ -6,6 +6,7 @@ import { FullLoading } from "@/components/FullLoading";
 import TimePeriodInfo from "@/components/TimePeriodInfo";
 import TimePeriodPopoverButton from "@/components/TimePeriodPopoverButton";
 import TimePeriodShiftButton from "@/components/TimePeriodShiftButton";
+import { InitialAccountTransDatetime } from "@/constants";
 import { usePreferences } from "@/contexts/useApi";
 import { useI18nLabel } from "@/contexts/useI18n";
 import useStore from "@/contexts/useStore";
@@ -15,7 +16,13 @@ import { TimePeriod } from "@/types";
 import { runAsync } from "@/utils";
 import utilStyles from "@/utilStyles";
 import { AccountType, Book, BookBalanceReport, ReportBookGranularityBalanceOption, TimeGranularity } from "@client/model";
-import { css, Divider, FormControlLabel, Grid2, Stack, Switch, SxProps, Theme, Typography } from '@mui/material';
+import Divider from '@mui/material/Divider';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Grid2 from '@mui/material/Grid2';
+import Stack from '@mui/material/Stack';
+import { css, SxProps, Theme } from '@mui/material/styles';
+import Switch from '@mui/material/Switch';
+import Typography from '@mui/material/Typography';
 import { isEqual } from "lodash";
 import { observer } from "mobx-react-lite";
 import moment from "moment";
@@ -23,7 +30,6 @@ import { Fragment, PropsWithChildren, useCallback, useEffect, useMemo, useState 
 import AccountsBalanceBarChartCard from "./components/AccountsBalanceBarChartCard";
 import AccountsBalancePieChartCard from "./components/AccountsBalancePieChartCard";
 import AccountTypesBalanceBarChartCard from "./components/AccountTypesBalanceBarChartCard";
-import { InitialAccountTransDatetime } from "@/constants";
 
 export type HomePageProps = PropsWithChildren
 

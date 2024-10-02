@@ -16,7 +16,16 @@ import { AccumulationType, TimePeriod } from "@/types";
 import { runAsync } from "@/utils";
 import utilStyles from "@/utilStyles";
 import { AccountType, Book, BookGranularityBalanceReport, ReportBookGranularityBalanceOption, TimeGranularity } from "@client/model";
-import { css, Divider, FormControlLabel, Grid2, Stack, Switch, SxProps, Theme, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from '@mui/material';
+import Divider from '@mui/material/Divider';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Grid2 from '@mui/material/Grid2';
+import Stack from '@mui/material/Stack';
+import { css, SxProps, Theme } from '@mui/material/styles';
+import Switch from '@mui/material/Switch';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import Tooltip from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
 import { isEqual } from "lodash";
 import { observer } from "mobx-react-lite";
 import moment from "moment";
@@ -167,18 +176,17 @@ export const TrendPage = observer(function TrendPage(props: TrendPageProps) {
                     setAccumulationType(value)
                 }}
             >
-
                 <ToggleButton value={AccumulationType.NONE}>
-                    <TbBadgeOff />
+                    <TbBadgeOff css={utilStyles.roate180} />
                 </ToggleButton>
                 <Tooltip title={ll('desktop.accumulatedAmount')}>
                     <ToggleButton value={AccumulationType.NORAML}>
-                        <TbBadge />
+                        <TbBadge css={utilStyles.roate180} />
                     </ToggleButton>
                 </Tooltip>
                 <Tooltip title={ll('desktop.initNAccumulatedAmount')}>
                     <ToggleButton value={AccumulationType.PLUS_INIT}>
-                        <TbBadges />
+                        <TbBadges css={utilStyles.roate180} />
                     </ToggleButton>
                 </Tooltip>
             </ToggleButtonGroup>

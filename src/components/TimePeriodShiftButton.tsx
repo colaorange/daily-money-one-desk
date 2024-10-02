@@ -1,6 +1,5 @@
 import { TimePeriod } from "@/types";
-import { IconButton } from "@mui/material";
-
+import IconButton from '@mui/material/IconButton';
 import moment from "moment";
 import { memo, PropsWithChildren, useCallback } from "react";
 import { FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";

@@ -10,7 +10,7 @@ import MainTemplate from "@/templates/MainTemplate"
 import { TimePeriod } from "@/types"
 import utilStyles from "@/utilStyles"
 import { Book } from "@client/model"
-import { Divider } from "@mui/material"
+import Divider from '@mui/material/Divider'
 import { observer } from "mobx-react-lite"
 import { PropsWithChildren, useCallback, useEffect } from "react"
 

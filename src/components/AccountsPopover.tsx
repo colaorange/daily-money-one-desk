@@ -1,8 +1,13 @@
 import { useI18nLabel } from "@/contexts/useI18n";
 import useTheme from "@/contexts/useTheme";
-import { Button, Checkbox, css, Divider, FormControlLabel, Popover, PopoverProps, Stack } from "@mui/material";
-
 import { Account } from "@client/model";
+import Button from '@mui/material/Button';
+import Checkbox from '@mui/material/Checkbox';
+import Divider from '@mui/material/Divider';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Popover, { PopoverProps } from '@mui/material/Popover';
+import Stack from '@mui/material/Stack';
+import { css } from '@mui/material/styles';
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 
 export type AccountsPopoverProps = {

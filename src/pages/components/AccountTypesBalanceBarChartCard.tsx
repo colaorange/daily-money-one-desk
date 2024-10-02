@@ -10,10 +10,13 @@ import { TimePeriod } from "@/types";
 import { getNumberFormat } from "@/utils";
 import utilStyles from "@/utilStyles";
 import { AccountType, Balance, Book, BookBalanceReport } from "@client/model";
-import { Card, CardContent, css, Stack, SxProps, Theme, Typography } from "@mui/material";
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Stack from '@mui/material/Stack';
+import { css, SxProps, Theme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import { BarChartProps, ChartsReferenceLine, chartsTooltipClasses, ChartsXAxisProps, ChartsYAxisProps } from "@mui/x-charts";
 import { BarChart, BarItem } from '@mui/x-charts/BarChart';
-import { axisClasses } from '@mui/x-charts/ChartsAxis';
 import { observer } from "mobx-react-lite";
 import { PropsWithChildren, useMemo } from "react";
 
@@ -41,7 +44,7 @@ export const AccountTypesBalanceBarChartCard = observer(function AccountTypeBala
         }
 
         const { accountTypes: reportAccountTypes } = report
-        
+
         const fractionDigits = book.fractionDigits || 0
         const numberFormat = getNumberFormat(language, { maximumFractionDigits: fractionDigits, minimumFractionDigits: fixBalanceFractionDigits ? fractionDigits : undefined })
 

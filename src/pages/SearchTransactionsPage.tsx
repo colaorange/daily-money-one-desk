@@ -1,7 +1,6 @@
 import { UnderConsturction } from "@/components/UnderContruction"
 import { useAccountStore, useBookStore } from "@/contexts/useStore"
 import MainTemplate from "@/templates/MainTemplate"
-import { Typography } from "@mui/material"
 import { observer } from "mobx-react-lite"
 import { PropsWithChildren, useEffect } from "react"
 
@@ -12,7 +11,7 @@ export const SearchTransactionsPage = observer(function AboutPage(props: SearchT
     const bookStore = useBookStore()
     const accountStore = useAccountStore()
 
-    const { books} = bookStore
+    const { books } = bookStore
     const { accounts } = accountStore
 
     useEffect(() => {
@@ -27,7 +26,7 @@ export const SearchTransactionsPage = observer(function AboutPage(props: SearchT
     }, [accountStore, accounts])
 
     return <MainTemplate>
-        <UnderConsturction/>
+        <UnderConsturction />
     </MainTemplate>
 })
 

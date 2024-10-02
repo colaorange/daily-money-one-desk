@@ -1,6 +1,9 @@
 import { useI18nLabel } from "@/contexts/useI18n";
 import { Book } from "@client/model";
-import { FormControl, InputLabel, MenuItem, Select, SelectProps } from "@mui/material";
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import Select, { SelectProps } from '@mui/material/Select';
 import { memo } from "react";
 
 
