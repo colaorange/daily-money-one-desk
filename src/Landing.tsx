@@ -18,14 +18,19 @@ import Paper from '@mui/material/Paper';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 
+import SmartDisplayIcon from '@mui/icons-material/SmartDisplay';
+import Stack from '@mui/material/Stack';
 import { AxiosError } from 'axios';
 import { memo, PropsWithChildren, useCallback, useMemo, useState } from 'react';
+import useTheme from './contexts/useTheme';
 import { AdsLevel } from './types';
 
 export type LandingProps = PropsWithChildren
 
 export const Landing = memo(function Landing(props: LandingProps) {
-    const { basePath, custom, setAuhtorization } = useApi()
+
+    const {theme} = useTheme()
+    const { basePath, custom, publicSetting, setAuhtorization } = useApi()
     const ll = useI18nLabel()
 
     const [tokenVisible, setTokenVisible] = useState<boolean>()
@@ -79,9 +84,8 @@ export const Landing = memo(function Landing(props: LandingProps) {
                     preferences
                 })
 
-                if (!preferences.adsLevel || (preferences.adsLevel < AdsLevel.NONE)) {
-                    authedApi.watchAds().catch(() => {//eat
-                    })
+                if (!publicSetting.adsLevel || (publicSetting.adsLevel < AdsLevel.NONE)) {
+                    authedApi.watchAds().catch(() => { })//eat
                 }
 
             } else {
@@ -93,7 +97,7 @@ export const Landing = memo(function Landing(props: LandingProps) {
         } catch (err) {
             doError(err)
         }
-    }, [basePath, connectionToken, doError, ll, setAuhtorization])
+    }, [basePath, connectionToken, doError, ll, setAuhtorization, publicSetting])
 
     const styles = useMemo(() => {
         const logoSpin = keyframes({
@@ -183,8 +187,13 @@ export const Landing = memo(function Landing(props: LandingProps) {
             <Button variant="contained" onClick={doAuth}>
                 {ll('action.authorize')}
             </Button>
+            {(!publicSetting.adsLevel || publicSetting.adsLevel < AdsLevel.NONE) &&
+                <Stack direction='row' alignItems='center' justifyContent='center' gap={theme.spacing(1)}>
+                    <SmartDisplayIcon />
+                    <Typography>{ll('desktop.playAdsInfo')}</Typography>
+                </Stack>}
         </form>
-    </Paper>)
+    </Paper >)
 })
 
 export default Landing
