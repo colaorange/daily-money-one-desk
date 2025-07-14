@@ -11,7 +11,7 @@
         "lint": "tsc --noEmit && eslint .",
         "preview": "vite preview",
         "//1.": "",
-        "syncApi": "ts-node --esm --project ./tsconfig.ts-node.json -r tsconfig-paths/register ./src/cli/syncApi.ts"
+        "syncApi": "node --loader ts-node/esm ./src/cli/syncApi.ts"
     },
     "dependencies": {
         "@emotion/css": "^11.13.0",

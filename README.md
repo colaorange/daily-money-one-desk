@@ -1,6 +1,18 @@
 # daily-money-one-desktop
 The Desktop Web App for DailyMoneyOne ServerMode
 
+# Project Prerequisites
+
+- Node.js version 20 or above is required
+- Global installation of yarn package manager is required
+
+# Startup for Dev
+
+```
+yarn dev
+```
+
+The link to http://localhost:8088/desktop/?apiBasePath=http://127.0.0.1:8080 , where apiBasePath is the url of DMO server mode connection point
 
 # React + Vite
 
