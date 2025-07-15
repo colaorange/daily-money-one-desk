@@ -1,6 +1,6 @@
 import inspect from "browser-util-inspect"
 import { ValidationError, Validator } from "jsonschema"
-import { AppError, I18nLabel } from './types'
+import { AppError, FirstDayOfMonth, FirstDayOfYear, I18nLabel } from './types'
 import { AccountType, ColorScheme } from "@client/model"
 import { I18nContextValue } from "./contexts/I18nProvider"
 
@@ -16,6 +16,14 @@ export function isReversedAccountType(type: AccountType): boolean {
         default:
             return false
     }
+}
+
+export function isCustomizedFirstDayOfYear(firstDayOfYear?:  FirstDayOfYear): firstDayOfYear is  FirstDayOfYear {
+    return firstDayOfYear && (firstDayOfYear[0] > 0 || (firstDayOfYear[0] === 0 && firstDayOfYear[1] > 1)) ? true : false
+}
+
+export function isCustomizedFirstDayOfMonth(firstDayOfMonth?: FirstDayOfMonth): firstDayOfMonth is FirstDayOfMonth {
+    return firstDayOfMonth && firstDayOfMonth > 1 ? true : false
 }
 
 export function accountTypeFactor(type: AccountType): 1 | -1 {

@@ -45,7 +45,7 @@ function AppBoundary2({ children }: PropsWithChildren) {
         const searchParams = url.searchParams;
         const basePath = searchParams.get('apiBasePath')
         return basePath ? {
-            basePath,
+            basePath: basePath.endsWith('/') ? basePath.slice(0, -1) : basePath,
             custom: true
         } : {
             basePath: `${url.protocol}//${url.hostname}:${url.port}`
