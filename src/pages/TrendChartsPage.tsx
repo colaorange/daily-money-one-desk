@@ -60,7 +60,7 @@ export const TrendPage = observer(function TrendPage(props: TrendPageProps) {
         return accounts && accounts.filter((a) => a.bookId === currentBookId).sort((a, b) => (b.priority || 0) - (a.priority || 0))
     }, [accounts, currentBookId])
 
-    const { balanceAccountTypeOrder } = usePreferences() || {}
+    const { balanceAccountTypeOrder, firstDayOfMonth, firstDayOfYear } = usePreferences() || {}
 
     const [allOn, setAllOn] = useState<boolean>()
     const [accountTypesOn, setAccountTypesOn] = useState<Set<AccountType>>(new Set([balanceAccountTypeOrder?.[0] || AccountType.EXPENSE]))
@@ -106,7 +106,9 @@ export const TrendPage = observer(function TrendPage(props: TrendPageProps) {
                         from: (timePeriod.start === null || timePeriod.start < 0) ? InitialAccountTransDatetime : timePeriod.start,
                         to: timePeriod.end
                     },
-                    granularity: timePeriod.granularity
+                    granularity: timePeriod.granularity,
+                    firstDayOfMonth: firstDayOfMonth,
+                    firstDayOfYear: firstDayOfYear
                 }
                 const cacheKey = `TrendChartsPage-${currentBookId}-report-${JSON.stringify(option)}`
                 let report: BookGranularityBalanceReport | null = cacheStore.get(cacheKey) as BookGranularityBalanceReport
@@ -119,7 +121,7 @@ export const TrendPage = observer(function TrendPage(props: TrendPageProps) {
                 setProcessing(false)
             })
         }
-    }, [reportStore, currentBookId, accounts, timePeriod, bookStore, cacheStore])
+    }, [reportStore, currentBookId, accounts, timePeriod, bookStore, cacheStore, firstDayOfMonth, firstDayOfYear])
 
     const styles = useMemo(() => {
         return {

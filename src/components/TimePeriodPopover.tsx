@@ -18,7 +18,7 @@ import { FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";
 import { FaAngleLeft, FaAngleRight, FaStop } from "react-icons/fa6";
 import TimeGranularitySelect from "./TimeGranularitySelect";
 import TimePeriodShiftButton from "./TimePeriodShiftButton";
-import { isCustomizedFirstDayOfMonth, isCustomizedFirstDayOfYear } from "@/appUtils";
+import { isCustomFirstDayOfMonth, isCustomFirstDayOfYear } from "@/appUtils";
 
 export type TimePeriodPopoverProps = {
     timePeriod: TimePeriod
@@ -127,7 +127,7 @@ export const TimePeriodPopover = memo(function TimePeriodPopover({ timePeriod, h
         const mStart = moment().add(value, unit).startOf(unit)
         const mEnd = moment().add(value, unit).endOf(unit)
         if (unit === 'month') {
-            if (isCustomizedFirstDayOfMonth(firstDayOfMonth as FirstDayOfMonth)) {
+            if (isCustomFirstDayOfMonth(firstDayOfMonth as FirstDayOfMonth)) {
                 if (mStart.date() >= firstDayOfMonth) {
                     mStart.date(firstDayOfMonth)
                     mEnd.add(1, 'month').date(firstDayOfMonth).subtract(1, 'day')
@@ -137,7 +137,7 @@ export const TimePeriodPopover = memo(function TimePeriodPopover({ timePeriod, h
                 }
             }
         }else if(unit === 'year'){
-            if (isCustomizedFirstDayOfYear(firstDayOfYear as FirstDayOfYear)) {
+            if (isCustomFirstDayOfYear(firstDayOfYear as FirstDayOfYear)) {
                 const [month, date] = firstDayOfYear
                 if (mStart.month() > month || (mStart.month() === month && mStart.date() >= date)) {
                     mStart.month(month).date(date).startOf('day')
@@ -326,10 +326,10 @@ export const TimePeriodPopover = memo(function TimePeriodPopover({ timePeriod, h
                 <FormHelperText error>{stateMix.error}</FormHelperText>
             </Stack>}
             <Stack direction='column'>
-                {isCustomizedFirstDayOfMonth(firstDayOfMonth as FirstDayOfMonth) && <FormHelperText>
+                {isCustomFirstDayOfMonth(firstDayOfMonth as FirstDayOfMonth) && <FormHelperText>
                     {ll('preferences.firstDayOfMonth')} : {firstDayOfMonth}
                     </FormHelperText>}
-                {isCustomizedFirstDayOfYear(firstDayOfYear as FirstDayOfYear) && <FormHelperText>
+                {isCustomFirstDayOfYear(firstDayOfYear as FirstDayOfYear) && <FormHelperText>
                     {ll('preferences.firstDayOfYear')} : {moment().month(firstDayOfYear[0]).format('MMM')}-{firstDayOfYear[1]}
                     </FormHelperText>}
             </Stack>

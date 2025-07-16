@@ -15,7 +15,7 @@ import MainTemplate from "@/templates/MainTemplate";
 import { TimePeriod } from "@/types";
 import { runAsync } from "@/utils";
 import utilStyles from "@/utilStyles";
-import { AccountType, Book, BookBalanceReport, ReportBookGranularityBalanceOption, TimeGranularity } from "@client/model";
+import { AccountType, Book, BookBalanceReport, ReportBookBalanceOption, TimeGranularity } from "@client/model";
 import Divider from '@mui/material/Divider';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Grid2 from '@mui/material/Grid2';
@@ -95,7 +95,7 @@ export const HomePage = observer(function HomePage(props: HomePageProps) {
         if (currentBookId && accounts && timePeriod) {
             setProcessing(true)
             runAsync(async () => {
-                const option: ReportBookGranularityBalanceOption = {
+                const option: ReportBookBalanceOption = {
                     accountTypes: [AccountType.INCOME, AccountType.ASSET, AccountType.EXPENSE, AccountType.LIABILITY, AccountType.OTHER],
                     accountIds: accounts.filter((a) => a.bookId === currentBookId && !a.hidden).map((a) => a.id),
                     transDatetimeRange: {

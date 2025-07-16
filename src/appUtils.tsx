@@ -18,11 +18,11 @@ export function isReversedAccountType(type: AccountType): boolean {
     }
 }
 
-export function isCustomizedFirstDayOfYear(firstDayOfYear?:  FirstDayOfYear): firstDayOfYear is  FirstDayOfYear {
+export function isCustomFirstDayOfYear(firstDayOfYear?:  FirstDayOfYear): firstDayOfYear is  FirstDayOfYear {
     return firstDayOfYear && (firstDayOfYear[0] > 0 || (firstDayOfYear[0] === 0 && firstDayOfYear[1] > 1)) ? true : false
 }
 
-export function isCustomizedFirstDayOfMonth(firstDayOfMonth?: FirstDayOfMonth): firstDayOfMonth is FirstDayOfMonth {
+export function isCustomFirstDayOfMonth(firstDayOfMonth?: FirstDayOfMonth): firstDayOfMonth is FirstDayOfMonth {
     return firstDayOfMonth && firstDayOfMonth > 1 ? true : false
 }
 
