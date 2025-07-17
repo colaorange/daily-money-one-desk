@@ -304,13 +304,45 @@ export const AccountsGranularityBalanceLineChartCard = observer(function Account
         }
     }, [theme, appStyles])
 
+    const reportTimePeriod = useMemo(() => {
+        if (!report || !timePeriod) {
+            return undefined
+        }
+        const { reports } = report
+
+        if(Object.keys(reports).length === 0) {
+            return undefined
+        }
+
+        const reportTimePeriod: TimePeriod = {...timePeriod,
+            start: Math.min(...Object.keys(reports).map(key => parseInt(key)).filter(time => time > 0)),
+            end: Math.max(...Object.keys(reports).map(key => parseInt(key)).filter(time => time > 0)),
+        }
+
+        const tempm = moment(reportTimePeriod.end)
+        //add one time unit to the end
+        switch(timePeriod.granularity) {
+            case TimeGranularity.DAILY:
+                //nothing
+                break;
+            case TimeGranularity.MONTHLY:
+                tempm.add(1, 'month')
+                break;
+            case TimeGranularity.YEARLY:
+                tempm.add(1, 'year')
+                break;
+        }
+        reportTimePeriod.end = tempm.subtract(1, 'day').endOf('day').valueOf()
+        return reportTimePeriod
+    }, [timePeriod, report])
+
     return <Card>
         <CardContent >
             <CardHeader title={
                 <Stack direction='row' css={styles.header}>
                     {book && <Typography variant="caption">{book.name}</Typography>}
                     {accountType && <Typography variant="caption" color={colorScheme[accountType]}>{ll(`account.type.${accountType}`)}</Typography>}
-                    {timePeriod && <TimePeriodInfo timePeriod={timePeriod} hideGranularity />}
+                    {reportTimePeriod && <TimePeriodInfo timePeriod={reportTimePeriod} hideGranularity />}
                 </Stack>}
                 action={<AccountsPopoverButton accounts={typeAccounts} selectedAccountIds={selectedAccountIds} disabled={refreshing} onSelectedAccountsChange={onSelectedAccountsChange} icon={<FaFilter />} />}
             />

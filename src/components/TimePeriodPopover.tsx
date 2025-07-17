@@ -2,7 +2,7 @@ import { DEFAULT_DATE_FORMAT } from "@/constants";
 import { usePreferences } from "@/contexts/useApi";
 import { useI18nLabel } from "@/contexts/useI18n";
 import useTheme from "@/contexts/useTheme";
-import { TimeGranularity, TimePeriod } from "@/types";
+import { FirstDayOfMonth, FirstDayOfYear, TimeGranularity, TimePeriod } from "@/types";
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -18,6 +18,7 @@ import { FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";
 import { FaAngleLeft, FaAngleRight, FaStop } from "react-icons/fa6";
 import TimeGranularitySelect from "./TimeGranularitySelect";
 import TimePeriodShiftButton from "./TimePeriodShiftButton";
+import { isCustomFirstDayOfMonth, isCustomFirstDayOfYear } from "@/appUtils";
 
 export type TimePeriodPopoverProps = {
     timePeriod: TimePeriod
@@ -45,7 +46,7 @@ type StateMix = {
 
 export const TimePeriodPopover = memo(function TimePeriodPopover({ timePeriod, hideGranularity, granularityModes = Object.values(TimeGranularity), onTimePeriodClose, ...rest }: TimePeriodPopoverProps) {
     const { theme, appScheme } = useTheme()
-    const { dateFormat = DEFAULT_DATE_FORMAT } = usePreferences() || {}
+    const { dateFormat = DEFAULT_DATE_FORMAT, firstDayOfMonth = 1, firstDayOfYear = [0, 1] } = usePreferences() || {}
     const ll = useI18nLabel()
 
 
@@ -122,31 +123,55 @@ export const TimePeriodPopover = memo(function TimePeriodPopover({ timePeriod, h
         }
     }, [])
 
-    const fixedRange = useCallback((value: number, unit: 'month' | 'year', granularity: TimeGranularity) => {
+    const fixedThisLastRange = useCallback((value: number, unit: 'month' | 'year', granularity: TimeGranularity) => {
+        const mStart = moment().add(value, unit).startOf(unit)
+        const mEnd = moment().add(value, unit).endOf(unit)
+        if (unit === 'month') {
+            if (isCustomFirstDayOfMonth(firstDayOfMonth as FirstDayOfMonth)) {
+                if (mStart.date() >= firstDayOfMonth) {
+                    mStart.date(firstDayOfMonth)
+                    mEnd.add(1, 'month').date(firstDayOfMonth).subtract(1, 'day')
+                } else {
+                    mStart.subtract(1, 'month').date(firstDayOfMonth)
+                    mEnd.date(firstDayOfMonth).subtract(1, 'day')
+                }
+            }
+        }else if(unit === 'year'){
+            if (isCustomFirstDayOfYear(firstDayOfYear as FirstDayOfYear)) {
+                const [month, date] = firstDayOfYear
+                if (mStart.month() > month || (mStart.month() === month && mStart.date() >= date)) {
+                    mStart.month(month).date(date).startOf('day')
+                    mEnd.add(1, 'year').month(month).date(date).subtract(1, 'day').endOf('day')
+                } else {
+                    mStart.subtract(1, 'year').month(month).date(date).startOf('day')
+                    mEnd.month(month).date(date).subtract(1, 'day').endOf('day')
+                }
+            }
+        }
         resetOrClose({
             fromInit: false,
-            mStart: moment().add(value, unit).startOf(unit),
-            mEnd: moment().add(value, unit).endOf(unit),
+            mStart,
+            mEnd,
             granularity,
         })
-    }, [resetOrClose])
+    }, [resetOrClose, firstDayOfMonth, firstDayOfYear])
 
 
     const onThisMonth = useCallback(() => {
-        fixedRange(0, 'month', TimeGranularity.DAILY)
-    }, [fixedRange])
+        fixedThisLastRange(0, 'month', TimeGranularity.DAILY)
+    }, [fixedThisLastRange])
 
     const onLastMonth = useCallback(() => {
-        fixedRange(-1, 'month', TimeGranularity.DAILY)
-    }, [fixedRange])
+        fixedThisLastRange(-1, 'month', TimeGranularity.DAILY)
+    }, [fixedThisLastRange])
 
     const onThisYear = useCallback(() => {
-        fixedRange(0, 'year', TimeGranularity.MONTHLY)
-    }, [fixedRange])
+        fixedThisLastRange(0, 'year', TimeGranularity.MONTHLY)
+    }, [fixedThisLastRange])
 
     const onLastYear = useCallback(() => {
-        fixedRange(-1, 'year', TimeGranularity.MONTHLY)
-    }, [fixedRange])
+        fixedThisLastRange(-1, 'year', TimeGranularity.MONTHLY)
+    }, [fixedThisLastRange])
 
     const withIn = useCallback((value: number, unit: 'month' | 'year', granularity: TimeGranularity) => {
         resetOrClose({
@@ -300,6 +325,14 @@ export const TimePeriodPopover = memo(function TimePeriodPopover({ timePeriod, h
             {stateMix.error && <Stack direction='column'>
                 <FormHelperText error>{stateMix.error}</FormHelperText>
             </Stack>}
+            <Stack direction='column'>
+                {isCustomFirstDayOfMonth(firstDayOfMonth as FirstDayOfMonth) && <FormHelperText>
+                    {ll('preferences.firstDayOfMonth')} : {firstDayOfMonth}
+                    </FormHelperText>}
+                {isCustomFirstDayOfYear(firstDayOfYear as FirstDayOfYear) && <FormHelperText>
+                    {ll('preferences.firstDayOfYear')} : {moment().month(firstDayOfYear[0]).format('MMM')}-{firstDayOfYear[1]}
+                    </FormHelperText>}
+            </Stack>
             <Divider flexItem css={styles.divider} />
             <Stack alignSelf={'flex-end'} direction={'row'}>
                 <Button css={styles.button} onClick={onClose}>{ll('action.close')}</Button>

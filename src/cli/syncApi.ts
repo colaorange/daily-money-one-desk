@@ -1,17 +1,26 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
+import 'dotenv/config'
 
 
 export function syncApi() {
 
-    const apiProjectPath = path.resolve(process.cwd(), '../daily-money-one-api')
+    const apiProjectPath = process.env.DMO_API_PROJECT_PATH || path.resolve(process.cwd(), '../daily-money-one-api')
+
+    if (!fs.existsSync(apiProjectPath) || !fs.statSync(apiProjectPath).isDirectory()) {
+        console.error(`DMO_API_PROJECT_PATH is not set or not a directory: ${apiProjectPath}`);
+        process.exit(1);
+    }
+
+    console.log(`Syncing api from ${apiProjectPath}`)
+
     //sync api model
     {
         const clientPath = path.resolve(apiProjectPath, './gen/client')
         if (!fs.existsSync(clientPath)) {
             console.error(`Client directory does not exist: ${clientPath}`);
-            return null;
+            process.exit(1);
         }
 
         const desktopClientPath = path.resolve(process.cwd(), './sync/client')
