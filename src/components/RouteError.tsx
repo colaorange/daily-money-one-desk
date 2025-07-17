@@ -1,5 +1,6 @@
 import { appErrMessage } from "@/appUtils";
 import { useI18nLabel } from "@/contexts/useI18n";
+import useTheme from "@/contexts/useTheme";
 import utilStyles from "@/utilStyles";
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -31,7 +32,7 @@ export const RouteError = memo(function RouteError() {
         title = `<ERROR>`
     }
 
-    const theme = useTheme()
+    const { theme } = useTheme()
     const styles = useMemo(() => {
 
         let color: string
